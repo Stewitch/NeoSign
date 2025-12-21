@@ -1,2 +1,2 @@
 # NeoSign
-A signup system based on Django 6 + PostgreSQL 18
+A signin system based on Django 6 + PostgreSQL 18
