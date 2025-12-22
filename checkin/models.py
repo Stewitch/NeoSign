@@ -96,6 +96,13 @@ class Activity(models.Model):
 			return False
 		return token == self.current_qr_token(dt)
 
+	@property
+	def is_ongoing(self) -> bool:
+		"""Convenience flag for UI to show current status.
+		Uses `is_open_for(now)` for both single and repeating activities.
+		"""
+		return self.is_open_for(timezone.now())
+
 
 class ActivityParticipation(models.Model):
 	activity = models.ForeignKey(Activity, on_delete=models.CASCADE, verbose_name='活动')

@@ -10,6 +10,8 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views import View
 from django.views.generic import CreateView, TemplateView, UpdateView
+from django.conf import settings
+from django.contrib.auth.hashers import PBKDF2PasswordHasher
 
 from checkin.models import Activity, ActivityParticipation, CheckInRecord
 from datetime import datetime, time, timedelta
@@ -24,6 +26,15 @@ from .utils import (
 
 
 User = get_user_model()
+
+# Use a slightly lower iteration PBKDF2 hasher for bulk imports to improve speed.
+# Users are still forced to change password on first login (first_login=True).
+_bulk_hasher = PBKDF2PasswordHasher()
+_bulk_hasher.iterations = getattr(settings, 'BULK_CREATE_PBKDF2_ITERATIONS', 120000)
+
+
+def _bulk_hash_password(raw_password: str) -> str:
+    return _bulk_hasher.encode(password=raw_password, salt=_bulk_hasher.salt())
 
 
 class AdminOnlyMixin(UserPassesTestMixin):
@@ -191,12 +202,12 @@ class UserBulkCreateView(LoginRequiredMixin, AdminOnlyMixin, View):
             User(
                 student_id=sid,
                 first_name=name,
-                password=make_password(pwd),
+                password=_bulk_hash_password(pwd),
                 first_login=True,
             )
             for sid, name, pwd in pending
         ]
-        User.objects.bulk_create(users_to_create, batch_size=500)
+        User.objects.bulk_create(users_to_create, batch_size=1000)
 
         headers = ['学号', '初始密码']
         rows = [[sid, pwd] for sid, _, pwd in pending]
@@ -364,7 +375,11 @@ class ActivityStatsExportView(LoginRequiredMixin, AdminOnlyMixin, View):
 class SiteSettingsView(LoginRequiredMixin, AdminOnlyMixin, UpdateView):
     model = SystemConfig
     template_name = 'management/site_settings.html'
-    fields = ['site_title', 'site_logo', 'technician_contact', 'map_api_key']
+    fields = [
+        'site_title', 'site_logo', 'technician_contact', 'map_api_key',
+        'password_length', 'password_require_uppercase', 'password_require_lowercase',
+        'password_require_digits', 'password_require_symbols', 'password_symbols'
+    ]
     success_url = reverse_lazy('management:dashboard')
 
     def get_object(self):
@@ -373,9 +388,12 @@ class SiteSettingsView(LoginRequiredMixin, AdminOnlyMixin, UpdateView):
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        for name in ['site_title', 'technician_contact', 'map_api_key']:
+        text_fields = ['site_title', 'technician_contact', 'map_api_key', 'password_symbols']
+        for name in text_fields:
             if name in form.fields:
                 form.fields[name].widget.attrs.update({'class': 'form-control'})
+        if 'password_length' in form.fields:
+            form.fields['password_length'].widget.attrs.update({'class': 'form-control', 'min': 6})
         if 'site_logo' in form.fields:
             form.fields['site_logo'].widget.attrs.update({'class': 'form-control'})
         return form

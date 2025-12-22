@@ -25,6 +25,39 @@
                         {{ form.map_api_key }}
                         <div class="form-text">用于位置签到前端地图 SDK；可留空禁用。</div>
                     </div>
+                    <hr>
+                    <div class="vstack gap-2">
+                        <div class="fw-semibold">初始密码策略</div>
+                        <div class="row g-2 align-items-center">
+                            <div class="col-sm-4">
+                                <label class="form-label">长度</label>
+                                {{ form.password_length }}
+                            </div>
+                            <div class="col-sm-8">
+                                <div class="form-check form-check-inline">
+                                    {{ form.password_require_uppercase }}
+                                    <label class="form-check-label">包含大写</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    {{ form.password_require_lowercase }}
+                                    <label class="form-check-label">包含小写</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    {{ form.password_require_digits }}
+                                    <label class="form-check-label">包含数字</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    {{ form.password_require_symbols }}
+                                    <label class="form-check-label">包含符号</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="form-label">符号字符集合</label>
+                            {{ form.password_symbols }}
+                            <div class="form-text">默认：!@#$%^&*。仅当勾选“包含符号”时生效。</div>
+                        </div>
+                    </div>
                     <div class="text-end">
                         <button type="submit" class="btn btn-primary">保存</button>
                     </div>

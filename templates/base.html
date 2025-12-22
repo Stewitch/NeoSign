@@ -21,13 +21,26 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="mainNav">
+            <!-- 左侧：管理页面导航（进入后台后显示在标题后面） -->
+            <ul class="navbar-nav me-auto align-items-lg-center gap-lg-2">
+                {% if user.is_authenticated %}
+                    {% if user.is_admin or user.is_superuser %}
+                        {% if request.resolver_match and request.resolver_match.namespace == 'management' %}
+                            <li class="nav-item"><a class="nav-link" href="{% url 'management:user_list' %}">用户</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'management:activity_list' %}">活动</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'management:site_settings' %}">设置</a></li>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+            </ul>
+            <!-- 右侧：账号信息与登录/退出 -->
             <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
                 {% if user.is_authenticated %}
                     {% if user.is_admin or user.is_superuser %}
-                        <li class="nav-item"><a class="nav-link" href="{% url 'management:dashboard' %}">管理后台</a></li>
+                        <li class="nav-item"><a class="btn btn-outline-light btn-sm" href="{% url 'management:dashboard' %}">管理后台</a></li>
                     {% endif %}
                     <li class="nav-item"><span class="nav-link text-info">学号: {{ user.student_id }}</span></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'authentication:logout' %}">退出登录</a></li>
+                    <li class="nav-item"><a class="btn btn-primary btn-sm" href="{% url 'authentication:logout' %}">退出登录</a></li>
                 {% else %}
                     <li class="nav-item"><a class="nav-link" href="{% url 'authentication:login' %}">登录</a></li>
                 {% endif %}

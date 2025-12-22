@@ -65,6 +65,18 @@ class SystemConfig(models.Model):
     db_host = models.CharField(max_length=100, blank=True, verbose_name='数据库地址')
     db_name = models.CharField(max_length=100, blank=True, verbose_name='数据库名称')
     db_user = models.CharField(max_length=100, blank=True, verbose_name='数据库用户名')
+    # 密码策略
+    password_length = models.PositiveSmallIntegerField(default=12, verbose_name='初始密码长度')
+    password_require_uppercase = models.BooleanField(default=True, verbose_name='包含大写字母')
+    password_require_lowercase = models.BooleanField(default=True, verbose_name='包含小写字母')
+    password_require_digits = models.BooleanField(default=True, verbose_name='包含数字')
+    password_require_symbols = models.BooleanField(default=True, verbose_name='包含符号')
+    password_symbols = models.CharField(
+        max_length=50,
+        default='!@#$%^&*',
+        blank=True,
+        verbose_name='符号字符集合'
+    )
 
     class Meta:
         verbose_name = '系统配置'

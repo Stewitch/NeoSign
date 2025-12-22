@@ -6,12 +6,56 @@ import string
 from typing import Iterable, Sequence
 
 from openpyxl import Workbook
+from core.models import SystemConfig
 from django.http import HttpResponse
 
 
 def generate_random_password(length: int = 12) -> str:
-    chars = string.ascii_letters + string.digits + '!@#$%^&*'
-    return ''.join(random.choice(chars) for _ in range(length))
+    # Load policy from SystemConfig
+    try:
+        cfg, _ = SystemConfig.objects.get_or_create(pk=1)
+    except Exception:
+        cfg = None
+
+    length = max(6, (cfg.password_length if cfg else length))
+    require_upper = (cfg.password_require_uppercase if cfg else True)
+    require_lower = (cfg.password_require_lowercase if cfg else True)
+    require_digits = (cfg.password_require_digits if cfg else True)
+    require_symbols = (cfg.password_require_symbols if cfg else True)
+    symbols = (cfg.password_symbols if cfg else '!@#$%^&*')
+
+    upper = string.ascii_uppercase
+    lower = string.ascii_lowercase
+    digits = string.digits
+    syms = symbols or ''
+
+    pools = []
+    if require_upper:
+        pools.append(upper)
+    if require_lower:
+        pools.append(lower)
+    if require_digits:
+        pools.append(digits)
+    if require_symbols and syms:
+        pools.append(syms)
+
+    # Fallback if all disabled: use digits
+    if not pools:
+        pools = [digits]
+
+    # Ensure each required category contributes at least one character
+    password_chars = []
+    for pool in pools:
+        password_chars.append(random.choice(pool))
+
+    # Fill remaining length from combined pool
+    all_chars = ''.join(pools)
+    while len(password_chars) < length:
+        password_chars.append(random.choice(all_chars))
+
+    # Shuffle to avoid predictable positions
+    random.shuffle(password_chars)
+    return ''.join(password_chars)
 
 
 def export_table_to_csv(headers: Sequence[str], rows: Iterable[Sequence[str]], filename: str) -> HttpResponse:
