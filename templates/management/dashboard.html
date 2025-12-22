@@ -1,34 +1,35 @@
 {% extends 'base.html' %}
-{% block title %}管理后台 - {{ block.super }}{% endblock %}
+{% load i18n %}
+{% block title %}{% trans '管理后台' %} - {{ block.super }}{% endblock %}
 {% block content %}
-<h3 class="mb-4">管理后台</h3>
+<h3 class="mb-4">{% trans '管理后台' %}</h3>
 <div class="row g-3">
     <div class="col-md-4">
         <div class="card h-100">
             <div class="card-body">
-                <h5 class="card-title">用户管理</h5>
-                <p class="card-text">查看用户、重置密码、删除。</p>
-                <a class="btn btn-primary" href="{% url 'management:user_list' %}">进入用户列表</a>
+                <h5 class="card-title">{% trans '用户管理' %}</h5>
+                <p class="card-text">{% trans '查看用户、重置密码、删除。' %}</p>
+                <a class="btn btn-primary" href="{% url 'management:user_list' %}">{% trans '进入用户列表' %}</a>
             </div>
         </div>
     </div>
     <div class="col-md-4">
         <div class="card h-100">
             <div class="card-body">
-                <h5 class="card-title">批量创建用户</h5>
-                <p class="card-text">在用户列表页进行批量创建并导出初始密码。</p>
-                <a class="btn btn-secondary" href="{% url 'management:user_list' %}">打开用户列表</a>
+                <h5 class="card-title">{% trans '批量创建用户' %}</h5>
+                <p class="card-text">{% trans '在用户列表页进行批量创建并导出初始密码。' %}</p>
+                <a class="btn btn-secondary" href="{% url 'management:user_list' %}">{% trans '打开用户列表' %}</a>
             </div>
         </div>
     </div>
     <div class="col-md-4">
         <div class="card h-100">
             <div class="card-body">
-                <h5 class="card-title">活动管理</h5>
-                <p class="card-text">创建、编辑、分配参与人员。</p>
+                <h5 class="card-title">{% trans '活动管理' %}</h5>
+                <p class="card-text">{% trans '创建、编辑、分配参与人员。' %}</p>
                 <div class="d-grid gap-2">
-                    <a class="btn btn-primary" href="{% url 'management:activity_create' %}">新建活动</a>
-                    <a class="btn btn-outline-primary" href="{% url 'management:activity_list' %}">查看活动列表</a>
+                    <a class="btn btn-primary" href="{% url 'management:activity_create' %}">{% trans '新建活动' %}</a>
+                    <a class="btn btn-outline-primary" href="{% url 'management:activity_list' %}">{% trans '查看活动列表' %}</a>
                 </div>
             </div>
         </div>
@@ -36,18 +37,18 @@
     <div class="col-md-4">
         <div class="card h-100">
             <div class="card-body">
-                <h5 class="card-title">签到统计</h5>
-                <p class="card-text">查看签到情况并导出已签到/未签到名单。</p>
-                <a class="btn btn-outline-secondary" href="{% url 'management:activity_list' %}">选择活动查看</a>
+                <h5 class="card-title">{% trans '签到统计' %}</h5>
+                <p class="card-text">{% trans '查看签到情况并导出已签到/未签到名单。' %}</p>
+                <a class="btn btn-outline-secondary" href="{% url 'management:activity_list' %}">{% trans '选择活动查看' %}</a>
             </div>
         </div>
     </div>
     <div class="col-md-4">
         <div class="card h-100">
             <div class="card-body">
-                <h5 class="card-title">网站设置</h5>
-                <p class="card-text">修改站点标题和联系方式。</p>
-                <a class="btn btn-outline-primary" href="{% url 'management:site_settings' %}">设置</a>
+                <h5 class="card-title">{% trans '网站设置' %}</h5>
+                <p class="card-text">{% trans '修改站点标题和联系方式。' %}</p>
+                <a class="btn btn-outline-primary" href="{% url 'management:site_settings' %}">{% trans '设置' context 'nav' %}</a>
             </div>
         </div>
     </div>
