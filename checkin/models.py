@@ -1,5 +1,13 @@
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
+from django.core.validators import MinValueValidator
+import hashlib
+import os
+
+
+def generate_qr_secret() -> str:
+	return hashlib.sha256(os.urandom(16)).hexdigest()[:32]
 
 
 class Activity(models.Model):
@@ -7,6 +15,27 @@ class Activity(models.Model):
 	description = models.TextField(blank=True, verbose_name='活动描述')
 	start_time = models.DateTimeField(verbose_name='开始时间')
 	end_time = models.DateTimeField(verbose_name='结束时间')
+	# 位置签到
+	location_enabled = models.BooleanField(default=False, verbose_name='启用位置限制')
+	location_lat = models.FloatField(null=True, blank=True, verbose_name='纬度')
+	location_lng = models.FloatField(null=True, blank=True, verbose_name='经度')
+	location_radius_m = models.PositiveIntegerField(default=0, verbose_name='范围(米)')
+	# 重复签到
+	repeat_type = models.CharField(
+		max_length=10,
+		choices=(('none', '不重复'), ('daily', '每日'), ('weekly', '每周')),
+		default='none',
+		verbose_name='重复方式',
+	)
+	repeat_weekdays = models.JSONField(default=list, verbose_name='每周重复日(1-7)')
+	window_start_time = models.TimeField(null=True, blank=True, verbose_name='每日开始时刻')
+	window_end_time = models.TimeField(null=True, blank=True, verbose_name='每日结束时刻')
+	# 二维码签到
+	qr_enabled = models.BooleanField(default=False, verbose_name='启用二维码')
+	qr_refresh_interval_s = models.PositiveIntegerField(
+		default=30, validators=[MinValueValidator(10)], verbose_name='二维码刷新周期(秒)'
+	)
+	qr_secret = models.CharField(max_length=32, default=generate_qr_secret, verbose_name='二维码密钥')
 	created_by = models.ForeignKey(
 		settings.AUTH_USER_MODEL,
 		on_delete=models.CASCADE,
@@ -30,6 +59,42 @@ class Activity(models.Model):
 
 	def __str__(self) -> str:  # pragma: no cover - simple display
 		return self.name
+
+	def is_open_for(self, dt):
+		if not self.is_active:
+			return False
+		if self.repeat_type == 'none':
+			return self.start_time <= dt <= self.end_time
+		# 总体有效期：使用日期边界
+		start_date = self.start_time.date()
+		end_date = self.end_time.date() if self.end_time else None
+		current_date = dt.date()
+		if current_date < start_date:
+			return False
+		if end_date and current_date > end_date:
+			return False
+		if not (self.window_start_time and self.window_end_time):
+			return False
+		current_time = dt.time()
+		if not (self.window_start_time <= current_time <= self.window_end_time):
+			return False
+		if self.repeat_type == 'weekly':
+			weekday = dt.isoweekday()  # 1-7
+			return weekday in (self.repeat_weekdays or [])
+		# daily
+		return True
+
+	def current_qr_token(self, dt=None):
+		dt = dt or timezone.now()
+		interval = max(self.qr_refresh_interval_s or 30, 10)
+		slot = int(dt.timestamp() // interval)
+		payload = f"{self.qr_secret}:{slot}"
+		return hashlib.sha256(payload.encode('utf-8')).hexdigest()[:24]
+
+	def is_valid_qr_token(self, token, dt=None):
+		if not (self.qr_enabled and token):
+			return False
+		return token == self.current_qr_token(dt)
 
 
 class ActivityParticipation(models.Model):
@@ -56,6 +121,9 @@ class CheckInRecord(models.Model):
 	checkin_time = models.DateTimeField(auto_now_add=True, verbose_name='签到时间')
 	ip_address = models.GenericIPAddressField(null=True, blank=True, verbose_name='IP地址')
 	user_agent = models.TextField(blank=True, verbose_name='UserAgent')
+	# 位置数据（若启用）
+	latitude = models.FloatField(null=True, blank=True, verbose_name='签到纬度')
+	longitude = models.FloatField(null=True, blank=True, verbose_name='签到经度')
 
 	class Meta:
 		unique_together = ('activity', 'user')

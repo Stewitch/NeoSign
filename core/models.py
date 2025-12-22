@@ -6,8 +6,8 @@ from django.db import models
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, student_id: str, password: str | None = None, **extra_fields):
-        if not student_id or not student_id.isdigit() or len(student_id) != 10:
-            raise ValueError('学号必须是10位数字')
+        if not student_id or not student_id.isdigit() or not (4 <= len(student_id) <= 23):
+            raise ValueError('学号必须是4-23位数字')
 
         user = self.model(student_id=student_id, **extra_fields)
         user.set_password(password)
@@ -29,9 +29,9 @@ class CustomUserManager(BaseUserManager):
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     student_id = models.CharField(
-        max_length=10,
+        max_length=23,
         unique=True,
-        validators=[RegexValidator(r'^\d{10}$', '学号必须是10位数字')],
+        validators=[RegexValidator(r'^\d{4,23}$', '学号必须是4-23位数字')],
         verbose_name='学号',
     )
     first_name = models.CharField(max_length=50, blank=True, verbose_name='姓名')
@@ -60,6 +60,7 @@ class SystemConfig(models.Model):
     site_title = models.CharField(max_length=100, default='签到系统', verbose_name='站点标题')
     site_logo = models.ImageField(upload_to='system/logo/', null=True, blank=True, verbose_name='站点Logo')
     technician_contact = models.CharField(max_length=100, blank=True, verbose_name='技术支持联系方式')
+    map_api_key = models.CharField(max_length=200, blank=True, verbose_name='地图 API Key')
     installed = models.BooleanField(default=False, verbose_name='是否已安装')
     db_host = models.CharField(max_length=100, blank=True, verbose_name='数据库地址')
     db_name = models.CharField(max_length=100, blank=True, verbose_name='数据库名称')

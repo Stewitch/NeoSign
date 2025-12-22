@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}二维码签到展示 - {{ block.super }}{% endblock %}
+{% block content %}
+<h3 class="mb-3">{{ activity.name }} - 二维码签到</h3>
+<div class="card shadow-sm">
+  <div class="card-body text-center">
+    {% if activity.qr_enabled %}
+      <img id="qr-img" src="{% url 'checkin:qr_image' activity.id %}?t={{ interval }}" alt="QR" class="img-fluid" style="max-width: 300px;"/>
+      <div class="mt-2 text-muted">每 {{ interval }} 秒自动刷新</div>
+    {% else %}
+      <div class="alert alert-warning">该活动未启用二维码签到。</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+  (function(){
+    const img = document.getElementById('qr-img');
+    const interval = {{ interval }} * 1000;
+    if (!img) return;
+    function refresh(){
+      const url = img.src.split('?')[0] + '?t=' + Date.now();
+      img.src = url;
+    }
+    setInterval(refresh, interval);
+  })();
+</script>
+{% endblock %}

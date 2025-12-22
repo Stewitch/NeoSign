@@ -2,9 +2,35 @@
 {% block title %}网站设置 - {{ block.super }}{% endblock %}
 {% block content %}
 <h3 class="mb-4">网站设置</h3>
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">保存</button>
-</form>
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" class="vstack gap-3">
+                    {% csrf_token %}
+                    <div>
+                        <label class="form-label fw-semibold">站点标题</label>
+                        {{ form.site_title }}
+                    </div>
+                    <div>
+                        <label class="form-label fw-semibold">站点 Logo</label><br>
+                        {{ form.site_logo }}
+                    </div>
+                    <div>
+                        <label class="form-label fw-semibold">技术支持联系方式</label>
+                        {{ form.technician_contact }}
+                    </div>
+                    <div>
+                        <label class="form-label fw-semibold">地图 API Key</label>
+                        {{ form.map_api_key }}
+                        <div class="form-text">用于位置签到前端地图 SDK；可留空禁用。</div>
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

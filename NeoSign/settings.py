@@ -30,7 +30,6 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key')
 DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').strip().split(',') if os.environ.get('ALLOWED_HOSTS') else []
-print("Allowed Hosts:", ALLOWED_HOSTS)
 
 
 # Application definition

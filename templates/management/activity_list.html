@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}活动管理 - {{ block.super }}{% endblock %}
+{% block content %}
+<h3 class="mb-4">活动管理</h3>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <a class="btn btn-primary" href="{% url 'management:activity_create' %}">新建活动</a>
+    <small class="text-muted">管理参与人员、时间、状态。</small>
+</div>
+<div class="table-responsive">
+    <table class="table table-striped align-middle table-hover">
+        <thead>
+            <tr>
+                <th>名称</th>
+                <th>时间</th>
+                <th>状态</th>
+                <th>创建人</th>
+                <th class="text-end">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for activity in page_obj %}
+            <tr>
+                <td>{{ activity.name }}</td>
+                <td>{{ activity.start_time }} - {{ activity.end_time }}</td>
+                <td>{% if activity.is_active %}<span class="badge bg-success">进行中</span>{% else %}<span class="badge bg-secondary">已结束</span>{% endif %}</td>
+                <td>{{ activity.created_by.first_name|default:activity.created_by.student_id }}</td>
+                <td class="text-end">
+                    <a class="btn btn-sm btn-outline-primary" href="{% url 'management:activity_edit' activity.id %}">编辑</a>
+                    <a class="btn btn-sm btn-outline-secondary" href="{% url 'management:activity_stats' activity.id %}">签到统计</a>
+                    {% if activity.is_active %}
+                    <form class="d-inline" method="post" action="{% url 'management:activity_close' activity.id %}" onsubmit="return confirm('确认提前结束该活动？');">
+                        {% csrf_token %}
+                        <button class="btn btn-sm btn-outline-danger" type="submit">提前结束</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center text-muted">暂无活动</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<nav aria-label="活动分页">
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">上一页</a></li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">上一页</span></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">第 {{ page_obj.number }} / {{ page_obj.paginator.num_pages }} 页</span></li>
+        {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">下一页</a></li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">下一页</span></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endblock %}

@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}签到统计 - {{ block.super }}{% endblock %}
+{% block content %}
+<h3 class="mb-3">{{ activity.name }} 的签到统计</h3>
+<div class="d-flex flex-wrap gap-3 mb-3">
+    <span class="badge bg-primary">总参与: {{ total_participants }}</span>
+    <span class="badge bg-success">已签到: {{ checked_count }}</span>
+    <span class="badge bg-warning text-dark">未签到: {{ unchecked_count }}</span>
+    <div class="btn-group" role="group">
+        <a class="btn btn-outline-success btn-sm" href="{% url 'management:activity_stats_export' activity.id 'checked' 'xlsx' %}">导出已签到 XLSX</a>
+        <a class="btn btn-outline-success btn-sm" href="{% url 'management:activity_stats_export' activity.id 'checked' 'csv' %}">导出已签到 CSV</a>
+    </div>
+    <div class="btn-group" role="group">
+        <a class="btn btn-outline-warning btn-sm" href="{% url 'management:activity_stats_export' activity.id 'unchecked' 'xlsx' %}">导出未签到 XLSX</a>
+        <a class="btn btn-outline-warning btn-sm" href="{% url 'management:activity_stats_export' activity.id 'unchecked' 'csv' %}">导出未签到 CSV</a>
+    </div>
+</div>
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">已签到</h5>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr><th>学号</th><th>姓名</th><th>时间</th><th>IP</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for record in checked_page %}
+                            <tr>
+                                <td>{{ record.user.student_id }}</td>
+                                <td>{{ record.user.first_name|default:'-' }}</td>
+                                <td>{{ record.checkin_time }}</td>
+                                <td>{{ record.ip_address|default:'-' }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" class="text-center text-muted">暂无签到</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <nav aria-label="已签到分页">
+                    <ul class="pagination pagination-sm">
+                        {% if checked_page.has_previous %}
+                            <li class="page-item"><a class="page-link" href="?checked_page={{ checked_page.previous_page_number }}&unchecked_page={{ unchecked_page.number }}">上一页</a></li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">上一页</span></li>
+                        {% endif %}
+                        <li class="page-item disabled"><span class="page-link">{{ checked_page.number }} / {{ checked_page.paginator.num_pages }}</span></li>
+                        {% if checked_page.has_next %}
+                            <li class="page-item"><a class="page-link" href="?checked_page={{ checked_page.next_page_number }}&unchecked_page={{ unchecked_page.number }}">下一页</a></li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">下一页</span></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">未签到</h5>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr><th>学号</th><th>姓名</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for user in unchecked_page %}
+                            <tr>
+                                <td>{{ user.student_id }}</td>
+                                <td>{{ user.first_name|default:'-' }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="2" class="text-center text-muted">全部已签到</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <nav aria-label="未签到分页">
+                    <ul class="pagination pagination-sm">
+                        {% if unchecked_page.has_previous %}
+                            <li class="page-item"><a class="page-link" href="?checked_page={{ checked_page.number }}&unchecked_page={{ unchecked_page.previous_page_number }}">上一页</a></li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">上一页</span></li>
+                        {% endif %}
+                        <li class="page-item disabled"><span class="page-link">{{ unchecked_page.number }} / {{ unchecked_page.paginator.num_pages }}</span></li>
+                        {% if unchecked_page.has_next %}
+                            <li class="page-item"><a class="page-link" href="?checked_page={{ checked_page.number }}&unchecked_page={{ unchecked_page.next_page_number }}">下一页</a></li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">下一页</span></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
