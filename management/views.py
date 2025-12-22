@@ -1,3 +1,4 @@
+from django import forms
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
@@ -378,7 +379,8 @@ class SiteSettingsView(LoginRequiredMixin, AdminOnlyMixin, UpdateView):
     fields = [
         'site_title', 'site_logo', 'technician_contact', 'map_api_key',
         'password_length', 'password_require_uppercase', 'password_require_lowercase',
-        'password_require_digits', 'password_require_symbols', 'password_symbols'
+        'password_require_digits', 'password_require_symbols', 'password_symbols',
+        'language_code', 'timezone_str',
     ]
     success_url = reverse_lazy('management:dashboard')
 
@@ -396,6 +398,26 @@ class SiteSettingsView(LoginRequiredMixin, AdminOnlyMixin, UpdateView):
             form.fields['password_length'].widget.attrs.update({'class': 'form-control', 'min': 6})
         if 'site_logo' in form.fields:
             form.fields['site_logo'].widget.attrs.update({'class': 'form-control'})
+        # Dropdown choices for language/timezone
+        if 'language_code' in form.fields:
+            form.fields['language_code'].widget = forms.Select(
+                choices=[
+                    ('zh-hans', '中文 (简体)'),
+                    ('en-us', 'English (US)'),
+                ],
+                attrs={'class': 'form-select'}
+            )
+        if 'timezone_str' in form.fields:
+            form.fields['timezone_str'].widget = forms.Select(
+                choices=[
+                    ('Asia/Shanghai', 'Asia/Shanghai'),
+                    ('Asia/Tokyo', 'Asia/Tokyo'),
+                    ('UTC', 'UTC'),
+                    ('Europe/London', 'Europe/London'),
+                    ('America/New_York', 'America/New_York'),
+                ],
+                attrs={'class': 'form-select'}
+            )
         return form
 
     def form_valid(self, form):

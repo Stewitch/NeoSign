@@ -65,6 +65,8 @@ class SystemConfig(models.Model):
     db_host = models.CharField(max_length=100, blank=True, verbose_name='数据库地址')
     db_name = models.CharField(max_length=100, blank=True, verbose_name='数据库名称')
     db_user = models.CharField(max_length=100, blank=True, verbose_name='数据库用户名')
+    language_code = models.CharField(max_length=20, default='zh-hans', verbose_name='界面语言')
+    timezone_str = models.CharField(max_length=50, default='Asia/Shanghai', verbose_name='时区')
     # 密码策略
     password_length = models.PositiveSmallIntegerField(default=12, verbose_name='初始密码长度')
     password_require_uppercase = models.BooleanField(default=True, verbose_name='包含大写字母')

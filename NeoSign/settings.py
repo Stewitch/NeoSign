@@ -59,6 +59,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'core.middleware.InstallationMiddleware',
     'core.middleware.ActivityAutoCloseMiddleware',
+    'core.middleware.ConfigLocaleMiddleware',
 ]
 
 ROOT_URLCONF = 'NeoSign.urls'

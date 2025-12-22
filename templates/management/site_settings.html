@@ -25,6 +25,18 @@
                         {{ form.map_api_key }}
                         <div class="form-text">用于位置签到前端地图 SDK；可留空禁用。</div>
                     </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">界面语言</label>
+                            {{ form.language_code }}
+                            <div class="form-text">当前支持：中文（简体）、English (US)。</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">时区</label>
+                            {{ form.timezone_str }}
+                            <div class="form-text">常用选项：Asia/Shanghai, Asia/Tokyo, UTC, Europe/London, America/New_York。</div>
+                        </div>
+                    </div>
                     <hr>
                     <div class="vstack gap-2">
                         <div class="fw-semibold">初始密码策略</div>

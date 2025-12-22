@@ -1,5 +1,5 @@
 from django.db.utils import OperationalError, ProgrammingError
-from django.utils import timezone
+from django.utils import timezone, translation
 from django.shortcuts import redirect
 
 from .models import SystemConfig
@@ -52,3 +52,36 @@ class ActivityAutoCloseMiddleware:
                 pass
 
         return self.get_response(request)
+
+
+class ConfigLocaleMiddleware:
+    """Apply language and timezone from SystemConfig per request."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        lang_activated = False
+        tz_activated = False
+        try:
+            cfg = SystemConfig.objects.first()
+            if cfg:
+                if cfg.timezone_str:
+                    try:
+                        timezone.activate(cfg.timezone_str)
+                        tz_activated = True
+                    except Exception:
+                        pass
+                if cfg.language_code:
+                    translation.activate(cfg.language_code)
+                    lang_activated = True
+        except (OperationalError, ProgrammingError):
+            cfg = None
+
+        response = self.get_response(request)
+
+        if lang_activated:
+            translation.deactivate()
+        if tz_activated:
+            timezone.deactivate()
+        return response
