@@ -24,12 +24,13 @@ dotenv.load_dotenv(BASE_DIR / '.env')
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').strip().split(',') if os.environ.get('ALLOWED_HOSTS') else []
+print("Allowed Hosts:", ALLOWED_HOSTS)
 
 
 # Application definition
@@ -41,6 +42,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # project apps
+    'core',
+    'authentication',
+    'checkin',
+    'installation',
+    'management',
 ]
 
 MIDDLEWARE = [
@@ -51,6 +58,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'core.middleware.InstallationMiddleware',
 ]
 
 ROOT_URLCONF = 'NeoSign.urls'
@@ -58,14 +66,16 @@ ROOT_URLCONF = 'NeoSign.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.system_config',
             ],
+            'builtins': ['django.templatetags.static'],
         },
     },
 ]
@@ -79,11 +89,11 @@ WSGI_APPLICATION = 'NeoSign.wsgi.application'
 DATABASES = {
    'default': {
        'ENGINE': 'django.db.backends.postgresql',
-       'NAME': 'neosign',
-       'USER': 'postgres',
-       'PASSWORD': os.environ.get('DB_PASSWORD'),
-       'HOST': 'localhost',
-       'PORT': '5432',
+       'NAME': os.environ.get('DB_NAME', 'neosign'),
+       'USER': os.environ.get('DB_USER', 'postgres'),
+       'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+       'HOST': os.environ.get('DB_HOST', 'localhost'),
+       'PORT': os.environ.get('DB_PORT', '5432'),
    }
 }
 
@@ -97,6 +107,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {'min_length': 8}
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -104,22 +115,41 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
+    {
+        'NAME': 'core.validators.SpecialCharacterValidator',
+    },
 ]
-
-
-# Internationalization
-# https://docs.djangoproject.com/en/6.0/topics/i18n/
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
-USE_I18N = True
-
-USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'assets']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Authentication
+AUTH_USER_MODEL = 'core.CustomUser'
+LOGIN_URL = 'authentication:login'
+LOGIN_REDIRECT_URL = 'checkin:dashboard'
+LOGOUT_REDIRECT_URL = 'authentication:login'
+
+# Locale
+LANGUAGE_CODE = 'zh-hans'
+TIME_ZONE = 'Asia/Shanghai'
+USE_I18N = True
+USE_TZ = True
+
+# Default primary key field type
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Security defaults (can be overridden via env)
+CSRF_COOKIE_SECURE = os.environ.get('CSRF_COOKIE_SECURE', 'False').lower() == 'true'
+SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'False').lower() == 'true'
+SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False').lower() == 'true'
+SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '0'))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = os.environ.get('SECURE_HSTS_INCLUDE_SUBDOMAINS', 'False').lower() == 'true'
+SECURE_HSTS_PRELOAD = os.environ.get('SECURE_HSTS_PRELOAD', 'False').lower() == 'true'

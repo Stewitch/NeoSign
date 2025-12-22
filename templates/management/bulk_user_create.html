@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}批量创建用户 - {{ block.super }}{% endblock %}
+{% block content %}
+<h3 class="mb-4">批量创建用户</h3>
+<form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label class="form-label">学号列表（空格或换行分隔）</label>
+        <textarea name="student_ids" class="form-control" rows="6" placeholder="1234567890 0987654321"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">生成并导出Excel</button>
+</form>
+{% endblock %}

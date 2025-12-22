@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}创建活动 - {{ block.super }}{% endblock %}
+{% block content %}
+<h3 class="mb-4">创建活动</h3>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="mb-3">
+        <label class="form-label">参与用户（学号列表，空格分隔）</label>
+        <input type="text" name="participants" class="form-control" placeholder="1234567890 0987654321">
+        <small class="text-muted">可在创建后于管理员后台再调整。</small>
+    </div>
+    <button type="submit" class="btn btn-primary">保存</button>
+</form>
+{% endblock %}

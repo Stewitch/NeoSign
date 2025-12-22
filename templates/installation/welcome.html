@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}安装向导 - {{ block.super }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <h3 class="mb-3">安装向导</h3>
+        <p>检测到系统尚未完成安装。请填写必要信息后提交。</p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label">站点标题</label>
+                <input class="form-control" name="site_title" value="{{ config.site_title }}">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">技术支持联系方式</label>
+                <input class="form-control" name="technician_contact" value="{{ config.technician_contact }}">
+            </div>
+            <p class="text-muted small">完成后将标记为已安装，后续可在管理后台修改配置。</p>
+            <button type="submit" class="btn btn-primary">完成安装</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
