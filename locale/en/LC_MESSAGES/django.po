@@ -313,6 +313,114 @@ msgstr "Activate"
 msgid "保存"
 msgstr "Save"
 
+#: .\management\views.py:28
+msgid "您没有权限访问此页面"
+msgstr "You do not have permission to access this page."
+
+#: .\management\views.py:47
+msgid "管理员账号请单独处理，无法在此重置"
+msgstr "Administrator accounts must be handled separately; cannot reset here."
+
+#: .\management\views.py:53
+msgid "已为 %(student_id)s 重置密码"
+msgstr "Password reset for %(student_id)s."
+
+#: .\management\views.py:61
+msgid "管理员账号请单独处理，无法在此删除"
+msgstr "Administrator accounts must be handled separately; cannot delete here."
+
+#: .\management\views.py:65
+msgid "已删除用户 %(student_id)s"
+msgstr "Deleted user %(student_id)s."
+
+#: .\management\views.py:74
+msgid "未选择用户"
+msgstr "No users selected."
+
+#: .\management\views.py:87
+msgid "未选择可删除的用户（管理员不会在此删除）"
+msgstr "No deletable users selected (administrators are skipped)."
+
+#: .\management\views.py:98
+msgid "已删除 %(deleted)s 个用户"
+msgstr "Deleted %(deleted)s users."
+
+#: .\management\views.py:101
+msgid "已删除 %(deleted)s 个用户，跳过 %(skipped)s 个管理员"
+msgstr "Deleted %(deleted)s users, skipped %(skipped)s administrators."
+
+#: .\management\views.py:113
+msgid "无效的身份选择"
+msgstr "Invalid role selection."
+
+#: .\management\views.py:118
+msgid "已更新 %(updated)s 个用户身份"
+msgstr "Updated roles for %(updated)s users."
+
+#: .\management\views.py:121
+msgid "已更新 %(updated)s 个用户身份，跳过 %(skipped)s 个系统管理员"
+msgstr "Updated roles for %(updated)s users, skipped %(skipped)s superusers."
+
+#: .\management\views.py:136
+msgid "成功创建 0 个用户（全部为重复或输入为空）"
+msgstr "Created 0 users (all duplicates or empty input)."
+
+#: .\management\views.py:170
+msgid "活动创建成功"
+msgstr "Activity created successfully."
+
+#: .\management\views.py:196
+msgid "活动已更新"
+msgstr "Activity updated."
+
+#: .\management\views.py:205
+msgid "活动已提前结束"
+msgstr "Activity closed early."
+
+#: .\management\views.py:246
+msgid "网站设置已更新"
+msgstr "Site settings updated."
+
+#: .\checkin\views.py:22
+msgid "活动不在开放时间"
+msgstr "Activity is not currently open."
+
+#: .\checkin\views.py:27
+msgid "您无权参与此活动"
+msgstr "You are not allowed to join this activity."
+
+#: .\checkin\views.py:31
+msgid "您已签到过此活动"
+msgstr "You have already checked in to this activity."
+
+#: .\checkin\views.py:39
+msgid "缺少或无效的位置参数"
+msgstr "Missing or invalid location parameters."
+
+#: .\checkin\views.py:41
+msgid "不在签到范围内"
+msgstr "Outside the check-in area."
+
+#: .\checkin\views.py:45
+msgid "二维码已过期或无效"
+msgstr "QR code is expired or invalid."
+
+#: .\checkin\views.py:52
+msgid "签到成功"
+msgstr "Check-in successful."
+
+#: .\authentication\views.py:17
+msgid "首次登录，请修改密码"
+msgstr "First login, please change your password."
+
+#: .\authentication\views.py:30
+msgid "密码修改成功"
+msgstr "Password updated successfully."
+
+#: .\installation\views.py:17
+msgid "安装完成，您现在可以登录系统"
+msgstr "Installation completed; you can log in now."
+
 #: .\templates\management\activity_form.html:171
 msgid "返回"
 msgstr "Back"
@@ -601,10 +709,8 @@ msgid "符号字符集合"
 msgstr "Symbol set"
 
 #: .\templates\management\site_settings.html:71
-#, fuzzy, python-format
-#| msgid "默认：!@#$%%^&*。仅当勾选“包含符号”时生效。"
-msgid "默认：!@#$%%^&*。仅当勾选“包含符号”时生效。"
-msgstr "Default: !@#$%^&*. Applies only when symbols are required."
+msgid "仅当勾选“包含符号”时生效"
+msgstr "Applies only when \"Require symbols\" is checked."
 
 #: .\templates\management\user_list.html:15
 #: .\templates\management\user_list.html:17

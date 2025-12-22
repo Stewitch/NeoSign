@@ -9,6 +9,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views import View
 from django.views.generic import CreateView, TemplateView, UpdateView
 from django.conf import settings
@@ -43,7 +44,7 @@ class AdminOnlyMixin(UserPassesTestMixin):
         return self.request.user.is_admin or self.request.user.is_superuser
 
     def handle_no_permission(self):  # pragma: no cover - view-level redirect
-        messages.error(self.request, '您没有权限访问此页面')
+        messages.error(self.request, _('您没有权限访问此页面'))
         return redirect('checkin:dashboard')
 
 
@@ -73,13 +74,16 @@ class UserResetView(LoginRequiredMixin, AdminOnlyMixin, View):
     def post(self, request, pk):
         user = get_object_or_404(User, pk=pk)
         if user.is_admin or user.is_superuser:
-            messages.warning(request, '管理员账号请单独处理，无法在此重置')
+            messages.warning(request, _('管理员账号请单独处理，无法在此重置'))
             return redirect('management:user_list')
         new_password = generate_random_password()
         user.set_password(new_password)
         user.first_login = True
         user.save(update_fields=['password', 'first_login'])
-        messages.success(request, f'已为 {user.student_id} 重置密码')
+        messages.success(
+            request,
+            _('已为 %(student_id)s 重置密码') % {'student_id': user.student_id},
+        )
         return redirect('management:user_list')
 
 
@@ -87,10 +91,13 @@ class UserDeleteView(LoginRequiredMixin, AdminOnlyMixin, View):
     def post(self, request, pk):
         user = get_object_or_404(User, pk=pk)
         if user.is_admin or user.is_superuser:
-            messages.warning(request, '管理员账号请单独处理，无法在此删除')
+            messages.warning(request, _('管理员账号请单独处理，无法在此删除'))
             return redirect('management:user_list')
         user.delete()
-        messages.success(request, f'已删除用户 {user.student_id}')
+        messages.success(
+            request,
+            _('已删除用户 %(student_id)s') % {'student_id': user.student_id},
+        )
         return redirect('management:user_list')
 
 
@@ -100,7 +107,7 @@ class UserBulkResetView(LoginRequiredMixin, AdminOnlyMixin, View):
         fmt = request.POST.get('format', 'xlsx')
         users = User.objects.filter(id__in=user_ids, is_admin=False, is_superuser=False)
         if not users.exists():
-            messages.warning(request, '未选择用户')
+            messages.warning(request, _('未选择用户'))
             return redirect('management:user_list')
 
         rows = []
@@ -123,20 +130,23 @@ class UserBulkDeleteView(LoginRequiredMixin, AdminOnlyMixin, View):
         user_ids = request.POST.getlist('user_ids')
         selected_ids = {uid for uid in user_ids if uid}
         if not selected_ids:
-            messages.warning(request, '未选择可删除的用户（管理员不会在此删除）')
+            messages.warning(request, _('未选择可删除的用户（管理员不会在此删除）'))
             return redirect('management:user_list')
 
         users = User.objects.filter(id__in=selected_ids, is_admin=False, is_superuser=False)
         deletable_count = users.count()
         if deletable_count == 0:
-            messages.warning(request, '未选择可删除的用户（管理员不会在此删除）')
+            messages.warning(request, _('未选择可删除的用户（管理员不会在此删除）'))
             return redirect('management:user_list')
 
         protected_count = max(len(selected_ids) - deletable_count, 0)
         users.delete()
-        msg = f'已删除 {deletable_count} 个用户'
         if protected_count:
-            msg += f'，跳过 {protected_count} 个管理员'
+            msg = _(
+                '已删除 %(deleted)s 个用户，跳过 %(skipped)s 个管理员'
+            ) % {'deleted': deletable_count, 'skipped': protected_count}
+        else:
+            msg = _('已删除 %(deleted)s 个用户') % {'deleted': deletable_count}
         messages.success(request, msg)
         return redirect('management:user_list')
 
@@ -146,7 +156,7 @@ class UserBulkRoleUpdateView(LoginRequiredMixin, AdminOnlyMixin, View):
         user_ids = request.POST.getlist('user_ids')
         role = request.POST.get('role')
         if not user_ids:
-            messages.warning(request, '未选择用户')
+            messages.warning(request, _('未选择用户'))
             return redirect('management:user_list')
 
         role_flags = {
@@ -156,15 +166,18 @@ class UserBulkRoleUpdateView(LoginRequiredMixin, AdminOnlyMixin, View):
         }.get(role)
 
         if role_flags is None:
-            messages.warning(request, '无效的身份选择')
+            messages.warning(request, _('无效的身份选择'))
             return redirect('management:user_list')
 
         qs = User.objects.filter(id__in=user_ids, is_superuser=False)
         updated = qs.update(**role_flags)
         skipped = len(user_ids) - updated
-        msg = f'已更新 {updated} 个用户身份'
         if skipped:
-            msg += f'，跳过 {skipped} 个系统管理员'
+            msg = _(
+                '已更新 %(updated)s 个用户身份，跳过 %(skipped)s 个系统管理员'
+            ) % {'updated': updated, 'skipped': skipped}
+        else:
+            msg = _('已更新 %(updated)s 个用户身份') % {'updated': updated}
         messages.success(request, msg)
         return redirect('management:user_list')
 
@@ -196,7 +209,7 @@ class UserBulkCreateView(LoginRequiredMixin, AdminOnlyMixin, View):
             pending.append((student_id, name or '', password))
 
         if not pending:
-            messages.success(request, '成功创建 0 个用户（全部为重复或输入为空）')
+            messages.success(request, _('成功创建 0 个用户（全部为重复或输入为空）'))
             return redirect('management:user_list')
 
         users_to_create = [
@@ -260,7 +273,7 @@ class ActivityCreateView(LoginRequiredMixin, AdminOnlyMixin, CreateView):
             ActivityParticipation.objects.get_or_create(
                 activity=self.object, user_id=user_id, defaults={'can_participate': True}
             )
-        messages.success(self.request, '活动创建成功')
+        messages.success(self.request, _('活动创建成功'))
         return response
 
 
@@ -305,7 +318,7 @@ class ActivityUpdateView(LoginRequiredMixin, AdminOnlyMixin, UpdateView):
                 activity=self.object, user_id=uid, defaults={'can_participate': True}
             )
 
-        messages.success(self.request, '活动已更新')
+        messages.success(self.request, _('活动已更新'))
         return response
 
 
@@ -315,7 +328,7 @@ class ActivityCloseView(LoginRequiredMixin, AdminOnlyMixin, View):
         activity.is_active = False
         activity.end_time = timezone.now()
         activity.save(update_fields=['is_active', 'end_time'])
-        messages.success(request, '活动已提前结束')
+        messages.success(request, _('活动已提前结束'))
         return redirect('management:activity_list')
 
 
@@ -421,7 +434,7 @@ class SiteSettingsView(LoginRequiredMixin, AdminOnlyMixin, UpdateView):
         return form
 
     def form_valid(self, form):
-        messages.success(self.request, '网站设置已更新')
+        messages.success(self.request, _('网站设置已更新'))
         return super().form_valid(form)
 
 

@@ -2,6 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views import View
 from django.views.generic import TemplateView
 from django.urls import reverse
@@ -49,16 +50,16 @@ class CheckInAPIView(LoginRequiredMixin, View):
     def post(self, request, activity_id):
         activity = get_object_or_404(Activity, id=activity_id, is_active=True)
         if not activity.is_open_for(timezone.now()):
-            return JsonResponse({'success': False, 'error': '活动不在开放时间'})
+            return JsonResponse({'success': False, 'error': _('活动不在开放时间')})
 
         allowed = ActivityParticipation.objects.filter(
             activity=activity, user=request.user, can_participate=True
         ).exists()
         if not allowed:
-            return JsonResponse({'success': False, 'error': '您无权参与此活动'})
+            return JsonResponse({'success': False, 'error': _('您无权参与此活动')})
 
         if CheckInRecord.objects.filter(activity=activity, user=request.user).exists():
-            return JsonResponse({'success': False, 'error': '您已签到过此活动'})
+            return JsonResponse({'success': False, 'error': _('您已签到过此活动')})
 
         lat = request.POST.get('lat')
         lng = request.POST.get('lng')
@@ -67,13 +68,13 @@ class CheckInAPIView(LoginRequiredMixin, View):
                 lat_v = float(lat)
                 lng_v = float(lng)
             except (TypeError, ValueError):
-                return JsonResponse({'success': False, 'error': '缺少或无效的位置参数'})
+                return JsonResponse({'success': False, 'error': _('缺少或无效的位置参数')})
             if not self._within_radius(activity, lat_v, lng_v):
-                return JsonResponse({'success': False, 'error': '不在签到范围内'})
+                return JsonResponse({'success': False, 'error': _('不在签到范围内')})
 
         token = request.POST.get('qr_token')
         if activity.qr_enabled and not activity.is_valid_qr_token(token, timezone.now()):
-            return JsonResponse({'success': False, 'error': '二维码已过期或无效'})
+            return JsonResponse({'success': False, 'error': _('二维码已过期或无效')})
 
         CheckInRecord.objects.create(
             activity=activity,
@@ -84,7 +85,7 @@ class CheckInAPIView(LoginRequiredMixin, View):
             longitude=float(lng) if lng else None,
         )
 
-        return JsonResponse({'success': True, 'message': '签到成功'})
+        return JsonResponse({'success': True, 'message': _('签到成功')})
 
     def get_client_ip(self, request):
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')

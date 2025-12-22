@@ -4,6 +4,7 @@ from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from .forms import CustomAuthenticationForm, RequiredPasswordChangeForm
 
@@ -19,7 +20,7 @@ class CustomLoginView(LoginView):
         user.save(update_fields=['last_login'])
 
         if user.first_login:
-            messages.warning(self.request, '首次登录，请修改密码')
+            messages.warning(self.request, _('首次登录，请修改密码'))
             return redirect('authentication:password_change_required')
 
         if user.is_admin or user.is_superuser:
@@ -44,7 +45,7 @@ class RequiredPasswordChangeView(PasswordChangeView):
         user = self.request.user
         user.first_login = False
         user.save(update_fields=['first_login'])
-        messages.success(self.request, '密码修改成功')
+        messages.success(self.request, _('密码修改成功'))
         return response
 
     def dispatch(self, request, *args, **kwargs):
