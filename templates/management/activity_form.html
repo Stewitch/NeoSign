@@ -28,6 +28,17 @@
                         <textarea name="description" class="form-control" rows="3">{{ form.instance.description }}</textarea>
                     </div>
 
+                    <div class="row g-3 mb-2">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">重复方式</label>
+                            <select name="repeat_type" id="repeat_type" class="form-select">
+                                <option value="none" {% if form.instance.repeat_type == 'none' %}selected{% endif %}>不重复</option>
+                                <option value="daily" {% if form.instance.repeat_type == 'daily' %}selected{% endif %}>每日</option>
+                                <option value="weekly" {% if form.instance.repeat_type == 'weekly' %}selected{% endif %}>每周</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="row g-3" id="block-once">
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">开始时间</label>
@@ -40,14 +51,6 @@
                     </div>
 
                     <div class="row g-3" id="block-repeat">
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">重复方式</label>
-                            <select name="repeat_type" id="repeat_type" class="form-select">
-                                <option value="none" {% if form.instance.repeat_type == 'none' %}selected{% endif %}>不重复</option>
-                                <option value="daily" {% if form.instance.repeat_type == 'daily' %}selected{% endif %}>每日</option>
-                                <option value="weekly" {% if form.instance.repeat_type == 'weekly' %}selected{% endif %}>每周</option>
-                            </select>
-                        </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">重复起止日期</label>
                             <div class="input-group">

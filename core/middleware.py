@@ -1,7 +1,9 @@
 from django.db.utils import OperationalError, ProgrammingError
+from django.utils import timezone
 from django.shortcuts import redirect
 
 from .models import SystemConfig
+from checkin.models import Activity
 
 
 class InstallationMiddleware:
@@ -17,5 +19,36 @@ class InstallationMiddleware:
                 return redirect('installation:welcome')
         except (OperationalError, ProgrammingError):
             return redirect('installation:welcome')
+
+        return self.get_response(request)
+
+
+class ActivityAutoCloseMiddleware:
+    """Auto-close expired activities on management requests.
+    - Single events (repeat_type='none'): end_time < now -> is_active=False
+    - Repeating events (daily/weekly): end_time date < today -> is_active=False
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Only run on management pages to reduce overhead
+        if request.path.startswith('/manage/'):
+            try:
+                now = timezone.now()
+                today = timezone.localdate()
+                # Close single-shot events past their end_time
+                Activity.objects.filter(
+                    repeat_type='none', is_active=True, end_time__lt=now
+                ).update(is_active=False)
+                # Close repeating events beyond their overall end date (if set)
+                Activity.objects.filter(
+                    is_active=True
+                ).exclude(repeat_type='none').filter(
+                    end_time__isnull=False, end_time__date__lt=today
+                ).update(is_active=False)
+            except (OperationalError, ProgrammingError):
+                # DB not ready during installation/migration
+                pass
 
         return self.get_response(request)

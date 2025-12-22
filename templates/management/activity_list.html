@@ -27,7 +27,7 @@
                 <td class="text-end">
                     <a class="btn btn-sm btn-outline-primary" href="{% url 'management:activity_edit' activity.id %}">编辑</a>
                     <a class="btn btn-sm btn-outline-secondary" href="{% url 'management:activity_stats' activity.id %}">签到统计</a>
-                    {% if activity.is_active %}
+                    {% if activity.is_ongoing %}
                     <form class="d-inline" method="post" action="{% url 'management:activity_close' activity.id %}" onsubmit="return confirm('确认提前结束该活动？');">
                         {% csrf_token %}
                         <button class="btn btn-sm btn-outline-danger" type="submit">提前结束</button>

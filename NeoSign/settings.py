@@ -58,6 +58,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'core.middleware.InstallationMiddleware',
+    'core.middleware.ActivityAutoCloseMiddleware',
 ]
 
 ROOT_URLCONF = 'NeoSign.urls'
