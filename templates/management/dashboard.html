@@ -16,21 +16,21 @@
     <div class="col-md-4">
         <div class="card h-100">
             <div class="card-body">
-                <h5 class="card-title">{% trans '批量创建用户' %}</h5>
-                <p class="card-text">{% trans '在用户列表页进行批量创建并导出初始密码。' %}</p>
-                <a class="btn btn-secondary" href="{% url 'management:user_list' %}">{% trans '打开用户列表' %}</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card h-100">
-            <div class="card-body">
                 <h5 class="card-title">{% trans '活动管理' %}</h5>
                 <p class="card-text">{% trans '创建、编辑、分配参与人员。' %}</p>
                 <div class="d-grid gap-2">
                     <a class="btn btn-primary" href="{% url 'management:activity_create' %}">{% trans '新建活动' %}</a>
                     <a class="btn btn-outline-primary" href="{% url 'management:activity_list' %}">{% trans '查看活动列表' %}</a>
                 </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">{% trans '批量创建用户' %}</h5>
+                <p class="card-text">{% trans '在用户列表页进行批量创建并导出初始密码。' %}</p>
+                <a class="btn btn-secondary" href="{% url 'management:user_list' %}">{% trans '打开用户列表' %}</a>
             </div>
         </div>
     </div>

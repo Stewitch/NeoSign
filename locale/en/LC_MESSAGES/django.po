@@ -58,6 +58,10 @@ msgstr "Log out"
 msgid "登录"
 msgstr "Log in"
 
+#: .\templates\authentication\login.html:9
+msgid "密码"
+msgstr "Password"
+
 #: .\templates\base.html:65
 msgid "技术支持"
 msgstr "Support"
@@ -98,15 +102,66 @@ msgstr "Check-in time"
 msgid "立即签到"
 msgstr "Check in now"
 
+#: .\templates\checkin\dashboard.html:0
+msgid "请在手机上完成"
+msgstr "Please complete on your phone"
+
+#: .\templates\checkin\dashboard.html:0
+msgid "打开摄像头扫码"
+msgstr "Open camera to scan"
+
+#: .\templates\checkin\qr_scan.html:3
+msgid "扫码签到"
+msgstr "Scan to check in"
+
+#: .\templates\checkin\qr_scan.html:6
+msgid "请在手机上完成扫码签到"
+msgstr "Please use your phone to scan and check in"
+
+#: .\templates\checkin\qr_scan.html:7
+msgid "授予摄像头权限后，对准二维码即可识别。"
+msgstr "Grant camera permission and point to the QR code to recognize."
+
+#: .\templates\checkin\qr_scan.html:11
+msgid "打开摄像头"
+msgstr "Open camera"
+
+#: .\templates\checkin\qr_scan.html:12
+msgid "停止"
+msgstr "Stop"
+
+#: .\templates\checkin\qr_scan.html:26
+msgid "摄像头不可用，请检查浏览器权限或设备"
+msgstr "Camera unavailable, please check browser permission or device"
+
+#: .\templates\checkin\qr_scan.html:30
+msgid "无法在非安全环境打开摄像头，请使用 HTTPS 或 localhost 访问"
+msgstr "Cannot open camera in an insecure context; please use HTTPS or localhost"
+
+#: .\templates\checkin\qr_scan.html:34
+msgid "网络错误，请重试"
+msgstr "Network error, please try again"
+
+#: .\templates\checkin\qr_scan.html:43
+msgid "正在扫描..."
+msgstr "Scanning..."
+
+#: .\templates\checkin\qr_scan.html:48
+msgid "无法打开摄像头，请检查权限"
+msgstr "Unable to open camera, please check permissions"
+
+#: .\templates\checkin\qr_scan.html:61
+msgid "正在请求摄像头权限..."
+msgstr "Requesting camera permission..."
+
 #: .\templates\checkin\dashboard.html:37
 msgid "发起人二维码（实时刷新）"
 msgstr "Organizer QR Code (auto-refresh)"
 
 #: .\templates\checkin\dashboard.html:38
-#, fuzzy, python-format
-#| msgid "每 %(item_qr_interval)s 秒"
-msgid "每 %(item.qr_interval)s 秒"
-msgstr "Every %(item_qr_interval)s seconds"
+#, python-format
+msgid "每 %(interval)s 秒"
+msgstr "Every %(interval)s seconds"
 
 #: .\templates\checkin\dashboard.html:49
 msgid "当前没有可签到的活动。"
@@ -123,10 +178,9 @@ msgid "%(activity.name)s - 二维码签到"
 msgstr "QR check-in"
 
 #: .\templates\checkin\qr_presenter.html:10
-#, fuzzy, python-format
-#| msgid "每 %(item_qr_interval)s 秒"
+#, python-format
 msgid "每 %(interval)s 秒自动刷新"
-msgstr "Every %(item_qr_interval)s seconds"
+msgstr "Auto refresh every %(interval)s seconds"
 
 #: .\templates\checkin\qr_presenter.html:12
 msgid "该活动未启用二维码签到。"
@@ -322,8 +376,9 @@ msgid "管理员账号请单独处理，无法在此重置"
 msgstr "Administrator accounts must be handled separately; cannot reset here."
 
 #: .\management\views.py:53
-msgid "已为 %(student_id)s 重置密码"
-msgstr "Password reset for %(student_id)s."
+#: .\management\views.py:53
+msgid "已为 %(student_id)s 重置密码，新密码：%(password)s"
+msgstr "Password reset for %(student_id)s. New password: %(password)s"
 
 #: .\management\views.py:61
 msgid "管理员账号请单独处理，无法在此删除"
@@ -412,6 +467,26 @@ msgstr "Check-in successful."
 #: .\authentication\views.py:17
 msgid "首次登录，请修改密码"
 msgstr "First login, please change your password."
+
+#: .\templates\authentication\password_change_required.html:5
+msgid "首次登录需修改密码"
+msgstr "Password change required on first login"
+
+#: .\templates\authentication\password_change_required.html:9
+msgid "当前密码"
+msgstr "Current password"
+
+#: .\templates\authentication\password_change_required.html:13
+msgid "新密码"
+msgstr "New password"
+
+#: .\templates\authentication\password_change_required.html:17
+msgid "确认新密码"
+msgstr "Confirm new password"
+
+#: .\templates\authentication\password_change_required.html:20
+msgid "确认修改"
+msgstr "Confirm change"
 
 #: .\authentication\views.py:30
 msgid "密码修改成功"
@@ -654,61 +729,69 @@ msgid "技术支持联系方式"
 msgstr "Support contact"
 
 #: .\templates\management\site_settings.html:25
+msgid "地图提供商"
+msgstr "Map provider"
+
+#: .\templates\management\site_settings.html:26
+msgid "前端地图 SDK 选择：高德、腾讯或 Google。"
+msgstr "Front-end map SDK choice: AMap, Tencent, or Google."
+
+#: .\templates\management\site_settings.html:31
 msgid "地图 API Key"
 msgstr "Map API Key"
 
-#: .\templates\management\site_settings.html:27
+#: .\templates\management\site_settings.html:33
 msgid "用于位置签到前端地图 SDK；可留空禁用。"
 msgstr "For map SDK in location check-in; leave empty to disable."
 
-#: .\templates\management\site_settings.html:31
+#: .\templates\management\site_settings.html:37
 msgid "界面语言"
 msgstr "Interface language"
 
-#: .\templates\management\site_settings.html:33
+#: .\templates\management\site_settings.html:39
 msgid "当前支持：中文（简体）、English (US)。"
 msgstr "Supported: Simplified Chinese, English (US)."
 
-#: .\templates\management\site_settings.html:36
+#: .\templates\management\site_settings.html:42
 msgid "时区"
 msgstr "Timezone"
 
-#: .\templates\management\site_settings.html:38
+#: .\templates\management\site_settings.html:44
 msgid ""
 "常用选项：Asia/Shanghai, Asia/Tokyo, UTC, Europe/London, America/New_York。"
 msgstr ""
 "Common options: Asia/Shanghai, Asia/Tokyo, UTC, Europe/London, America/"
 "New_York."
 
-#: .\templates\management\site_settings.html:43
+#: .\templates\management\site_settings.html:49
 msgid "初始密码策略"
 msgstr "Initial password policy"
 
-#: .\templates\management\site_settings.html:46
+#: .\templates\management\site_settings.html:52
 msgid "长度"
 msgstr "Length"
 
-#: .\templates\management\site_settings.html:52
+#: .\templates\management\site_settings.html:58
 msgid "包含大写"
 msgstr "Require uppercase"
 
-#: .\templates\management\site_settings.html:56
+#: .\templates\management\site_settings.html:62
 msgid "包含小写"
 msgstr "Require lowercase"
 
-#: .\templates\management\site_settings.html:60
+#: .\templates\management\site_settings.html:66
 msgid "包含数字"
 msgstr "Require digits"
 
-#: .\templates\management\site_settings.html:64
+#: .\templates\management\site_settings.html:70
 msgid "包含符号"
 msgstr "Require symbols"
 
-#: .\templates\management\site_settings.html:69
+#: .\templates\management\site_settings.html:75
 msgid "符号字符集合"
 msgstr "Symbol set"
 
-#: .\templates\management\site_settings.html:71
+#: .\templates\management\site_settings.html:77
 msgid "仅当勾选“包含符号”时生效"
 msgstr "Applies only when \"Require symbols\" is checked."
 

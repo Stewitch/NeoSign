@@ -82,7 +82,10 @@ class UserResetView(LoginRequiredMixin, AdminOnlyMixin, View):
         user.save(update_fields=['password', 'first_login'])
         messages.success(
             request,
-            _('已为 %(student_id)s 重置密码') % {'student_id': user.student_id},
+            _('已为 %(student_id)s 重置密码，新密码：%(password)s') % {
+                'student_id': user.student_id,
+                'password': new_password,
+            },
         )
         return redirect('management:user_list')
 
@@ -390,7 +393,7 @@ class SiteSettingsView(LoginRequiredMixin, AdminOnlyMixin, UpdateView):
     model = SystemConfig
     template_name = 'management/site_settings.html'
     fields = [
-        'site_title', 'site_logo', 'technician_contact', 'map_api_key',
+        'site_title', 'site_logo', 'technician_contact', 'map_provider', 'map_api_key',
         'password_length', 'password_require_uppercase', 'password_require_lowercase',
         'password_require_digits', 'password_require_symbols', 'password_symbols',
         'language_code', 'timezone_str',
@@ -412,6 +415,16 @@ class SiteSettingsView(LoginRequiredMixin, AdminOnlyMixin, UpdateView):
         if 'site_logo' in form.fields:
             form.fields['site_logo'].widget.attrs.update({'class': 'form-control'})
         # Dropdown choices for language/timezone
+        if 'map_provider' in form.fields:
+            form.fields['map_provider'].widget = forms.Select(
+                choices=[
+                    ('', '—'),
+                    ('amap', '高德 (AMap)'),
+                    ('tencent', '腾讯 (QQ 地图)'),
+                    ('google', 'Google Maps'),
+                ],
+                attrs={'class': 'form-select'}
+            )
         if 'language_code' in form.fields:
             form.fields['language_code'].widget = forms.Select(
                 choices=[

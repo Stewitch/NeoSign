@@ -30,6 +30,8 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key')
 DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').strip().split(',') if os.environ.get('ALLOWED_HOSTS') else []
+_CSRF_TRUSTED = os.environ.get('CSRF_TRUSTED_ORIGINS', '').strip()
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in _CSRF_TRUSTED.split(',') if o.strip()] if _CSRF_TRUSTED else []
 
 
 # Application definition
@@ -56,6 +58,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'core.middleware.ForcePasswordChangeMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'core.middleware.InstallationMiddleware',
@@ -162,3 +165,33 @@ SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'True').lower() == '
 SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '0'))
 SECURE_HSTS_INCLUDE_SUBDOMAINS = os.environ.get('SECURE_HSTS_INCLUDE_SUBDOMAINS', 'False').lower() == 'true'
 SECURE_HSTS_PRELOAD = os.environ.get('SECURE_HSTS_PRELOAD', 'False').lower() == 'true'
+
+# Proxy / SSL termination support (optional)
+_proxy_ssl = os.environ.get('SECURE_PROXY_SSL_HEADER', '').strip()
+if _proxy_ssl:
+    parts = [p.strip() for p in _proxy_ssl.split(',')]
+    if len(parts) == 2:
+        SECURE_PROXY_SSL_HEADER = (parts[0], parts[1])
+
+USE_X_FORWARDED_HOST = os.environ.get('USE_X_FORWARDED_HOST', 'False').lower() == 'true'
+
+# Security-related logging to surface 400 causes (DisallowedHost/CSRF)
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django.security.DisallowedHost': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+        },
+        'django.security.csrf': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+        },
+    },
+}

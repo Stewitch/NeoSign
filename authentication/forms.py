@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 
 class CustomAuthenticationForm(AuthenticationForm):
@@ -20,4 +21,18 @@ class CustomAuthenticationForm(AuthenticationForm):
 
 
 class RequiredPasswordChangeForm(PasswordChangeForm):
-    pass
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Add Bootstrap classes and translated placeholders
+        self.fields['old_password'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': _('当前密码'),
+        })
+        self.fields['new_password1'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': _('新密码'),
+        })
+        self.fields['new_password2'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': _('确认新密码'),
+        })

@@ -1,23 +1,24 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% block title %}登录 - {{ block.super }}{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-6 col-lg-4">
         <div class="card shadow-sm">
             <div class="card-body p-4">
-                <h2 class="mb-4 text-center">登录</h2>
+                <h2 class="mb-4 text-center">{% trans '登录' %}</h2>
                 <form method="post" novalidate class="vstack gap-3">
                     {% csrf_token %}
                     {{ form.non_field_errors }}
                     <div class="form-floating">
-                        <input type="text" name="username" id="username" class="form-control" maxlength="10" required placeholder="学号">
-                        <label for="username">学号</label>
+                        <input type="text" name="username" id="username" class="form-control" maxlength="10" required placeholder="{% trans '学号' %}">
+                        <label for="username">{% trans '学号' %}</label>
                     </div>
                     <div class="form-floating">
-                        <input type="password" name="password" id="password" class="form-control" required placeholder="密码">
-                        <label for="password">密码</label>
+                        <input type="password" name="password" id="password" class="form-control" required placeholder="{% trans '密码' %}">
+                        <label for="password">{% trans '密码' %}</label>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100 py-2">登录</button>
+                    <button type="submit" class="btn btn-primary w-100 py-2">{% trans '登录' %}</button>
                 </form>
             </div>
         </div>

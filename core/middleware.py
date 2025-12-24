@@ -85,3 +85,30 @@ class ConfigLocaleMiddleware:
         if tz_activated:
             timezone.deactivate()
         return response
+
+
+class ForcePasswordChangeMiddleware:
+    """Force non-admin users to change password on first login.
+    Allows access to password change route and static/install paths.
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        path = request.path or ''
+        allow_paths = (
+            '/auth/password-change-required/',
+            '/static/',
+            '/install/',
+        )
+        try:
+            user = getattr(request, 'user', None)
+            if user and user.is_authenticated:
+                is_admin = getattr(user, 'is_admin', False) or user.is_superuser
+                if user.first_login and not is_admin:
+                    if not any(path.startswith(p) for p in allow_paths):
+                        return redirect('authentication:password_change_required')
+        except Exception:
+            pass
+
+        return self.get_response(request)

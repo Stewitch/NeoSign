@@ -49,6 +49,13 @@ python manage.py compilemessages -l en
 python manage.py runserver
 ```
 
+### LAN access (mobile on same network)
+- Run dev server on all interfaces: `python manage.py runserver 0.0.0.0:8000`.
+- Find your LAN IP (e.g., `192.168.1.20`) and open `http://<LAN-IP>:8000` on your phone.
+- Update env for dev: `ALLOWED_HOSTS=<LAN-IP>` and `CSRF_TRUSTED_ORIGINS=http://<LAN-IP>` (see `.env.local.example`).
+- Ensure Windows Firewall allows inbound on port `8000` for Private network.
+- Use HTTP locally; disable `SECURE_SSL_REDIRECT` to avoid HTTPS redirects.
+
 ## Production deployment checklist
 1) Set env vars: `DEBUG=False`, strong `SECRET_KEY`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`, secure cookie flags.
 2) Install dependencies: `pip install -e .` (in a virtualenv).
@@ -59,6 +66,7 @@ python manage.py runserver
 5) Translations: `python manage.py compilemessages -l en` (and other locales as needed).
 6) Create admin: `python manage.py createsuperuser`.
 7) Run app behind a WSGI/ASGI server (gunicorn/uvicorn) with a reverse proxy for TLS; serve `/media` and `/static` either via proxy or WhiteNoise.
+	- See prod env template: `.env.production.example`
 8) Verify deployment with `python manage.py check --deploy`.
 
 ## Database backup/restore

@@ -138,3 +138,13 @@ class CheckInQRImageView(LoginRequiredMixin, PresenterOnlyMixin, View):
         buf = io.BytesIO()
         img.save(buf, format='PNG')
         return HttpResponse(buf.getvalue(), content_type='image/png')
+
+
+class CheckInQRScanView(LoginRequiredMixin, TemplateView):
+    template_name = 'checkin/qr_scan.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        activity = get_object_or_404(Activity, id=self.kwargs['activity_id'])
+        context['activity'] = activity
+        return context

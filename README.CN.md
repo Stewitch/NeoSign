@@ -48,6 +48,13 @@ python manage.py compilemessages -l en
 python manage.py runserver
 ```
 
+### 局域网访问（手机与电脑同一网络）
+- 将开发服务器绑定到所有网卡：`python manage.py runserver 0.0.0.0:8000`。
+- 查找电脑的局域网 IP（如 `192.168.1.20`），在手机浏览器访问 `http://<LAN-IP>:8000`。
+- 开发环境建议设置：`ALLOWED_HOSTS=<LAN-IP>`、`CSRF_TRUSTED_ORIGINS=http://<LAN-IP>`（参考 `.env.local.example`）。
+- 确认 Windows 防火墙允许 8000 端口入站（专用网络）。
+- 本地请使用 HTTP，关闭 `SECURE_SSL_REDIRECT` 以避免跳转到 HTTPS。
+
 ## 生产部署清单
 1) 设置环境变量：`DEBUG=False`、强随机 `SECRET_KEY`、`ALLOWED_HOSTS`、`CSRF_TRUSTED_ORIGINS`、安全 Cookie 相关标志。
 2) 安装依赖：在虚拟环境里执行 `pip install -e .`。
@@ -58,6 +65,7 @@ python manage.py runserver
 5) 翻译：`python manage.py compilemessages -l en`（如有其他语言一并编译）。
 6) 创建管理员：`python manage.py createsuperuser`。
 7) 运行：使用 WSGI/ASGI 服务器（gunicorn/uvicorn），前置反向代理做 TLS；`/media`、`/static` 由代理或 WhiteNoise 提供。
+   - 生产环境变量模板：`.env.production.example`
 8) 检查：`python manage.py check --deploy`。
 
 ## 数据库备份/恢复

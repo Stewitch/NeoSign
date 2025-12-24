@@ -22,6 +22,11 @@
                         {{ form.technician_contact }}
                     </div>
                     <div>
+                        <label class="form-label fw-semibold">{% trans '地图提供商' %}</label>
+                        {{ form.map_provider }}
+                        <div class="form-text">{% trans '前端地图 SDK 选择：高德、腾讯或 Google。' %}</div>
+                    </div>
+                    <div>
                         <label class="form-label fw-semibold">{% trans '地图 API Key' %}</label>
                         {{ form.map_api_key }}
                         <div class="form-text">{% trans '用于位置签到前端地图 SDK；可留空禁用。' %}</div>
