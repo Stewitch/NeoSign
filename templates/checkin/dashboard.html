@@ -266,17 +266,33 @@
             const shouldWarn = radius && loc.accuracy && loc.accuracy > Math.max(radius * 1.5, 100);
             const msg = `${okText}（{% trans "精度约" %} ${accuracy} m）${shouldWarn ? '，' + warnText : ''}`;
             setStatus(activityId, msg, shouldWarn ? 'warning' : 'success');
-            placeUserOnMap(activityId, loc);
+            
+            // 确保地图存在后再绘制用户位置
+            if (mapStates[activityId]) {
+                placeUserOnMap(activityId, loc);
+            } else if (mapContainers.length > 0) {
+                // 如果地图还没创建但容器存在，稍后重试
+                setTimeout(() => {
+                    if (mapStates[activityId]) {
+                        placeUserOnMap(activityId, loc);
+                    }
+                }, 200);
+            }
         });
     }
 
     const mapReady = loadMapSdk();
     (async () => {
+        // 首先加载地图SDK和创建地图容器
         if (mapContainers.length && mapProvider && mapApiKey) {
             await mapReady;
             mapContainers.forEach(createMap);
+            // 确保地图创建完成后再请求位置
+            await new Promise(resolve => setTimeout(resolve, 100));
         }
+        // 然后请求位置
         const loc = await requestLocation();
+        // 获取到位置后，更新所有地图和状态信息
         updateStatuses(loc);
     })();
 
@@ -290,8 +306,29 @@
         }
         const radius = parseFloat(form.dataset.radius || '0');
         if (radius && loc.accuracy && loc.accuracy > Math.max(radius * 1.5, 100)) {
-            const proceed = confirm('{% trans "定位精度较差，可能导致签到失败，继续吗？" %}');
-            if (!proceed) return null;
+            return new Promise(resolve => {
+                // 显示 Bootstrap 模态框
+                const modal = document.getElementById('confirmModal');
+                document.getElementById('confirmModalTitle').textContent = '{% trans "定位精度提示" %}';
+                document.getElementById('confirmModalBody').textContent = '{% trans "定位精度较差，可能导致签到失败，继续吗？" %}';
+                const bsModal = new bootstrap.Modal(modal);
+                
+                const confirmBtn = document.getElementById('confirmButton');
+                const originalOnClick = confirmBtn.onclick;
+                
+                confirmBtn.onclick = () => {
+                    confirmBtn.onclick = originalOnClick;
+                    bsModal.hide();
+                    resolve(loc);
+                };
+                
+                modal.addEventListener('hidden.bs.modal', () => {
+                    confirmBtn.onclick = originalOnClick;
+                    resolve(null);
+                }, { once: true });
+                
+                bsModal.show();
+            });
         }
         return loc;
     }

@@ -60,12 +60,89 @@
     {% endif %}
     {% block content %}{% endblock %}
 </main>
+
+<!-- 通用确认模态框 -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="confirmModalTitle"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="confirmModalBody"></div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans '取消' %}</button>
+                <button type="button" class="btn btn-danger" id="confirmButton">{% trans '确认' %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <footer class="mt-5 py-3 bg-light">
     <div class="container text-center">
         <p class="mb-0">{% trans '技术支持' %}: {{ config.technician_contact|default:_('请联系管理员') }}</p>
     </div>
 </footer>
 <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+<script>
+(function(){
+    const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+    let pendingForm = null;
+    let pendingCallback = null;
+
+    // 处理带 data-confirm 属性的表单和按钮
+    document.addEventListener('submit', function(e) {
+        const form = e.target;
+        const confirmMsg = form.dataset.confirm;
+        const confirmTitle = form.dataset.confirmTitle || '{% trans "请确认操作" %}';
+        
+        if (confirmMsg) {
+            e.preventDefault();
+            pendingForm = form;
+            pendingCallback = null;
+            showConfirmModal(confirmTitle, confirmMsg, () => form.submit());
+        }
+    }, true);
+
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('[data-confirm]');
+        if (!btn) return;
+        
+        const confirmMsg = btn.dataset.confirm;
+        const confirmTitle = btn.dataset.confirmTitle || '{% trans "请确认操作" %}';
+        
+        if (confirmMsg && btn.tagName !== 'FORM') {
+            e.preventDefault();
+            pendingCallback = null;
+            
+            if (btn.type === 'submit' && btn.form) {
+                pendingForm = btn.form;
+                showConfirmModal(confirmTitle, confirmMsg, () => btn.form.submit());
+            } else if (btn.dataset.confirmCallback) {
+                // 支持自定义回调
+                const callbackName = btn.dataset.confirmCallback;
+                if (window[callbackName]) {
+                    showConfirmModal(confirmTitle, confirmMsg, () => window[callbackName](btn));
+                }
+            }
+        }
+    }, true);
+
+    function showConfirmModal(title, message, callback) {
+        document.getElementById('confirmModalTitle').textContent = title;
+        document.getElementById('confirmModalBody').textContent = message;
+        pendingCallback = callback;
+        confirmModal.show();
+    }
+
+    document.getElementById('confirmButton').addEventListener('click', () => {
+        confirmModal.hide();
+        if (pendingCallback) {
+            pendingCallback();
+        }
+    });
+})();
+</script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>

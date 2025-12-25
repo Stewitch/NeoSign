@@ -336,6 +336,15 @@ class ActivityCloseView(LoginRequiredMixin, AdminOnlyMixin, View):
         return redirect('management:activity_list')
 
 
+class ActivityDeleteView(LoginRequiredMixin, AdminOnlyMixin, View):
+    def post(self, request, pk):
+        activity = get_object_or_404(Activity, pk=pk)
+        activity_name = activity.name
+        activity.delete()
+        messages.success(request, _('活动 "%(name)s" 已删除') % {'name': activity_name})
+        return redirect('management:activity_list')
+
+
 class ActivityStatsView(LoginRequiredMixin, AdminOnlyMixin, TemplateView):
     template_name = 'management/activity_stats.html'
     paginate_by = 10

@@ -28,7 +28,7 @@
                         <option value="csv">{% trans '导出 CSV' %}</option>
                     </select>
                     <button class="btn btn-primary" type="submit" form="user-action-form" formaction="{% url 'management:user_bulk_reset' %}">{% trans '批量重置并导出' %}</button>
-                    <button class="btn btn-danger" type="submit" form="user-action-form" formaction="{% url 'management:user_bulk_delete' %}" onclick="return confirm('{% trans '确认删除选中用户？（管理员不会被删除）' %}')">{% trans '批量删除' %}</button>
+                    <button class="btn btn-danger" type="submit" form="user-action-form" formaction="{% url 'management:user_bulk_delete' %}" data-confirm="{% trans '确认删除选中用户？（管理员不会被删除）' %}" data-confirm-title="{% trans '删除用户' %}">{% trans '批量删除' %}</button>
                     <div class="input-group" style="width: 240px;">
                         <span class="input-group-text">{% trans '身份' %}</span>
                         <select id="role-select" name="role" class="form-select" form="user-action-form">
@@ -84,14 +84,14 @@
                                             <span class="text-muted small d-block">{% trans '管理员受保护' %}</span>
                                             <div class="btn-group btn-group-sm" role="group">
                                                 <button class="btn btn-outline-primary" type="submit" form="user-action-form" formaction="{% url 'management:user_reset' user.id %}" formmethod="post">{% trans '重置密码' %}</button>
-                                                <button class="btn btn-outline-danger" type="submit" form="user-action-form" formaction="{% url 'management:user_delete' user.id %}" formmethod="post" onclick="return confirm('{% trans '确认删除该用户?' %}')">{% trans '删除' %}</button>
+                                                <button class="btn btn-outline-danger" type="submit" form="user-action-form" formaction="{% url 'management:user_delete' user.id %}" formmethod="post" data-confirm="{% trans '确认删除该用户?' %}" data-confirm-title="{% trans '删除用户' %}">{% trans '删除' %}</button>
                                             </div>
                                         </td>
                                     {% else %}
                                         <td class="text-end">
                                             <div class="btn-group btn-group-sm" role="group">
                                                 <button class="btn btn-outline-primary" type="submit" form="user-action-form" formaction="{% url 'management:user_reset' user.id %}" formmethod="post">{% trans '重置密码' %}</button>
-                                                <button class="btn btn-outline-danger" type="submit" form="user-action-form" formaction="{% url 'management:user_delete' user.id %}" formmethod="post" onclick="return confirm('{% trans '确认删除该用户?' %}')">{% trans '删除' %}</button>
+                                                <button class="btn btn-outline-danger" type="submit" form="user-action-form" formaction="{% url 'management:user_delete' user.id %}" formmethod="post" data-confirm="{% trans '确认删除该用户?' %}" data-confirm-title="{% trans '删除用户' %}">{% trans '删除' %}</button>
                                             </div>
                                         </td>
                                     {% endif %}

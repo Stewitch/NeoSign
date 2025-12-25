@@ -468,7 +468,11 @@ msgstr "Activity updated."
 msgid "活动已提前结束"
 msgstr "Activity closed early."
 
-#: .\management\views.py:246
+#: .\management\views.py:210
+msgid "活动 \"%(name)s\" 已删除"
+msgstr "Activity \"%(name)s\" has been deleted."
+
+#: .\management\views.py:214
 msgid "网站设置已更新"
 msgstr "Site settings updated."
 
@@ -618,7 +622,11 @@ msgstr "End this activity early?"
 msgid "提前结束"
 msgstr "End early"
 
-#: .\templates\management\activity_list.html:40
+#: .\templates\management\activity_list.html:36
+msgid "确认删除该活动？删除后将无法恢复。"
+msgstr "Confirm delete this activity? It cannot be recovered after deletion."
+
+#: .\templates\management\activity_list.html:46
 msgid "暂无活动"
 msgstr "No activities"
 
@@ -1028,6 +1036,7 @@ msgstr "Reset password"
 msgid "确认删除该用户?"
 msgstr "Delete this user?"
 
+#: .\templates\management\activity_list.html:39
 #: .\templates\management\user_list.html:84
 #: .\templates\management\user_list.html:91
 msgid "删除"
@@ -1048,6 +1057,34 @@ msgstr "Generate"
 #: .\templates\management\user_list.html:139
 msgid "支持上传 CSV（列：学号, 可选姓名）。"
 msgstr "CSV upload supported (columns: student_id, optional name)."
+
+#: .\templates\base.html:97
+msgid "请确认操作"
+msgstr "Confirm Action"
+
+#: .\templates\base.html:82
+msgid "取消"
+msgstr "Cancel"
+
+#: .\templates\base.html:84
+msgid "确认"
+msgstr "Confirm"
+
+#: .\templates\management\activity_list.html:32
+msgid "结束活动"
+msgstr "End Activity"
+
+#: .\templates\management\activity_list.html:38
+msgid "删除活动"
+msgstr "Delete Activity"
+
+#: .\templates\management\user_list.html:31
+msgid "删除用户"
+msgstr "Delete User"
+
+#: .\templates\checkin\dashboard.html:290
+msgid "定位精度提示"
+msgstr "Location Accuracy Notice"
 
 #~ msgid "导出为 XLSX"
 #~ msgstr "Export as XLSX"

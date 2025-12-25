@@ -29,11 +29,15 @@
                     <a class="btn btn-sm btn-outline-primary" href="{% url 'management:activity_edit' activity.id %}">{% trans '编辑' %}</a>
                     <a class="btn btn-sm btn-outline-secondary" href="{% url 'management:activity_stats' activity.id %}">{% trans '签到统计' %}</a>
                     {% if activity.is_ongoing %}
-                    <form class="d-inline" method="post" action="{% url 'management:activity_close' activity.id %}" onsubmit="return confirm('{% trans '确认提前结束该活动？' %}');">
+                    <form class="d-inline" method="post" action="{% url 'management:activity_close' activity.id %}" data-confirm="{% trans '确认提前结束该活动？' %}" data-confirm-title="{% trans '结束活动' %}">
                         {% csrf_token %}
                         <button class="btn btn-sm btn-outline-danger" type="submit">{% trans '提前结束' %}</button>
                     </form>
                     {% endif %}
+                    <form class="d-inline" method="post" action="{% url 'management:activity_delete' activity.id %}" data-confirm="{% trans '确认删除该活动？删除后将无法恢复。' %}" data-confirm-title="{% trans '删除活动' %}">
+                        {% csrf_token %}
+                        <button class="btn btn-sm btn-outline-danger" type="submit">{% trans '删除' %}</button>
+                    </form>
                 </td>
             </tr>
             {% empty %}
