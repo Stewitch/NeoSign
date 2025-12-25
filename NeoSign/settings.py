@@ -176,6 +176,11 @@ if _proxy_ssl:
 
 USE_X_FORWARDED_HOST = os.environ.get('USE_X_FORWARDED_HOST', 'False').lower() == 'true'
 
+# Map Security (AMap)
+# 'nginx': Proxy security key via nginx (recommended for production)
+# 'frontend': Send security key directly to frontend (default, simpler)
+AMAP_PROXY_MODE = os.environ.get('AMAP_PROXY_MODE', 'frontend')
+
 # Security-related logging to surface 400 causes (DisallowedHost/CSRF)
 LOGGING = {
     'version': 1,

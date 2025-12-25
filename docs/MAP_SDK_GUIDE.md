@@ -137,6 +137,7 @@ NeoSign 支持可选的地图 SDK 集成，用于可视化位置签到。系统�
 **问题：地图不显示**
 - 检查 API Key 是否正确填写
 - **高德地图用户**：确认安全密钥（securityJsCode）已正确填写
+  - **生产环境推荐**：使用 Nginx 代理模式，参见 [Nginx 高德地图安全密钥代理配置](NGINX_AMAP_PROXY.md)
 - 检查 Key 的服务类型是否选择了 Web/JSAPI
 - 打开浏览器开发者工具查看控制台错误
 - 常见错误：`INVALID_USER_SCODE` 表示安全密钥错误或缺失

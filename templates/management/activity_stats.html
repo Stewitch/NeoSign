@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load display %}
 {% block title %}{% trans '签到统计' %} - {{ block.super }}{% endblock %}
 {% block content %}
 <h3 class="mb-3">{{ activity.name }} {% trans '的签到统计' %}</h3>
@@ -35,8 +36,8 @@
                         <tbody>
                             {% for record in checked_page %}
                             <tr>
-                                <td>{{ record.user.student_id }}</td>
-                                <td>{{ record.user.first_name|default:'-' }}</td>
+                                <td>{% mask_field record.user.student_id 'student_id' 'admin' config %}</td>
+                                <td>{% mask_field record.user.first_name 'name' 'admin' config %}</td>
                                 <td>{{ record.checkin_time }}</td>
                                 <td class="small text-muted">{{ record.ip_address|default:'-' }}</td>
                                 <td>
@@ -91,8 +92,8 @@
                         <tbody>
                             {% for user in unchecked_page %}
                             <tr>
-                                <td>{{ user.student_id }}</td>
-                                <td>{{ user.first_name|default:'-' }}</td>
+                                <td>{% mask_field user.student_id 'student_id' 'admin' config %}</td>
+                                <td>{% mask_field user.first_name 'name' 'admin' config %}</td>
                                 <td>
                                     <form method="post" action="{% url 'management:activity_status_update' activity.id %}" class="d-flex flex-column gap-1">
                                         {% csrf_token %}

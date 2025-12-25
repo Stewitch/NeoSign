@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load display %}
 {% block title %}{% trans '用户管理' %} - {{ block.super }}{% endblock %}
 {% block content %}
 <h3 class="mb-3">{% trans '用户管理' %}</h3>
@@ -62,8 +63,8 @@
                                 {% with protected_admin=user.is_admin %}{% with protected_super=user.is_superuser %}
                                 <tr>
                                     <td><input type="checkbox" name="user_ids" value="{{ user.id }}" {% if protected_admin or protected_super %}disabled{% endif %}></td>
-                                    <td class="fw-semibold">{{ user.student_id }}</td>
-                                    <td>{{ user.first_name|default:'-' }}</td>
+                                    <td class="fw-semibold">{% mask_field user.student_id 'student_id' 'admin' config %}</td>
+                                    <td>{% mask_field user.first_name 'name' 'admin' config %}</td>
                                     <td>
                                         {% if user.is_superuser %}
                                             <span class="badge bg-danger">{% trans '系统管理员' %}</span>

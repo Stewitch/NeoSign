@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load display %}
 {% block title %}签到 - {{ block.super }}{% endblock %}
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-3">
@@ -16,7 +17,7 @@
                             <div>
                                 <h5 class="card-title mb-1">{{ item.activity.name }}</h5>
                                 <div class="text-muted small">{% trans '时间' %}：{{ item.activity.start_time }} - {{ item.activity.end_time }}</div>
-                                <div class="text-muted small">{% trans '创建人' %}：{{ item.activity.created_by.first_name|default:item.activity.created_by.student_id }}</div>
+                                <div class="text-muted small">{% trans '创建人' %}：{% user_display item.activity.created_by 'frontend' config %}</div>
                             </div>
                             {% if item.has_checked_in %}
                                 <span class="badge bg-success">{% trans '已签到' %}</span>
@@ -122,13 +123,31 @@
     }
 
     function loadMapSdk(){
-        return new Promise(resolve => {
+        return new Promise(async resolve => {
             if (!mapProvider || !mapApiKey || mapContainers.length === 0) return resolve(null);
+            
+            // 高德地图：优先尝试从后端代理获取安全密钥
+            if (mapProvider === 'amap') {
+                let securityKey = mapSecurityKey;
+                if (!securityKey) {
+                    try {
+                        const resp = await fetch('{% url "core:amap_security" %}');
+                        if (resp.ok) {
+                            const data = await resp.json();
+                            securityKey = data.securityJsCode;
+                        }
+                    } catch (e) {
+                        // Fallback: 如果代理失败，继续使用前端配置的密钥（如果有）
+                        console.warn('Failed to fetch security key from proxy:', e);
+                    }
+                }
+                if (securityKey) {
+                    window._AMapSecurityConfig = { securityJsCode: securityKey };
+                }
+            }
+            
             const script = document.createElement('script');
             if (mapProvider === 'amap') {
-                if (mapSecurityKey) {
-                    window._AMapSecurityConfig = { securityJsCode: mapSecurityKey };
-                }
                 script.src = `https://webapi.amap.com/maps?v=2.0&key=${mapApiKey}`;
             } else if (mapProvider === 'tencent') {
                 script.src = `https://map.qq.com/api/gljs?v=1.exp&key=${mapApiKey}`;

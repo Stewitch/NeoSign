@@ -55,6 +55,22 @@
                     </div>
                     <hr>
                     <div class="vstack gap-2">
+                        <div class="fw-semibold">{% trans '用户名显示设置' %}</div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">{% trans '显示模式' %}</label>
+                                {{ form.username_display_mode }}
+                                <div class="form-text">{% trans '控制用户身份的显示方式（仅学号、仅姓名、或学号+姓名）' %}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{% trans '脱敏模式' %}</label>
+                                {{ form.username_masking_mode }}
+                                <div class="form-text">{% trans '控制是否对中间部分进行 * 脱敏（不脱敏、仅前台脱敏、前后台均脱敏）' %}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="vstack gap-2">
                         <div class="fw-semibold">{% trans '初始密码策略' %}</div>
                         <div class="row g-2 align-items-center">
                             <div class="col-sm-4">

@@ -1,5 +1,6 @@
-from django.http import FileResponse, HttpResponse, Http404
+from django.http import FileResponse, HttpResponse, Http404, JsonResponse
 from django.views import View
+from django.conf import settings
 from PIL import Image
 import io
 import os
@@ -42,3 +43,27 @@ class FaviconView(View):
                 
         except Exception as e:
             raise Http404(f"Error generating favicon: {str(e)}")
+
+
+class AmapSecurityKeyView(View):
+    """代理高德地图安全密钥，避免直接暴露在前端"""
+    
+    def get(self, request):
+        # 检查是否启用 nginx 代理模式
+        if settings.AMAP_PROXY_MODE != 'nginx':
+            return JsonResponse({'error': 'Proxy mode not enabled'}, status=403)
+        
+        try:
+            config = SystemConfig.objects.first()
+            if not config or not config.map_security_key:
+                return JsonResponse({'error': 'Security key not configured'}, status=404)
+            
+            # 返回安全密钥（仅当通过 nginx 代理时）
+            response = JsonResponse({
+                'securityJsCode': config.map_security_key
+            })
+            response['Cache-Control'] = 'public, max-age=3600'
+            return response
+            
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)

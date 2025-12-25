@@ -2,6 +2,7 @@ from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.core.validators import RegexValidator
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 class CustomUserManager(BaseUserManager):
@@ -82,6 +83,29 @@ class SystemConfig(models.Model):
         default='!@#$%^&*',
         blank=True,
         verbose_name='符号字符集合'
+    )
+    # 用户名显示设置
+    username_display_mode = models.CharField(
+        max_length=20,
+        default='student_id',
+        choices=[
+            ('student_id', _('仅学号')),
+            ('name', _('仅姓名')),
+            ('both', _('学号+姓名')),
+        ],
+        verbose_name=_('用户名显示模式'),
+        help_text=_('控制界面中用户身份的显示方式')
+    )
+    username_masking_mode = models.CharField(
+        max_length=20,
+        default='frontend',
+        choices=[
+            ('none', _('不脱敏')),
+            ('frontend', _('仅前台脱敏')),
+            ('both', _('前台和后台均脱敏')),
+        ],
+        verbose_name=_('用户名脱敏模式'),
+        help_text=_('控制是否对学号和姓名进行中间部分脱敏处理')
     )
 
     class Meta:

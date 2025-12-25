@@ -458,6 +458,7 @@ class SiteSettingsView(LoginRequiredMixin, AdminOnlyMixin, UpdateView):
         'site_title', 'site_logo', 'technician_contact', 'custom_footer', 'map_provider', 'map_api_key', 'map_security_key',
         'password_length', 'password_require_uppercase', 'password_require_lowercase',
         'password_require_digits', 'password_require_symbols', 'password_symbols',
+        'username_display_mode', 'username_masking_mode',
         'language_code', 'timezone_str',
     ]
     success_url = reverse_lazy('management:dashboard')
@@ -506,6 +507,10 @@ class SiteSettingsView(LoginRequiredMixin, AdminOnlyMixin, UpdateView):
                 ],
                 attrs={'class': 'form-select'}
             )
+        if 'username_display_mode' in form.fields:
+            form.fields['username_display_mode'].widget.attrs.update({'class': 'form-select'})
+        if 'username_masking_mode' in form.fields:
+            form.fields['username_masking_mode'].widget.attrs.update({'class': 'form-select'})
         return form
 
     def form_valid(self, form):

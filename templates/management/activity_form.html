@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load display %}
 {% block title %}{% if is_edit %}{% trans '编辑活动' %}{% else %}{% trans '创建活动' %}{% endif %} - {{ block.super }}{% endblock %}
 {% block content %}
 <form method="post">
@@ -224,8 +225,8 @@
                                     <td>
                                         <input type="checkbox" name="participants" value="{{ u.id }}" {% if u.id in selected_user_ids %}checked{% endif %}>
                                     </td>
-                                    <td class="fw-semibold">{{ u.student_id }}</td>
-                                    <td>{{ u.first_name|default:'-' }}</td>
+                                    <td class="fw-semibold">{% mask_field u.student_id 'student_id' 'admin' config %}</td>
+                                    <td>{% mask_field u.first_name 'name' 'admin' config %}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -499,13 +500,33 @@ if (mapProvider && mapApiKey) {
     
     // For AMap, set security config before loading SDK
     if (mapProvider === 'amap') {
-        const securityKey = '{{ config.map_security_key|default:"" }}';
-        if (securityKey) {
-            window._AMapSecurityConfig = {
-                securityJsCode: securityKey
-            };
-        }
-        script.src = `https://webapi.amap.com/maps?v=2.0&key=${mapApiKey}`;
+        let securityKey = '{{ config.map_security_key|default:"" }}';
+        
+        // 异步加载安全密钥（优先从代理获取）
+        (async () => {
+            if (!securityKey) {
+                try {
+                    const resp = await fetch('{% url "core:amap_security" %}');
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        securityKey = data.securityJsCode;
+                    }
+                } catch (e) {
+                    console.warn('Failed to fetch security key from proxy:', e);
+                }
+            }
+            
+            if (securityKey) {
+                window._AMapSecurityConfig = {
+                    securityJsCode: securityKey
+                };
+            }
+            
+            script.src = `https://webapi.amap.com/maps?v=2.0&key=${mapApiKey}`;
+            script.onload = initMap;
+            document.head.appendChild(script);
+        })();
+        return; // 提前退出，由异步函数处理
     } else if (mapProvider === 'tencent') {
         script.src = `https://map.qq.com/api/gljs?v=1.exp&key=${mapApiKey}`;
     } else if (mapProvider === 'google') {

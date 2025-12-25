@@ -35,6 +35,8 @@ SECURE_SSL_REDIRECT=True
 SECURE_HSTS_SECONDS=31536000
 SECURE_HSTS_INCLUDE_SUBDOMAINS=True
 SECURE_HSTS_PRELOAD=True
+# Map security (for AMap only)
+AMAP_PROXY_MODE=nginx  # 'nginx' or 'frontend' (default)
 # Optional when behind reverse proxy
 # SECURE_PROXY_SSL_HEADER=HTTP_X_FORWARDED_PROTO,https
 ```
