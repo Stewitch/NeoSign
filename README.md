@@ -8,6 +8,8 @@ A sign-in system built with Django 6 and PostgreSQL 18.
 - Admin dashboard for activities, participants, and exports
 - User bulk import/reset with generated passwords
 - i18n: zh-Hans and en-US
+- Optional map SDK integration for visual location picking (AMap, Tencent, Google Maps)
+  - **See [Map SDK Integration Guide](docs/MAP_SDK_GUIDE.md) for setup**
 
 ## Requirements
 - Python 3.12+
@@ -33,6 +35,8 @@ SECURE_SSL_REDIRECT=True
 SECURE_HSTS_SECONDS=31536000
 SECURE_HSTS_INCLUDE_SUBDOMAINS=True
 SECURE_HSTS_PRELOAD=True
+# Map security (for AMap only)
+AMAP_PROXY_MODE=nginx  # 'nginx' or 'frontend' (default)
 # Optional when behind reverse proxy
 # SECURE_PROXY_SSL_HEADER=HTTP_X_FORWARDED_PROTO,https
 ```
@@ -55,6 +59,42 @@ python manage.py runserver
 - Update env for dev: `ALLOWED_HOSTS=<LAN-IP>` and `CSRF_TRUSTED_ORIGINS=http://<LAN-IP>` (see `.env.local.example`).
 - Ensure Windows Firewall allows inbound on port `8000` for Private network.
 - Use HTTP locally; disable `SECURE_SSL_REDIRECT` to avoid HTTPS redirects.
+
+### HTTPS development (for camera/geolocation APIs)
+Modern browsers require HTTPS (or localhost) for camera and precise geolocation access. For mobile testing over LAN:
+
+1. **Install mkcert** (trusted local CA)
+   - Windows: `choco install mkcert` or download from [releases](https://github.com/FiloSottile/mkcert/releases)
+   - macOS: `brew install mkcert`
+   - Linux: Follow [mkcert docs](https://github.com/FiloSottile/mkcert)
+   - Trust the local CA: `mkcert -install`
+
+2. **Generate certificates**
+   - Find your LAN IP (e.g., `192.168.1.20`)
+   - Run: `mkcert localhost 127.0.0.1 <your-LAN-IP>`
+   - This creates `localhost+2.pem` and `localhost+2-key.pem` (filenames may vary)
+
+3. **Start HTTPS dev server**
+   ```bash
+   python manage.py runserver_plus 0.0.0.0:8443 \
+     --cert-file=./localhost+2.pem \
+     --key-file=./localhost+2-key.pem
+   ```
+   *(Requires `django-extensions` and `Werkzeug` - already in dependencies)*
+
+4. **Update .env for HTTPS**
+   ```
+   ALLOWED_HOSTS=localhost,127.0.0.1,<your-LAN-IP>
+   CSRF_TRUSTED_ORIGINS=https://localhost,https://127.0.0.1,https://<your-LAN-IP>
+   SECURE_SSL_REDIRECT=False
+   ```
+
+5. **Access from mobile**
+   - Browse to `https://<your-LAN-IP>:8443`
+   - Trust the certificate when prompted (mkcert CA must be installed on mobile device for full trust)
+   - Camera and geolocation APIs will now work
+
+**Alternative: Use ngrok or similar tunneling** if you prefer not managing certificates locally.
 
 ## Production deployment checklist
 1) Set env vars: `DEBUG=False`, strong `SECRET_KEY`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`, secure cookie flags.

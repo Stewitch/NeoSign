@@ -20,8 +20,9 @@ class CustomLoginView(LoginView):
         user.last_login = timezone.now()
         user.save(update_fields=['last_login'])
 
-        # 非超级管理员/后台管理员首次登录需强制改密；管理员免除
-        if user.first_login and not (user.is_superuser or getattr(user, 'is_admin', False)):
+        # 非超级管理员/后台管理员/测试账号首次登录需强制改密
+        is_test = getattr(user, 'is_test', False)
+        if user.first_login and not (user.is_superuser or getattr(user, 'is_admin', False) or is_test):
             messages.warning(self.request, _('首次登录，请修改密码'))
             return redirect('authentication:password_change_required')
 

@@ -22,6 +22,11 @@
                         {{ form.technician_contact }}
                     </div>
                     <div>
+                        <label class="form-label fw-semibold">{% trans '自定义页脚' %}</label>
+                        {{ form.custom_footer }}
+                        <div class="form-text">{% trans '支持 HTML 标签，将显示在技术支持的上方。' %}</div>
+                    </div>
+                    <div>
                         <label class="form-label fw-semibold">{% trans '地图提供商' %}</label>
                         {{ form.map_provider }}
                         <div class="form-text">{% trans '前端地图 SDK 选择：高德、腾讯或 Google。' %}</div>
@@ -30,6 +35,11 @@
                         <label class="form-label fw-semibold">{% trans '地图 API Key' %}</label>
                         {{ form.map_api_key }}
                         <div class="form-text">{% trans '用于位置签到前端地图 SDK；可留空禁用。' %}</div>
+                    </div>
+                    <div>
+                        <label class="form-label fw-semibold">{% trans '地图安全密钥' %}</label>
+                        {{ form.map_security_key }}
+                        <div class="form-text">{% trans '高德地图需要填写安全密钥（securityJsCode），其他提供商可留空。' %}</div>
                     </div>
                     <div class="row g-3">
                         <div class="col-md-6">
@@ -41,6 +51,22 @@
                             <label class="form-label fw-semibold">{% trans '时区' %}</label>
                             {{ form.timezone_str }}
                             <div class="form-text">{% trans '常用选项：Asia/Shanghai, Asia/Tokyo, UTC, Europe/London, America/New_York。' %}</div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="vstack gap-2">
+                        <div class="fw-semibold">{% trans '用户名显示设置' %}</div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">{% trans '显示模式' %}</label>
+                                {{ form.username_display_mode }}
+                                <div class="form-text">{% trans '控制用户身份的显示方式（仅学号、仅姓名、或学号+姓名）' %}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{% trans '脱敏模式' %}</label>
+                                {{ form.username_masking_mode }}
+                                <div class="form-text">{% trans '控制是否对中间部分进行 * 脱敏（不脱敏、仅前台脱敏、前后台均脱敏）' %}</div>
+                            </div>
                         </div>
                     </div>
                     <hr>

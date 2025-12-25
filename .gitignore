@@ -209,4 +209,13 @@ __marimo__/
 # PHP Ref
 _php_references/
 
+# Deployment artifacts
 deploy/
+.deploy/
+*.pem
+
+# PowerShell
+fastrun.ps1
+
+# System logo
+logo/

@@ -105,7 +105,8 @@ class ForcePasswordChangeMiddleware:
             user = getattr(request, 'user', None)
             if user and user.is_authenticated:
                 is_admin = getattr(user, 'is_admin', False) or user.is_superuser
-                if user.first_login and not is_admin:
+                is_test = getattr(user, 'is_test', False)
+                if user.first_login and not is_admin and not is_test:
                     if not any(path.startswith(p) for p in allow_paths):
                         return redirect('authentication:password_change_required')
         except Exception:

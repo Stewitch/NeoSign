@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load display %}
 {% block title %}签到 - {{ block.super }}{% endblock %}
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-3">
@@ -16,20 +17,52 @@
                             <div>
                                 <h5 class="card-title mb-1">{{ item.activity.name }}</h5>
                                 <div class="text-muted small">{% trans '时间' %}：{{ item.activity.start_time }} - {{ item.activity.end_time }}</div>
-                                <div class="text-muted small">{% trans '创建人' %}：{{ item.activity.created_by.first_name|default:item.activity.created_by.student_id }}</div>
+                                <div class="text-muted small">{% trans '创建人' %}：{% user_display item.activity.created_by 'frontend' config %}</div>
                             </div>
                             {% if item.has_checked_in %}
                                 <span class="badge bg-success">{% trans '已签到' %}</span>
                             {% endif %}
                         </div>
+
+                        {% if item.activity.location_enabled %}
+                            <div class="alert alert-warning small d-none" data-desktop-location-warning>
+                                {% trans '桌面端定位可能不准确，建议在手机端完成位置签到。' %}
+                            </div>
+                            <div class="border rounded overflow-hidden" style="height: 240px;">
+                                {% if config.map_provider and config.map_api_key and item.activity.location_lat and item.activity.location_lng %}
+                                    <div class="w-100 h-100" data-map
+                                         data-activity-id="{{ item.activity.id }}"
+                                         data-lat="{{ item.activity.location_lat }}"
+                                         data-lng="{{ item.activity.location_lng }}"
+                                         data-radius="{{ item.activity.location_radius_m|default:50 }}">
+                                    </div>
+                                {% else %}
+                                    <div class="p-2 small text-muted h-100 d-flex align-items-center">{% trans '未配置地图 SDK，仍可签到。' %}</div>
+                                {% endif %}
+                            </div>
+                            <div class="small mt-2 text-muted" data-location-status
+                                 data-activity-id="{{ item.activity.id }}"
+                                 data-radius="{{ item.activity.location_radius_m|default:50 }}">
+                                {% trans '正在等待获取当前位置…' %}
+                            </div>
+                            <div class="mt-2" data-mobile-only style="display:none;">
+                                <button type="button" class="btn btn-outline-primary btn-sm" data-request-geo data-activity-id="{{ item.activity.id }}">{% trans '获取高精度位置' %}</button>
+                            </div>
+                        {% endif %}
                         {% if item.has_checked_in %}
                             <div class="text-muted small">{% trans '签到时间' %}：{{ item.checkin_time }}</div>
+                            {% if user.is_test %}
+                                <form method="post" action="{% url 'checkin:reset_api' item.activity.id %}" data-checkin-form>
+                                    {% csrf_token %}
+                                    <button class="btn btn-warning w-100 mt-2" type="submit">{% trans '重置签到（测试）' %}</button>
+                                </form>
+                            {% endif %}
                         {% else %}
                             {% if item.activity.qr_enabled %}
                                 <div class="alert alert-info" data-desktop-only style="display:none;">{% trans '请在手机上完成' %}</div>
                                 <a class="btn btn-primary w-100" href="{% url 'checkin:qr_scan' item.activity.id %}" data-mobile-only style="display:none;">{% trans '打开摄像头扫码' %}</a>
                             {% else %}
-                                <form method="post" action="{% url 'checkin:checkin_api' item.activity.id %}" data-checkin-form {% if item.activity.location_enabled %}data-location-required="true"{% endif %}>
+                                <form method="post" action="{% url 'checkin:checkin_api' item.activity.id %}" data-checkin-form {% if item.activity.location_enabled %}data-location-required="true" data-radius="{{ item.activity.location_radius_m|default:50 }}"{% endif %}>
                                     {% csrf_token %}
                                     <button class="btn btn-primary w-100" type="submit">{% trans '立即签到' %}</button>
                                 </form>
@@ -56,55 +89,503 @@
 {% endblock %}
 {% block extra_js %}
 <script>
-// Simple AJAX post for check-in buttons
-async function getLocationIfNeeded(form){
-    const required = form.dataset.locationRequired === 'true';
-    if (!required || !navigator.geolocation) return null;
-    return new Promise(resolve => {
-        navigator.geolocation.getCurrentPosition(
-            pos => resolve({lat: pos.coords.latitude, lng: pos.coords.longitude}),
-            () => resolve(null),
-            {enableHighAccuracy: true, timeout: 5000}
-        );
-    });
-}
-
-const forms = document.querySelectorAll('[data-checkin-form]');
-forms.forEach(form => {
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        try{
-            const loc = await getLocationIfNeeded(form);
-            const fd = new FormData();
-            fd.append('csrfmiddlewaretoken', form.querySelector('[name=csrfmiddlewaretoken]').value);
-            if (loc){ fd.append('lat', String(loc.lat)); fd.append('lng', String(loc.lng)); }
-            const res = await fetch(form.action, { method: 'POST', body: fd });
-            const data = await res.json();
-            if (data.success) {
-                window.location.reload();
-            } else {
-                alert(data.error || '{% trans "签到失败" %}');
-            }
-        }catch(err){
-            alert('{% trans "网络错误，请重试" %}');
-        }
-    });
-});
-
-// auto-refresh QR for creators
-document.querySelectorAll('[data-qr-img]').forEach(img => {
-    const interval = Math.max(parseInt(img.dataset.interval || '30', 10), 10) * 1000;
-    setInterval(() => {
-        img.src = img.src.split('?')[0] + '?t=' + Date.now();
-    }, interval);
-});
-</script>
-<script>
-// Show mobile vs desktop elements
 (function(){
+    const mapProvider = '{{ config.map_provider|default:"" }}';
+    const mapApiKey = '{{ config.map_api_key|default:"" }}';
+    const mapSecurityKey = '{{ config.map_security_key|default:"" }}';
+    const mapContainers = Array.from(document.querySelectorAll('[data-map]'));
+    const mapStates = {};
+    let locationPromise = null;
+    let latestLocation = null;
+    let geoWatchId = null;
+
     const isMobile = (navigator.maxTouchPoints > 0) || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     document.querySelectorAll('[data-mobile-only]').forEach(el => { el.style.display = isMobile ? '' : 'none'; });
     document.querySelectorAll('[data-desktop-only]').forEach(el => { el.style.display = isMobile ? 'none' : ''; });
+    document.querySelectorAll('[data-desktop-location-warning]').forEach(el => { el.classList.toggle('d-none', isMobile); });
+
+    // 调试用：暴露到全局以便在控制台查看缩放级别
+    window.mapStates = mapStates;
+    window.getMapZoom = (activityId) => {
+        const state = mapStates[activityId];
+        if (!state) return null;
+        return state.map.getZoom();
+    };
+
+    function statusClass(tone){
+        if (tone === 'danger') return 'text-danger';
+        if (tone === 'success') return 'text-success';
+        if (tone === 'warning') return 'text-warning';
+        return 'text-muted';
+    }
+
+    function setStatus(activityId, message, tone='muted'){
+        const el = document.querySelector(`[data-location-status][data-activity-id="${activityId}"]`);
+        if (!el) return;
+        el.classList.remove('text-danger','text-success','text-muted','text-warning');
+        el.classList.add(statusClass(tone));
+        el.textContent = message;
+    }
+
+    function loadMapSdk(){
+        return new Promise(async resolve => {
+            if (!mapProvider || !mapApiKey || mapContainers.length === 0) return resolve(null);
+            
+            // 高德地图：优先尝试从后端代理获取安全密钥
+            if (mapProvider === 'amap') {
+                let securityKey = mapSecurityKey;
+                if (!securityKey) {
+                    try {
+                        const resp = await fetch('{% url "core:amap_security" %}');
+                        if (resp.ok) {
+                            const data = await resp.json();
+                            securityKey = data.securityJsCode;
+                        }
+                    } catch (e) {
+                        // Fallback: 如果代理失败，继续使用前端配置的密钥（如果有）
+                        console.warn('Failed to fetch security key from proxy:', e);
+                    }
+                }
+                if (securityKey) {
+                    window._AMapSecurityConfig = { securityJsCode: securityKey };
+                }
+            }
+            
+            const script = document.createElement('script');
+            if (mapProvider === 'amap') {
+                script.src = `https://webapi.amap.com/maps?v=2.0&key=${mapApiKey}`;
+            } else if (mapProvider === 'tencent') {
+                script.src = `https://map.qq.com/api/gljs?v=1.exp&key=${mapApiKey}`;
+            } else if (mapProvider === 'google') {
+                script.src = `https://maps.googleapis.com/maps/api/js?key=${mapApiKey}`;
+            }
+            if (!script.src) return resolve(null);
+            script.onload = () => resolve(mapProvider);
+            script.onerror = () => resolve(null);
+            document.head.appendChild(script);
+        });
+    }
+
+    function centerDot(){
+        return '<div style="width:16px;height:16px;border:3px solid #1d4ed8;border-radius:50%;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,0.3);"></div>';
+    }
+    function userTriangle(){
+        return '<div style="width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:16px solid #22c55e;filter:drop-shadow(0 2px 3px rgba(0,0,0,0.4));"></div>';
+    }
+
+    function createMap(container){
+        const activityId = container.dataset.activityId;
+        const lat = parseFloat(container.dataset.lat);
+        const lng = parseFloat(container.dataset.lng);
+        const radius = parseInt(container.dataset.radius || '50', 10) || 50;
+        if (Number.isNaN(lat) || Number.isNaN(lng)) {
+            container.textContent = '{% trans "无法显示地图（缺少坐标）" %}';
+            return;
+        }
+
+        if (mapProvider === 'amap') {
+            const map = new AMap.Map(container, { zoom: 16, center: [lng, lat] });
+            const centerMarker = new AMap.Marker({ position: [lng, lat], content: centerDot(), offset: new AMap.Pixel(-8, -8) });
+            const centerCircle = new AMap.Circle({ center: [lng, lat], radius: radius, strokeColor: '#3b82f6', strokeWeight: 2, fillColor: '#3b82f6', fillOpacity: 0.25 });
+            map.add([centerMarker, centerCircle]);
+            mapStates[activityId] = { map, center: { lat, lng }, centerMarker, centerCircle, userMarker: null, accuracyCircle: null, distanceLine: null, distanceLabel: null };
+        } else if (mapProvider === 'tencent') {
+            const map = new TMap.Map(container, { zoom: 16, center: new TMap.LatLng(lat, lng) });
+            const centerMarker = new TMap.MultiMarker({
+                map: map,
+                styles: { center: new TMap.MarkerStyle({ width: 18, height: 18, anchor: { x: 9, y: 9 }, fillColor: '#3b82f6', strokeColor: '#1d4ed8', strokeWidth: 2 }) },
+                geometries: [{ id: 'center', styleId: 'center', position: new TMap.LatLng(lat, lng) }]
+            });
+            const centerCircle = new TMap.MultiCircle({ map: map, geometries: [{ id: 'range', center: new TMap.LatLng(lat, lng), radius: radius }], styles: { default: new TMap.CircleStyle({ color: 'rgba(59, 130, 246, 0.25)', borderColor: '#3b82f6', borderWidth: 2 }) } });
+            mapStates[activityId] = { map, center: { lat, lng }, centerMarker, centerCircle, userMarker: null, accuracyCircle: null, distanceLine: null, distanceLabel: null };
+        } else if (mapProvider === 'google') {
+            const map = new google.maps.Map(container, { zoom: 16, center: { lat, lng } });
+            const centerMarker = new google.maps.Marker({ position: { lat, lng }, map: map, icon: { path: google.maps.SymbolPath.CIRCLE, scale: 7, fillColor: '#3b82f6', fillOpacity: 1, strokeColor: '#1d4ed8', strokeWeight: 2 } });
+            const centerCircle = new google.maps.Circle({ center: { lat, lng }, radius: radius, map: map, strokeColor: '#3b82f6', strokeWeight: 2, fillColor: '#3b82f6', fillOpacity: 0.25 });
+            mapStates[activityId] = { map, center: { lat, lng }, centerMarker, centerCircle, userMarker: null, accuracyCircle: null, distanceLine: null, distanceLabel: null };
+        }
+    }
+
+    function placeUserOnMap(activityId, loc){
+        const state = mapStates[activityId];
+        if (!state || !loc || !mapProvider) return;
+        const accuracy = Math.min(Math.max(loc.accuracy || 0, 0), 800);
+
+        function distanceMeters(a, b){
+            const toRad = x => x * Math.PI / 180;
+            const R = 6371000;
+            const dLat = toRad(b.lat - a.lat);
+            const dLng = toRad(b.lng - a.lng);
+            const lat1 = toRad(a.lat);
+            const lat2 = toRad(b.lat);
+            const h = Math.sin(dLat/2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng/2) ** 2;
+            return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+        }
+
+        function updateDistanceLine(){
+            const center = state.center;
+            if (!center) return;
+            const dist = distanceMeters(center, { lat: loc.lat, lng: loc.lng });
+            const showLine = dist >= 1000; // 超过 1km 才画线并显示距离
+            const mid = { lat: (center.lat + loc.lat) / 2, lng: (center.lng + loc.lng) / 2 };
+            const labelText = dist >= 1000 ? `${(dist/1000).toFixed(2)} km` : `${dist.toFixed(0)} m`;
+
+            // 清理函数
+            function clearLine(){
+                if (mapProvider === 'amap') {
+                    if (state.distanceLine) state.map.remove(state.distanceLine);
+                    if (state.distanceLabel) state.map.remove(state.distanceLabel);
+                } else if (mapProvider === 'tencent') {
+                    if (state.distanceLine) state.distanceLine.setMap(null);
+                    if (state.distanceLabel) state.distanceLabel.setMap(null);
+                } else if (mapProvider === 'google') {
+                    if (state.distanceLine) state.distanceLine.setMap(null);
+                    if (state.distanceLabel) state.distanceLabel.close();
+                }
+                state.distanceLine = null;
+                state.distanceLabel = null;
+            }
+
+            if (!showLine) {
+                clearLine();
+                return;
+            }
+
+            if (mapProvider === 'amap') {
+                const path = [new AMap.LngLat(center.lng, center.lat), new AMap.LngLat(loc.lng, loc.lat)];
+                if (state.distanceLine) {
+                    state.distanceLine.setPath(path);
+                } else {
+                    state.distanceLine = new AMap.Polyline({ path, strokeColor: '#f97316', strokeWeight: 4, strokeOpacity: 0.9 });
+                    state.map.add(state.distanceLine);
+                }
+                const labelContent = `<div style="background:#fff;border:1px solid #f97316;border-radius:12px;padding:2px 8px;font-size:12px;color:#b45309;box-shadow:0 2px 6px rgba(0,0,0,0.2);">${labelText}</div>`;
+                if (state.distanceLabel) {
+                    state.distanceLabel.setPosition(new AMap.LngLat(mid.lng, mid.lat));
+                    state.distanceLabel.setContent(labelContent);
+                } else {
+                    state.distanceLabel = new AMap.Marker({ position: new AMap.LngLat(mid.lng, mid.lat), content: labelContent, offset: new AMap.Pixel(-20, -20) });
+                    state.map.add(state.distanceLabel);
+                }
+            } else if (mapProvider === 'tencent') {
+                const path = [new TMap.LatLng(center.lat, center.lng), new TMap.LatLng(loc.lat, loc.lng)];
+                if (state.distanceLine) {
+                    state.distanceLine.updateGeometries([{ id: 'dist', paths: path }]);
+                } else {
+                    state.distanceLine = new TMap.MultiPolyline({
+                        map: state.map,
+                        styles: { line: new TMap.PolylineStyle({ color: '#f97316', width: 4, borderWidth: 1, borderColor: '#ea580c', lineCap: 'round' }) },
+                        geometries: [{ id: 'dist', styleId: 'line', paths: path }]
+                    });
+                }
+                if (state.distanceLabel) {
+                    state.distanceLabel.setPosition(new TMap.LatLng(mid.lat, mid.lng));
+                    state.distanceLabel.setContent(labelText);
+                } else {
+                    state.distanceLabel = new TMap.InfoWindow({ map: state.map, position: new TMap.LatLng(mid.lat, mid.lng), content: labelText, offset: { x: 0, y: -10 } });
+                }
+            } else if (mapProvider === 'google') {
+                const path = [ { lat: center.lat, lng: center.lng }, { lat: loc.lat, lng: loc.lng } ];
+                if (state.distanceLine) {
+                    state.distanceLine.setPath(path);
+                } else {
+                    state.distanceLine = new google.maps.Polyline({ path, strokeColor: '#f97316', strokeWeight: 4, strokeOpacity: 0.9, map: state.map });
+                }
+                const midPoint = new google.maps.LatLng(mid.lat, mid.lng);
+                if (state.distanceLabel) {
+                    state.distanceLabel.setPosition(midPoint);
+                    state.distanceLabel.setContent(labelText);
+                } else {
+                    state.distanceLabel = new google.maps.InfoWindow({ position: midPoint, content: labelText, pixelOffset: new google.maps.Size(0, -8) });
+                    state.distanceLabel.open({ map: state.map, anchor: null, position: midPoint });
+                }
+            }
+        }
+
+        // 根据用户位置与签到点，自动调整视图以同时展示两者
+        function fitMapToPoints(){
+            const center = state.center;
+            if (!center) return;
+            
+            // 计算两点距离（单位：km）
+            const dist = distanceMeters(center, { lat: loc.lat, lng: loc.lng }) / 1000;
+            
+            // 根据距离动态计算合适的最大缩放级别
+            // 距离 < 1 km: max zoom = 16
+            // 距离 >= 1 km: max zoom = 16 - (dist - 1) * 1.35
+            const maxZoom = dist < 1 ? 16 : Math.max(10, 16 - (dist - 1) * 1.35);
+            
+            if (mapProvider === 'amap') {
+                const bounds = new AMap.Bounds(
+                    new AMap.LngLat(Math.min(center.lng, loc.lng), Math.min(center.lat, loc.lat)),
+                    new AMap.LngLat(Math.max(center.lng, loc.lng), Math.max(center.lat, loc.lat))
+                );
+                state.map.setBounds(bounds);
+                const z = state.map.getZoom();
+                if (z > maxZoom) state.map.setZoom(maxZoom);
+            } else if (mapProvider === 'tencent') {
+                const bounds = new TMap.LatLngBounds();
+                bounds.extend(new TMap.LatLng(center.lat, center.lng));
+                bounds.extend(new TMap.LatLng(loc.lat, loc.lng));
+                state.map.fitBounds(bounds, { padding: [60, 60, 60, 60] });
+                const z = state.map.getZoom();
+                if (z > maxZoom) state.map.setZoom(maxZoom);
+            } else if (mapProvider === 'google') {
+                const bounds = new google.maps.LatLngBounds();
+                bounds.extend({ lat: center.lat, lng: center.lng });
+                bounds.extend({ lat: loc.lat, lng: loc.lng });
+                state.map.fitBounds(bounds, { top: 60, bottom: 60, left: 60, right: 60 });
+                const z = state.map.getZoom();
+                if (z > maxZoom) state.map.setZoom(maxZoom);
+            }
+        }
+
+        if (mapProvider === 'amap') {
+            const point = [loc.lng, loc.lat];
+            if (state.userMarker) {
+                state.userMarker.setPosition(point);
+            } else {
+                state.userMarker = new AMap.Marker({ position: point, content: userTriangle(), offset: new AMap.Pixel(-8, -16) });
+                state.map.add(state.userMarker);
+            }
+            if (accuracy > 0) {
+                if (state.accuracyCircle) {
+                    state.accuracyCircle.setCenter(point);
+                    state.accuracyCircle.setRadius(accuracy);
+                } else {
+                    state.accuracyCircle = new AMap.Circle({ center: point, radius: accuracy, strokeColor: '#16a34a', strokeWeight: 1, fillColor: '#22c55e', fillOpacity: 0.12 });
+                    state.map.add(state.accuracyCircle);
+                }
+            }
+        } else if (mapProvider === 'tencent') {
+            const point = new TMap.LatLng(loc.lat, loc.lng);
+            if (state.userMarker) state.userMarker.updateGeometries([{ id: 'user', position: point }]);
+            else state.userMarker = new TMap.MultiMarker({
+                map: state.map,
+                styles: { user: new TMap.MarkerStyle({ width: 16, height: 16, anchor: { x: 8, y: 16 }, src: 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path d="M8 0 L0 16 L16 16 Z" fill="#22c55e" stroke="#15803d" stroke-width="1"/></svg>') }) },
+                geometries: [{ id: 'user', styleId: 'user', position: point }]
+            });
+            if (accuracy > 0) {
+                if (state.accuracyCircle) {
+                    state.accuracyCircle.updateGeometries([{ id: 'acc', center: point, radius: accuracy }]);
+                } else {
+                    state.accuracyCircle = new TMap.MultiCircle({ map: state.map, geometries: [{ id: 'acc', center: point, radius: accuracy }], styles: { default: new TMap.CircleStyle({ color: 'rgba(34, 197, 94, 0.12)', borderColor: '#16a34a', borderWidth: 1 }) } });
+                }
+            }
+        } else if (mapProvider === 'google') {
+            const point = { lat: loc.lat, lng: loc.lng };
+            if (state.userMarker) state.userMarker.setPosition(point);
+            else state.userMarker = new google.maps.Marker({ 
+                position: point, 
+                map: state.map, 
+                icon: { 
+                    path: 'M 0,-16 L -8,0 L 8,0 Z',
+                    fillColor: '#22c55e', 
+                    fillOpacity: 1, 
+                    strokeColor: '#15803d', 
+                    strokeWeight: 2,
+                    scale: 1,
+                    anchor: new google.maps.Point(0, 0)
+                } 
+            });
+            if (accuracy > 0) {
+                if (state.accuracyCircle) {
+                    state.accuracyCircle.setCenter(point);
+                    state.accuracyCircle.setRadius(accuracy);
+                } else {
+                    state.accuracyCircle = new google.maps.Circle({ center: point, radius: accuracy, map: state.map, strokeColor: '#16a34a', strokeWeight: 1, fillColor: '#22c55e', fillOpacity: 0.12 });
+                }
+            }
+        }
+
+        // 最后调整视口，确保能同时看到签到点和当前位置
+        fitMapToPoints();
+
+        // 远距离时绘制连线并标注距离
+        updateDistanceLine();
+    }
+
+    function requestLocation(){
+        if (latestLocation) return Promise.resolve(latestLocation);
+        if (locationPromise) return locationPromise;
+        locationPromise = new Promise(resolve => {
+            if (!navigator.geolocation) return resolve(null);
+            navigator.geolocation.getCurrentPosition(
+                pos => {
+                    latestLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy };
+                    resolve(latestLocation);
+                },
+                () => resolve(null),
+                { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
+            );
+        });
+        return locationPromise;
+    }
+
+    async function requestGeoPermission(){
+        try{
+            if (navigator.permissions && navigator.permissions.query) {
+                const p = await navigator.permissions.query({ name: 'geolocation' });
+                if (p.state === 'granted') return true;
+                // 触发权限弹窗
+                await requestLocation();
+                return true;
+            }
+            await requestLocation();
+            return true;
+        }catch{
+            return false;
+        }
+    }
+
+    function startGeoWatch(){
+        if (!navigator.geolocation || geoWatchId) return;
+        geoWatchId = navigator.geolocation.watchPosition(
+            pos => {
+                latestLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy };
+                updateStatuses(latestLocation);
+            },
+            err => {
+                // 保持静默，用户可手动重试
+                console.warn('geo watch error', err);
+            },
+            { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 }
+        );
+    }
+
+    function updateStatuses(loc){
+        const warnText = '{% trans "定位精度较差，可能影响签到，建议在手机端或室外重试。" %}';
+        const okText = '{% trans "已获取当前位置" %}';
+        const noLocText = '{% trans "无法获取当前位置，请开启定位或在手机端重试。" %}';
+        document.querySelectorAll('[data-location-status]').forEach(el => {
+            const activityId = el.dataset.activityId;
+            const radius = parseFloat(el.dataset.radius || '0');
+            if (!loc) {
+                setStatus(activityId, noLocText, 'warning');
+                return;
+            }
+            const accuracy = Math.round(loc.accuracy || 0);
+            const shouldWarn = radius && loc.accuracy && loc.accuracy > Math.max(radius * 1.5, 100);
+            const msg = `${okText}（{% trans "精度约" %} ${accuracy} m）${shouldWarn ? '，' + warnText : ''}`;
+            setStatus(activityId, msg, shouldWarn ? 'warning' : 'success');
+            
+            // 确保地图存在后再绘制用户位置
+            if (mapStates[activityId]) {
+                placeUserOnMap(activityId, loc);
+            } else if (mapContainers.length > 0) {
+                // 如果地图还没创建但容器存在，稍后重试
+                setTimeout(() => {
+                    if (mapStates[activityId]) {
+                        placeUserOnMap(activityId, loc);
+                    }
+                }, 200);
+            }
+        });
+    }
+
+    const mapReady = loadMapSdk();
+    (async () => {
+        // 首先加载地图SDK和创建地图容器
+        if (mapContainers.length && mapProvider && mapApiKey) {
+            await mapReady;
+            mapContainers.forEach(createMap);
+            // 确保地图创建完成后再请求位置
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        // 移动端启动持续定位，提高精度
+        if (isMobile) startGeoWatch();
+        // 初次获取位置，用于快速反馈
+        const loc = await requestLocation();
+        updateStatuses(loc);
+    })();
+
+    async function getLocationIfNeeded(form){
+        const required = form.dataset.locationRequired === 'true';
+        if (!required) return null;
+        const loc = await requestLocation();
+        if (!loc) {
+            alert('{% trans "无法获取当前位置，请开启定位或在手机端重试。" %}');
+            return null;
+        }
+        const radius = parseFloat(form.dataset.radius || '0');
+        if (radius && loc.accuracy && loc.accuracy > Math.max(radius * 1.5, 100)) {
+            return new Promise(resolve => {
+                // 显示 Bootstrap 模态框
+                const modal = document.getElementById('confirmModal');
+                document.getElementById('confirmModalTitle').textContent = '{% trans "定位精度提示" %}';
+                document.getElementById('confirmModalBody').textContent = '{% trans "定位精度较差，可能导致签到失败，继续吗？" %}';
+                const bsModal = new bootstrap.Modal(modal);
+                
+                const confirmBtn = document.getElementById('confirmButton');
+                const originalOnClick = confirmBtn.onclick;
+                
+                confirmBtn.onclick = () => {
+                    confirmBtn.onclick = originalOnClick;
+                    bsModal.hide();
+                    resolve(loc);
+                };
+                
+                modal.addEventListener('hidden.bs.modal', () => {
+                    confirmBtn.onclick = originalOnClick;
+                    resolve(null);
+                }, { once: true });
+                
+                bsModal.show();
+            });
+        }
+        return loc;
+    }
+
+    const forms = document.querySelectorAll('[data-checkin-form]');
+    forms.forEach(form => {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try{
+                if (form.dataset.locationRequired === 'true') {
+                    const ok = await requestGeoPermission();
+                    if (!ok) {
+                        alert('{% trans "需要定位权限以完成签到，请在浏览器中允许定位。" %}');
+                        return;
+                    }
+                    startGeoWatch();
+                }
+                const loc = await getLocationIfNeeded(form);
+                if (form.dataset.locationRequired === 'true' && !loc) return;
+                const fd = new FormData();
+                fd.append('csrfmiddlewaretoken', form.querySelector('[name=csrfmiddlewaretoken]').value);
+                if (loc){ fd.append('lat', String(loc.lat)); fd.append('lng', String(loc.lng)); }
+                const res = await fetch(form.action, { method: 'POST', body: fd });
+                const data = await res.json();
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert(data.error || '{% trans "签到失败" %}');
+                }
+            }catch(err){
+                alert('{% trans "网络错误，请重试" %}');
+            }
+        });
+    });
+
+    document.querySelectorAll('[data-request-geo]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const ok = await requestGeoPermission();
+            if (!ok) {
+                alert('{% trans "无法申请定位权限，请在系统设置或浏览器中开启。" %}');
+                return;
+            }
+            startGeoWatch();
+            const loc = await requestLocation();
+            updateStatuses(loc);
+        });
+    });
+
+    document.querySelectorAll('[data-qr-img]').forEach(img => {
+        const interval = Math.max(parseInt(img.dataset.interval || '30', 10), 10) * 1000;
+        setInterval(() => {
+            img.src = img.src.split('?')[0] + '?t=' + Date.now();
+        }, interval);
+    });
 })();
 </script>
 {% endblock %}

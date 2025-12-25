@@ -8,6 +8,8 @@
 - 后台管理活动、参与者、导出
 - 用户批量导入/重置并生成初始密码
 - 国际化：简体中文与英文
+- 可选地图 SDK 集成，支持可视化位置选点（高德、腾讯、Google Maps）
+  - **详见 [地图 SDK 集成指南](docs/MAP_SDK_GUIDE.md)**
 
 ## 环境要求
 - Python 3.12+
@@ -32,6 +34,8 @@ SECURE_SSL_REDIRECT=True
 SECURE_HSTS_SECONDS=31536000
 SECURE_HSTS_INCLUDE_SUBDOMAINS=True
 SECURE_HSTS_PRELOAD=True
+# 地图安全（仅高德地图）
+AMAP_PROXY_MODE=nginx  # 可选 'nginx' 或 'frontend'（默认）
 # 反向代理场景可选
 # SECURE_PROXY_SSL_HEADER=HTTP_X_FORWARDED_PROTO,https
 ```
@@ -54,6 +58,42 @@ python manage.py runserver
 - 开发环境建议设置：`ALLOWED_HOSTS=<LAN-IP>`、`CSRF_TRUSTED_ORIGINS=http://<LAN-IP>`（参考 `.env.local.example`）。
 - 确认 Windows 防火墙允许 8000 端口入站（专用网络）。
 - 本地请使用 HTTP，关闭 `SECURE_SSL_REDIRECT` 以避免跳转到 HTTPS。
+
+### HTTPS 开发环境（摄像头/地理位置 API 必需）
+现代浏览器要求通过 HTTPS（或 localhost）才能使用摄像头和精确地理位置。若需在手机上通过局域网测试：
+
+1. **安装 mkcert**（本地可信 CA）
+   - Windows: `choco install mkcert` 或从 [releases](https://github.com/FiloSottile/mkcert/releases) 下载
+   - macOS: `brew install mkcert`
+   - Linux: 参考 [mkcert 文档](https://github.com/FiloSottile/mkcert)
+   - 信任本地 CA：`mkcert -install`
+
+2. **生成证书**
+   - 查看本机局域网 IP（如 `192.168.1.20`）
+   - 运行：`mkcert localhost 127.0.0.1 <你的局域网IP>`
+   - 会生成 `localhost+2.pem` 和 `localhost+2-key.pem`（文件名可能有差异）
+
+3. **启动 HTTPS 开发服务器**
+   ```bash
+   python manage.py runserver_plus 0.0.0.0:8443 \
+     --cert-file=./localhost+2.pem \
+     --key-file=./localhost+2-key.pem
+   ```
+   *（需要 `django-extensions` 和 `Werkzeug`，已包含在依赖中）*
+
+4. **更新 .env 配置**
+   ```
+   ALLOWED_HOSTS=localhost,127.0.0.1,<你的局域网IP>
+   CSRF_TRUSTED_ORIGINS=https://localhost,https://127.0.0.1,https://<你的局域网IP>
+   SECURE_SSL_REDIRECT=False
+   ```
+
+5. **手机访问**
+   - 浏览器访问 `https://<你的局域网IP>:8443`
+   - 首次访问需信任证书（手机端也需安装 mkcert CA 以完全信任）
+   - 摄像头和地理位置 API 即可正常工作
+
+**备选：使用 ngrok 等隧道服务** 如果不想管理本地证书。
 
 ## 生产部署清单
 1) 设置环境变量：`DEBUG=False`、强随机 `SECRET_KEY`、`ALLOWED_HOSTS`、`CSRF_TRUSTED_ORIGINS`、安全 Cookie 相关标志。

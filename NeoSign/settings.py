@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # project apps
+    'django_extensions',
     'core',
     'authentication',
     'checkin',
@@ -174,6 +175,11 @@ if _proxy_ssl:
         SECURE_PROXY_SSL_HEADER = (parts[0], parts[1])
 
 USE_X_FORWARDED_HOST = os.environ.get('USE_X_FORWARDED_HOST', 'False').lower() == 'true'
+
+# Map Security (AMap)
+# 'nginx': Proxy security key via nginx (recommended for production)
+# 'frontend': Send security key directly to frontend (default, simpler)
+AMAP_PROXY_MODE = os.environ.get('AMAP_PROXY_MODE', 'frontend')
 
 # Security-related logging to surface 400 causes (DisallowedHost/CSRF)
 LOGGING = {

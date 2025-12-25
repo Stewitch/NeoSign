@@ -2,12 +2,94 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoSign\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-22 17:51+0800\n"
+"POT-Creation-Date: 2025-12-25 15:32+0800\n"
 "Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: .\authentication\forms.py:29
+#: .\templates\authentication\password_change_required.html:14
+msgid "当前密码"
+msgstr "Current password"
+
+#: .\authentication\forms.py:33
+#: .\templates\authentication\password_change_required.html:18
+msgid "新密码"
+msgstr "New password"
+
+#: .\authentication\forms.py:37
+#: .\templates\authentication\password_change_required.html:22
+msgid "确认新密码"
+msgstr "Confirm new password"
+
+#: .\authentication\forms.py:44
+msgid "新密码不能与当前密码相同"
+msgstr "New password cannot be the same as current password"
+
+#: .\authentication\views.py:26
+msgid "首次登录，请修改密码"
+msgstr "First login, please change your password."
+
+#: .\authentication\views.py:56
+msgid "密码修改成功"
+msgstr "Password updated successfully."
+
+#: .\checkin\models.py:124 .\templates\checkin\dashboard.html:23
+#: .\templates\management\activity_stats.html:24
+msgid "已签到"
+msgstr "Checked in"
+
+#: .\checkin\models.py:125
+msgid "代签"
+msgstr "Proxy"
+
+#: .\checkin\models.py:126
+msgid "请假"
+msgstr "Excused"
+
+#: .\checkin\models.py:127
+msgid "未签"
+msgstr "Absent"
+
+#: .\checkin\views.py:58
+msgid "活动不在开放时间"
+msgstr "Activity is not currently open."
+
+#: .\checkin\views.py:66
+msgid "您无权参与此活动"
+msgstr "You are not allowed to join this activity."
+
+#: .\checkin\views.py:69
+msgid "您已签到过此活动"
+msgstr "You have already checked in to this activity."
+
+#: .\checkin\views.py:78
+msgid "缺少或无效的位置参数"
+msgstr "Missing or invalid location parameters."
+
+#: .\checkin\views.py:80
+msgid "不在签到范围内"
+msgstr "Outside the check-in area."
+
+#: .\checkin\views.py:84
+msgid "二维码已过期或无效"
+msgstr "QR code is expired or invalid."
+
+#: .\checkin\views.py:100 .\templates\checkin\qr_scan.html:63
+msgid "签到成功"
+msgstr "Check-in successful."
+
+#: .\checkin\views.py:130
+msgid "仅测试用户可重置签到状态"
+msgstr "Only test users can reset check-in status"
+
+#: .\checkin\views.py:135
+#, fuzzy
+#| msgid "已设为未签到状态"
+msgid "已重置为未签到"
+msgstr "Marked as not checked in"
 
 #: .\core\admin.py:19
 msgid "Personal info"
@@ -21,151 +103,369 @@ msgstr ""
 msgid "Important dates"
 msgstr ""
 
-#: .\templates\base.html:19
+#: .\core\models.py:92
+msgid "仅学号"
+msgstr "Student ID Only"
+
+#: .\core\models.py:93
+msgid "仅姓名"
+msgstr "Name Only"
+
+#: .\core\models.py:94
+msgid "学号+姓名"
+msgstr "Student ID + Name"
+
+#: .\core\models.py:96
+msgid "用户名显示模式"
+msgstr "Username Display Mode"
+
+#: .\core\models.py:97
+msgid "控制界面中用户身份的显示方式"
+msgstr "Control how user identity is displayed in the interface"
+
+#: .\core\models.py:103
+msgid "不脱敏"
+msgstr "No Masking"
+
+#: .\core\models.py:104
+msgid "仅前台脱敏"
+msgstr "Frontend Only"
+
+#: .\core\models.py:105
+msgid "前台和后台均脱敏"
+msgstr "Both Frontend & Admin"
+
+#: .\core\models.py:107
+msgid "用户名脱敏模式"
+msgstr "Username Masking Mode"
+
+#: .\core\models.py:108
+msgid "控制是否对学号和姓名进行中间部分脱敏处理"
+msgstr "Control whether to mask the middle portion of student ID and name"
+
+#: .\installation\views.py:28
+msgid "安装完成，您现在可以登录系统"
+msgstr "Installation completed; you can log in now."
+
+#: .\management\views.py:47
+msgid "您没有权限访问此页面"
+msgstr "You do not have permission to access this page."
+
+#: .\management\views.py:77
+msgid "管理员账号请单独处理，无法在此重置"
+msgstr "Administrator accounts must be handled separately; cannot reset here."
+
+#: .\management\views.py:85
+#, python-format
+msgid "已为 %(student_id)s 重置密码，新密码：%(password)s"
+msgstr "Password reset for %(student_id)s. New password: %(password)s"
+
+#: .\management\views.py:97
+msgid "管理员账号请单独处理，无法在此删除"
+msgstr "Administrator accounts must be handled separately; cannot delete here."
+
+#: .\management\views.py:102
+#, python-format
+msgid "已删除用户 %(student_id)s"
+msgstr "Deleted user %(student_id)s."
+
+#: .\management\views.py:113 .\management\views.py:162
+msgid "未选择用户"
+msgstr "No users selected."
+
+#: .\management\views.py:136 .\management\views.py:142
+msgid "未选择可删除的用户（管理员不会在此删除）"
+msgstr "No deletable users selected (administrators are skipped)."
+
+#: .\management\views.py:149
+#, python-format
+msgid "已删除 %(deleted)s 个用户，跳过 %(skipped)s 个管理员"
+msgstr "Deleted %(deleted)s users, skipped %(skipped)s administrators."
+
+#: .\management\views.py:152
+#, python-format
+msgid "已删除 %(deleted)s 个用户"
+msgstr "Deleted %(deleted)s users."
+
+#: .\management\views.py:173
+msgid "无效的身份选择"
+msgstr "Invalid role selection."
+
+#: .\management\views.py:181
+#, python-format
+msgid "已更新 %(updated)s 个用户身份，跳过 %(skipped)s 个系统管理员"
+msgstr "Updated roles for %(updated)s users, skipped %(skipped)s superusers."
+
+#: .\management\views.py:184
+#, python-format
+msgid "已更新 %(updated)s 个用户身份"
+msgstr "Updated roles for %(updated)s users."
+
+#: .\management\views.py:216
+msgid "成功创建 0 个用户（全部为重复或输入为空）"
+msgstr "Created 0 users (all duplicates or empty input)."
+
+#: .\management\views.py:280
+msgid "活动创建成功"
+msgstr "Activity created successfully."
+
+#: .\management\views.py:325
+msgid "活动已更新"
+msgstr "Activity updated."
+
+#: .\management\views.py:335
+msgid "活动已提前结束"
+msgstr "Activity closed early."
+
+#: .\management\views.py:344
+#, python-format
+msgid "活动 \"%(name)s\" 已删除"
+msgstr "Activity \"%(name)s\" has been deleted."
+
+# Activity status backend messages
+#: .\management\views.py:383
+msgid "缺少用户信息"
+msgstr "Missing user information"
+
+#: .\management\views.py:388
+msgid "该用户不在活动参与名单中"
+msgstr "User is not in this activity's participant list"
+
+#: .\management\views.py:393
+msgid "已清除此用户的签到记录，可重新测试或签到。"
+msgstr "Cleared this user's check-in record; can test or check in again."
+
+#: .\management\views.py:397
+msgid "无效的状态选择"
+msgstr "Invalid status selection"
+
+#: .\management\views.py:403
+msgid "已设为未签到状态"
+msgstr "Marked as not checked in"
+
+#: .\management\views.py:416
+msgid "状态已更新"
+msgstr "Status updated"
+
+#: .\management\views.py:517
+msgid "网站设置已更新"
+msgstr "Site settings updated."
+
+#: .\templates\authentication\login.html:9
+#: .\templates\authentication\login.html:21 .\templates\base.html:135
+msgid "登录"
+msgstr "Log in"
+
+#: .\templates\authentication\login.html:14
+#: .\templates\authentication\login.html:15
+#: .\templates\management\activity_form.html:218
+#: .\templates\management\activity_stats.html:29
+#: .\templates\management\activity_stats.html:90
+#: .\templates\management\user_list.html:53
+msgid "学号"
+msgstr "Student ID"
+
+#: .\templates\authentication\login.html:18
+#: .\templates\authentication\login.html:19
+msgid "密码"
+msgstr "Password"
+
+#: .\templates\authentication\password_change_required.html:3
+#, fuzzy
+#| msgid "首次登录需修改密码"
+msgid "修改密码"
+msgstr "Password change required on first login"
+
+#: .\templates\authentication\password_change_required.html:9
+msgid "首次登录需修改密码"
+msgstr "Password change required on first login"
+
+#: .\templates\authentication\password_change_required.html:24
+msgid "确认修改"
+msgstr "Confirm change"
+
+#: .\templates\base.html:108
 msgid "签到系统"
 msgstr "Sign-in System"
 
-#: .\templates\base.html:30
+#: .\templates\base.html:119 .\templates\base.html:132
 msgid "用户"
 msgstr "Users"
 
-#: .\templates\base.html:31
+#: .\templates\base.html:120
 msgid "活动"
 msgstr "Activities"
 
-#: .\templates\base.html:32 .\templates\management\dashboard.html:51
+#: .\templates\base.html:121 .\templates\management\dashboard.html:51
 msgctxt "nav"
 msgid "设置"
 msgstr "Settings"
 
-#: .\templates\base.html:41 .\templates\management\dashboard.html:3
+#: .\templates\base.html:130 .\templates\management\dashboard.html:3
 #: .\templates\management\dashboard.html:5
 msgid "管理后台"
 msgstr "Admin"
 
-#: .\templates\base.html:43 .\templates\management\activity_form.html:192
-#: .\templates\management\activity_stats.html:27
-#: .\templates\management\activity_stats.html:68
-#: .\templates\management\user_list.html:51
-msgid "学号"
-msgstr "Student ID"
-
-#: .\templates\base.html:44
+#: .\templates\base.html:133
 msgid "退出登录"
 msgstr "Log out"
 
-#: .\templates\base.html:46
-msgid "登录"
-msgstr "Log in"
-
-#: .\templates\authentication\login.html:9
-msgid "密码"
-msgstr "Password"
-
-#: .\templates\base.html:65
+#: .\templates\base.html:158
 msgid "技术支持"
-msgstr "Support"
+msgstr "Technical Support"
 
-#: .\templates\base.html:65
+#: .\templates\base.html:158
 msgid "请联系管理员"
 msgstr "Please contact the administrator"
 
-#: .\templates\checkin\dashboard.html:6
+#: .\templates\base.html:172
+msgid "取消"
+msgstr "Cancel"
+
+#: .\templates\base.html:173
+msgid "确认"
+msgstr "Confirm"
+
+#: .\templates\base.html:186
+#, fuzzy
+#| msgid "浅色主题"
+msgid "浅色"
+msgstr "Light Theme"
+
+#: .\templates\base.html:192
+#, fuzzy
+#| msgid "深色主题"
+msgid "深色"
+msgstr "Dark Theme"
+
+#: .\templates\base.html:198
+msgid "跟随系统"
+msgstr "System Default"
+
+#: .\templates\base.html:201
+msgid "切换主题"
+msgstr ""
+
+#: .\templates\base.html:219 .\templates\base.html:234
+msgid "请确认操作"
+msgstr "Confirm Action"
+
+#: .\templates\checkin\dashboard.html:7
 msgid "可参与活动"
 msgstr "Available Activities"
 
-#: .\templates\checkin\dashboard.html:7
+#: .\templates\checkin\dashboard.html:8
 msgid "当前时间"
 msgstr "Current time"
 
-#: .\templates\checkin\dashboard.html:18
-#: .\templates\management\activity_list.html:15
-#: .\templates\management\activity_stats.html:27
+#: .\templates\checkin\dashboard.html:19
+#: .\templates\management\activity_list.html:16
+#: .\templates\management\activity_stats.html:31
 msgid "时间"
 msgstr "Time"
 
-#: .\templates\checkin\dashboard.html:19
-#: .\templates\management\activity_list.html:17
+#: .\templates\checkin\dashboard.html:20
+#: .\templates\management\activity_list.html:18
 msgid "创建人"
 msgstr "Created by"
 
-#: .\templates\checkin\dashboard.html:22
-#: .\templates\management\activity_stats.html:23
-msgid "已签到"
-msgstr "Checked in"
+# Dashboard location warnings
+#: .\templates\checkin\dashboard.html:29
+msgid "桌面端定位可能不准确，建议在手机端完成位置签到。"
+msgstr ""
+"Desktop geolocation may be inaccurate; please complete location check-in on "
+"mobile."
 
-#: .\templates\checkin\dashboard.html:26
+#: .\templates\checkin\dashboard.html:40
+msgid "未配置地图 SDK，仍可签到。"
+msgstr "Map SDK not configured; you can still check in."
+
+#: .\templates\checkin\dashboard.html:46
+msgid "正在等待获取当前位置…"
+msgstr "Waiting to obtain current location..."
+
+#: .\templates\checkin\dashboard.html:49
+msgid "获取高精度位置"
+msgstr "Get high-accuracy location"
+
+#: .\templates\checkin\dashboard.html:53
 msgid "签到时间"
 msgstr "Check-in time"
 
-#: .\templates\checkin\dashboard.html:30
-msgid "立即签到"
-msgstr "Check in now"
+#: .\templates\checkin\dashboard.html:57
+msgid "重置签到（测试）"
+msgstr "Reset Check-in (Test)"
 
-#: .\templates\checkin\dashboard.html:0
+#: .\templates\checkin\dashboard.html:62
 msgid "请在手机上完成"
 msgstr "Please complete on your phone"
 
-#: .\templates\checkin\dashboard.html:0
+#: .\templates\checkin\dashboard.html:63
 msgid "打开摄像头扫码"
 msgstr "Open camera to scan"
 
-#: .\templates\checkin\qr_scan.html:3
-msgid "扫码签到"
-msgstr "Scan to check in"
+#: .\templates\checkin\dashboard.html:67
+msgid "立即签到"
+msgstr "Check in now"
 
-#: .\templates\checkin\qr_scan.html:6
-msgid "请在手机上完成扫码签到"
-msgstr "Please use your phone to scan and check in"
-
-#: .\templates\checkin\qr_scan.html:7
-msgid "授予摄像头权限后，对准二维码即可识别。"
-msgstr "Grant camera permission and point to the QR code to recognize."
-
-#: .\templates\checkin\qr_scan.html:11
-msgid "打开摄像头"
-msgstr "Open camera"
-
-#: .\templates\checkin\qr_scan.html:12
-msgid "停止"
-msgstr "Stop"
-
-#: .\templates\checkin\qr_scan.html:26
-msgid "摄像头不可用，请检查浏览器权限或设备"
-msgstr "Camera unavailable, please check browser permission or device"
-
-#: .\templates\checkin\qr_scan.html:30
-msgid "无法在非安全环境打开摄像头，请使用 HTTPS 或 localhost 访问"
-msgstr "Cannot open camera in an insecure context; please use HTTPS or localhost"
-
-#: .\templates\checkin\qr_scan.html:34
-msgid "网络错误，请重试"
-msgstr "Network error, please try again"
-
-#: .\templates\checkin\qr_scan.html:43
-msgid "正在扫描..."
-msgstr "Scanning..."
-
-#: .\templates\checkin\qr_scan.html:48
-msgid "无法打开摄像头，请检查权限"
-msgstr "Unable to open camera, please check permissions"
-
-#: .\templates\checkin\qr_scan.html:61
-msgid "正在请求摄像头权限..."
-msgstr "Requesting camera permission..."
-
-#: .\templates\checkin\dashboard.html:37
+#: .\templates\checkin\dashboard.html:75
 msgid "发起人二维码（实时刷新）"
 msgstr "Organizer QR Code (auto-refresh)"
 
-#: .\templates\checkin\dashboard.html:38
+#: .\templates\checkin\dashboard.html:76
 #, python-format
 msgid "每 %(interval)s 秒"
 msgstr "Every %(interval)s seconds"
 
-#: .\templates\checkin\dashboard.html:49
+#: .\templates\checkin\dashboard.html:87
 msgid "当前没有可签到的活动。"
 msgstr "No activities available for check-in."
+
+#: .\templates\checkin\dashboard.html:182
+msgid "无法显示地图（缺少坐标）"
+msgstr "Cannot display map (missing coordinates)"
+
+#: .\templates\checkin\dashboard.html:457
+msgid "定位精度较差，可能影响签到，建议在手机端或室外重试。"
+msgstr ""
+"Low location accuracy may affect check-in; try again on mobile or outdoors."
+
+#: .\templates\checkin\dashboard.html:458
+msgid "已获取当前位置"
+msgstr "Obtained current location"
+
+#: .\templates\checkin\dashboard.html:459
+#: .\templates\checkin\dashboard.html:507
+msgid "无法获取当前位置，请开启定位或在手机端重试。"
+msgstr "Unable to get current location; enable location or try on mobile."
+
+#: .\templates\checkin\dashboard.html:469
+msgid "精度约"
+msgstr "Accuracy about"
+
+#: .\templates\checkin\dashboard.html:515
+msgid "定位精度提示"
+msgstr "Location Accuracy Notice"
+
+#: .\templates\checkin\dashboard.html:516
+msgid "定位精度较差，可能导致签到失败，继续吗？"
+msgstr "Location accuracy is low and may fail check-in. Continue?"
+
+#: .\templates\checkin\dashboard.html:547
+msgid "需要定位权限以完成签到，请在浏览器中允许定位。"
+msgstr "Location permission is required to check in; please allow it in your browser."
+
+#: .\templates\checkin\dashboard.html:562 .\templates\checkin\qr_scan.html:66
+msgid "签到失败"
+msgstr "Check-in failed"
+
+#: .\templates\checkin\dashboard.html:565 .\templates\checkin\qr_scan.html:69
+msgid "网络错误，请重试"
+msgstr "Network error, please try again"
+
+#: .\templates\checkin\dashboard.html:574
+msgid "无法申请定位权限，请在系统设置或浏览器中开启。"
+msgstr "Unable to request location permission; enable it in system settings or your browser."
 
 #: .\templates\checkin\qr_presenter.html:3
 msgid "二维码签到展示"
@@ -186,486 +486,477 @@ msgstr "Auto refresh every %(interval)s seconds"
 msgid "该活动未启用二维码签到。"
 msgstr "QR check-in is not enabled for this activity."
 
-#: .\templates\management\activity_form.html:3
-#: .\templates\management\activity_form.html:11
+#: .\templates\checkin\qr_scan.html:3
+msgid "扫码签到"
+msgstr "Scan to check in"
+
+#: .\templates\checkin\qr_scan.html:9
+msgid "请在手机上完成扫码签到"
+msgstr "Please use your phone to scan and check in"
+
+#: .\templates\checkin\qr_scan.html:10
+msgid "授予摄像头权限后，对准二维码即可识别。"
+msgstr "Grant camera permission and point to the QR code to recognize."
+
+#: .\templates\checkin\qr_scan.html:15
+msgid "打开摄像头"
+msgstr "Open camera"
+
+#: .\templates\checkin\qr_scan.html:16
+msgid "停止"
+msgstr "Stop"
+
+#: .\templates\checkin\qr_scan.html:86
+msgid "摄像头不可用，请检查浏览器权限或设备"
+msgstr "Camera unavailable, please check browser permission or device"
+
+#: .\templates\checkin\qr_scan.html:90
+msgid "无法在非安全环境打开摄像头，请使用 HTTPS 或 localhost 访问"
+msgstr ""
+"Cannot open camera in an insecure context; please use HTTPS or localhost"
+
+#: .\templates\checkin\qr_scan.html:94
+msgid "正在请求摄像头权限..."
+msgstr "Requesting camera permission..."
+
+#: .\templates\checkin\qr_scan.html:110
+msgid "正在扫描..."
+msgstr "Scanning..."
+
+#: .\templates\checkin\qr_scan.html:115
+msgid "无法打开摄像头，请检查权限"
+msgstr "Unable to open camera, please check permissions"
+
+#: .\templates\management\activity_form.html:4
+#: .\templates\management\activity_form.html:12
 msgid "编辑活动"
 msgstr "Edit Activity"
 
-#: .\templates\management\activity_form.html:3
-#: .\templates\management\activity_form.html:11
+#: .\templates\management\activity_form.html:4
+#: .\templates\management\activity_form.html:12
 msgid "创建活动"
 msgstr "Create Activity"
 
-#: .\templates\management\activity_form.html:14
+#: .\templates\management\activity_form.html:15
 msgid "签到形式"
 msgstr "Check-in mode"
 
-#: .\templates\management\activity_form.html:16
+#: .\templates\management\activity_form.html:17
 msgctxt "mode"
 msgid "普通"
 msgstr "Basic"
 
-#: .\templates\management\activity_form.html:17
+#: .\templates\management\activity_form.html:18
 msgid "位置"
 msgstr "Location"
 
-#: .\templates\management\activity_form.html:18
+#: .\templates\management\activity_form.html:19
 msgid "二维码"
 msgstr "QR"
 
-#: .\templates\management\activity_form.html:19
+#: .\templates\management\activity_form.html:20
 msgid "位置 + 二维码"
 msgstr "Location + QR"
 
-#: .\templates\management\activity_form.html:24
-#: .\templates\management\activity_list.html:14
+#: .\templates\management\activity_form.html:25
+#: .\templates\management\activity_list.html:15
 msgid "名称"
 msgstr "Name"
 
 # Duplicate of "名称"; keep single translation defined earlier.
 # (Removed to avoid msgfmt duplicate error.)
-#: .\templates\management\activity_form.html:28
+#: .\templates\management\activity_form.html:29
 msgid "描述"
 msgstr "Description"
 
-#: .\templates\management\activity_form.html:34
+#: .\templates\management\activity_form.html:35
 msgid "重复方式"
 msgstr "Repeat type"
 
-#: .\templates\management\activity_form.html:36
+#: .\templates\management\activity_form.html:37
 msgid "不重复"
 msgstr "None"
 
-#: .\templates\management\activity_form.html:37
+#: .\templates\management\activity_form.html:38
 msgid "每日"
 msgstr "Daily"
 
-#: .\templates\management\activity_form.html:38
+#: .\templates\management\activity_form.html:39
 msgid "每周"
 msgstr "Weekly"
 
-#: .\templates\management\activity_form.html:45
-#: .\templates\management\activity_form.html:79
+#: .\templates\management\activity_form.html:46
+#: .\templates\management\activity_form.html:80
 msgid "开始时间"
 msgstr "Start time"
 
-#: .\templates\management\activity_form.html:49
-#: .\templates\management\activity_form.html:83
+#: .\templates\management\activity_form.html:50
+#: .\templates\management\activity_form.html:84
 msgid "结束时间"
 msgstr "End time"
 
-#: .\templates\management\activity_form.html:56
+#: .\templates\management\activity_form.html:57
 msgid "重复起止日期"
 msgstr "Repeat date range"
 
-#: .\templates\management\activity_form.html:58
+#: .\templates\management\activity_form.html:59
 msgid "开始"
 msgstr "Start"
 
-#: .\templates\management\activity_form.html:60
+#: .\templates\management\activity_form.html:61
 msgid "结束"
 msgstr "End"
 
-#: .\templates\management\activity_form.html:63
+#: .\templates\management\activity_form.html:64
 msgid "结束日期可空，空则长期重复。"
 msgstr "End date optional; empty means no end."
 
-#: .\templates\management\activity_form.html:66
+#: .\templates\management\activity_form.html:67
 msgid "时间窗模式"
 msgstr "Window mode"
 
-#: .\templates\management\activity_form.html:70
+#: .\templates\management\activity_form.html:71
 msgid "开始-结束时段"
 msgstr "Start-End range"
 
-#: .\templates\management\activity_form.html:74
+#: .\templates\management\activity_form.html:75
 msgid "开始时间 + 持续分钟"
 msgstr "Start + duration (min)"
 
-#: .\templates\management\activity_form.html:87
+#: .\templates\management\activity_form.html:88
 msgid "持续分钟"
 msgstr "Duration (minutes)"
 
-#: .\templates\management\activity_form.html:91
+#: .\templates\management\activity_form.html:92
 msgid "每周重复日"
 msgstr "Weekly days"
 
-#: .\templates\management\activity_form.html:95
+#: .\templates\management\activity_form.html:96
 msgid "周一"
 msgstr "Mon"
 
-#: .\templates\management\activity_form.html:99
+#: .\templates\management\activity_form.html:100
 msgid "周二"
 msgstr "Tue"
 
-#: .\templates\management\activity_form.html:103
+#: .\templates\management\activity_form.html:104
 msgid "周三"
 msgstr "Wed"
 
-#: .\templates\management\activity_form.html:107
+#: .\templates\management\activity_form.html:108
 msgid "周四"
 msgstr "Thu"
 
-#: .\templates\management\activity_form.html:111
+#: .\templates\management\activity_form.html:112
 msgid "周五"
 msgstr "Fri"
 
-#: .\templates\management\activity_form.html:115
+#: .\templates\management\activity_form.html:116
 msgid "周六"
 msgstr "Sat"
 
-#: .\templates\management\activity_form.html:119
+#: .\templates\management\activity_form.html:120
 msgid "周日"
 msgstr "Sun"
 
-#: .\templates\management\activity_form.html:122
+#: .\templates\management\activity_form.html:123
 msgid "全选则自动转为每日。"
 msgstr "Selecting all switches to Daily."
 
-#: .\templates\management\activity_form.html:128
+#: .\templates\management\activity_form.html:129
 msgid "位置签到"
 msgstr "Location check-in"
 
 #: .\templates\management\activity_form.html:131
+msgid "签到范围(米)"
+msgstr "Check-in radius (m)"
+
+#: .\templates\management\activity_form.html:133
+msgid "设定允许签到的半径范围，签到时会自动判断是否在范围内。"
+msgstr "Set the allowed check-in radius; system auto-checks if within range."
+
+#: .\templates\management\activity_form.html:137
+msgid "中心位置"
+msgstr "Center location"
+
+#: .\templates\management\activity_form.html:140
+#: .\templates\management\activity_form.html:312
+#: .\templates\management\activity_form.html:322
+msgid "使用当前位置"
+msgstr "Use current location"
+
+#: .\templates\management\activity_form.html:143
+msgid "清除"
+msgstr "Clear"
+
+#: .\templates\management\activity_form.html:148
 msgid "纬度"
 msgstr "Latitude"
 
-#: .\templates\management\activity_form.html:135
+#: .\templates\management\activity_form.html:152
 msgid "经度"
 msgstr "Longitude"
 
-#: .\templates\management\activity_form.html:139
-msgid "范围(米)"
-msgstr "Radius (m)"
+#: .\templates\management\activity_form.html:156
+msgid ""
+"点击使用当前位置自动获取坐标。若启用地图SDK，下方将显示可视化地图选点界面。"
+msgstr ""
+"Click Use current location button to fetch coordinates. If map SDK enabled, "
+"visual map will appear below."
 
-#: .\templates\management\activity_form.html:142
-msgid "前端可接入地图 API 获取坐标，后端按半径校验。"
-msgstr "Frontend can use map API for coords; backend checks radius."
+#: .\templates\management\activity_form.html:164
+msgid "点击地图标记中心位置，自动更新经纬度坐标。"
+msgstr "Click map to mark center position and auto-update coordinates."
 
-#: .\templates\management\activity_form.html:147
+#: .\templates\management\activity_form.html:167
+msgid ""
+"未配置地图SDK。如需可视化地图选点，请在网站设置中配置地图提供商和API Key。"
+msgstr ""
+"Map SDK not configured. To enable visual map picker, configure map provider "
+"and API Key in Site Settings."
+
+#: .\templates\management\activity_form.html:173
 msgid "二维码签到"
 msgstr "QR check-in"
 
-#: .\templates\management\activity_form.html:150
+#: .\templates\management\activity_form.html:176
 msgid "刷新周期(秒, ≥10)"
 msgstr "Refresh interval (s, ≥10)"
 
-#: .\templates\management\activity_form.html:152
+#: .\templates\management\activity_form.html:178
 msgid "发起者可在二维码展示页实时显示。"
 msgstr "Organizer can show QR on presenter page."
 
-#: .\templates\management\activity_form.html:156
+#: .\templates\management\activity_form.html:182
 msgid "打开二维码展示页"
 msgstr "Open QR presenter"
 
-#: .\templates\management\activity_form.html:165
+#: .\templates\management\activity_form.html:191
 msgid "活动启用"
 msgstr "Activate"
 
-#: .\templates\management\activity_form.html:170
-#: .\templates\management\site_settings.html:75
+#: .\templates\management\activity_form.html:196
+#: .\templates\management\activity_stats.html:53
+#: .\templates\management\site_settings.html:106
 msgid "保存"
 msgstr "Save"
 
-#: .\management\views.py:28
-msgid "您没有权限访问此页面"
-msgstr "You do not have permission to access this page."
-
-#: .\management\views.py:47
-msgid "管理员账号请单独处理，无法在此重置"
-msgstr "Administrator accounts must be handled separately; cannot reset here."
-
-#: .\management\views.py:53
-#: .\management\views.py:53
-msgid "已为 %(student_id)s 重置密码，新密码：%(password)s"
-msgstr "Password reset for %(student_id)s. New password: %(password)s"
-
-#: .\management\views.py:61
-msgid "管理员账号请单独处理，无法在此删除"
-msgstr "Administrator accounts must be handled separately; cannot delete here."
-
-#: .\management\views.py:65
-msgid "已删除用户 %(student_id)s"
-msgstr "Deleted user %(student_id)s."
-
-#: .\management\views.py:74
-msgid "未选择用户"
-msgstr "No users selected."
-
-#: .\management\views.py:87
-msgid "未选择可删除的用户（管理员不会在此删除）"
-msgstr "No deletable users selected (administrators are skipped)."
-
-#: .\management\views.py:98
-msgid "已删除 %(deleted)s 个用户"
-msgstr "Deleted %(deleted)s users."
-
-#: .\management\views.py:101
-msgid "已删除 %(deleted)s 个用户，跳过 %(skipped)s 个管理员"
-msgstr "Deleted %(deleted)s users, skipped %(skipped)s administrators."
-
-#: .\management\views.py:113
-msgid "无效的身份选择"
-msgstr "Invalid role selection."
-
-#: .\management\views.py:118
-msgid "已更新 %(updated)s 个用户身份"
-msgstr "Updated roles for %(updated)s users."
-
-#: .\management\views.py:121
-msgid "已更新 %(updated)s 个用户身份，跳过 %(skipped)s 个系统管理员"
-msgstr "Updated roles for %(updated)s users, skipped %(skipped)s superusers."
-
-#: .\management\views.py:136
-msgid "成功创建 0 个用户（全部为重复或输入为空）"
-msgstr "Created 0 users (all duplicates or empty input)."
-
-#: .\management\views.py:170
-msgid "活动创建成功"
-msgstr "Activity created successfully."
-
-#: .\management\views.py:196
-msgid "活动已更新"
-msgstr "Activity updated."
-
-#: .\management\views.py:205
-msgid "活动已提前结束"
-msgstr "Activity closed early."
-
-#: .\management\views.py:246
-msgid "网站设置已更新"
-msgstr "Site settings updated."
-
-#: .\checkin\views.py:22
-msgid "活动不在开放时间"
-msgstr "Activity is not currently open."
-
-#: .\checkin\views.py:27
-msgid "您无权参与此活动"
-msgstr "You are not allowed to join this activity."
-
-#: .\checkin\views.py:31
-msgid "您已签到过此活动"
-msgstr "You have already checked in to this activity."
-
-#: .\checkin\views.py:39
-msgid "缺少或无效的位置参数"
-msgstr "Missing or invalid location parameters."
-
-#: .\checkin\views.py:41
-msgid "不在签到范围内"
-msgstr "Outside the check-in area."
-
-#: .\checkin\views.py:45
-msgid "二维码已过期或无效"
-msgstr "QR code is expired or invalid."
-
-#: .\checkin\views.py:52
-msgid "签到成功"
-msgstr "Check-in successful."
-
-#: .\authentication\views.py:17
-msgid "首次登录，请修改密码"
-msgstr "First login, please change your password."
-
-#: .\templates\authentication\password_change_required.html:5
-msgid "首次登录需修改密码"
-msgstr "Password change required on first login"
-
-#: .\templates\authentication\password_change_required.html:9
-msgid "当前密码"
-msgstr "Current password"
-
-#: .\templates\authentication\password_change_required.html:13
-msgid "新密码"
-msgstr "New password"
-
-#: .\templates\authentication\password_change_required.html:17
-msgid "确认新密码"
-msgstr "Confirm new password"
-
-#: .\templates\authentication\password_change_required.html:20
-msgid "确认修改"
-msgstr "Confirm change"
-
-#: .\authentication\views.py:30
-msgid "密码修改成功"
-msgstr "Password updated successfully."
-
-#: .\installation\views.py:17
-msgid "安装完成，您现在可以登录系统"
-msgstr "Installation completed; you can log in now."
-
-#: .\templates\management\activity_form.html:171
+#: .\templates\management\activity_form.html:197
 msgid "返回"
 msgstr "Back"
 
-#: .\templates\management\activity_form.html:180
+#: .\templates\management\activity_form.html:206
 msgid "参与用户"
 msgstr "Participants"
 
-#: .\templates\management\activity_form.html:183
+#: .\templates\management\activity_form.html:209
 msgid "全选"
 msgstr "Select all"
 
-#: .\templates\management\activity_form.html:193
-#: .\templates\management\activity_stats.html:27
-#: .\templates\management\activity_stats.html:68
-#: .\templates\management\user_list.html:52
+#: .\templates\management\activity_form.html:219
+#: .\templates\management\activity_stats.html:30
+#: .\templates\management\activity_stats.html:90
+#: .\templates\management\user_list.html:54
 msgid "姓名"
 msgstr "Name"
 
-#: .\templates\management\activity_form.html:209
+#: .\templates\management\activity_form.html:235
 msgid "勾选参与用户，保存后生效。"
 msgstr "Select participants; takes effect after save."
 
-#: .\templates\management\activity_list.html:3
-#: .\templates\management\activity_list.html:5
-#: .\templates\management\dashboard.html:28
+#: .\templates\management\activity_form.html:300
+msgid "浏览器不支持地理位置"
+msgstr "Browser does not support geolocation"
+
+#: .\templates\management\activity_form.html:304
+msgid "获取中..."
+msgstr "Fetching..."
+
+#: .\templates\management\activity_form.html:320
+#, fuzzy
+#| msgid "无法获取位置：%s"
+msgid "无法获取位置："
+msgstr "Cannot get location: %s"
+
+#: .\templates\management\activity_list.html:4
+#: .\templates\management\activity_list.html:6
+#: .\templates\management\dashboard.html:19
 msgid "活动管理"
 msgstr "Activity Management"
 
-#: .\templates\management\activity_list.html:7
-#: .\templates\management\dashboard.html:31
+#: .\templates\management\activity_list.html:8
+#: .\templates\management\dashboard.html:22
 msgid "新建活动"
 msgstr "New Activity"
 
-#: .\templates\management\activity_list.html:8
+#: .\templates\management\activity_list.html:9
 msgid "管理参与人员、时间、状态。"
 msgstr "Manage participants, time, status."
 
-#: .\templates\management\activity_list.html:16
+#: .\templates\management\activity_list.html:17
+#: .\templates\management\activity_stats.html:33
 msgid "状态"
 msgstr "Status"
 
-#: .\templates\management\activity_list.html:18
-#: .\templates\management\user_list.html:56
+#: .\templates\management\activity_list.html:19
+#: .\templates\management\activity_stats.html:90
+#: .\templates\management\user_list.html:58
 msgid "操作"
 msgstr "Actions"
 
-#: .\templates\management\activity_list.html:26
+#: .\templates\management\activity_list.html:27
 msgid "进行中"
 msgstr "Ongoing"
 
-#: .\templates\management\activity_list.html:26
+#: .\templates\management\activity_list.html:27
 msgid "已结束"
 msgstr "Ended"
 
-#: .\templates\management\activity_list.html:29
+#: .\templates\management\activity_list.html:30
 msgid "编辑"
 msgstr "Edit"
 
-#: .\templates\management\activity_list.html:30
-#: .\templates\management\activity_stats.html:3
+#: .\templates\management\activity_list.html:31
+#: .\templates\management\activity_stats.html:4
 #: .\templates\management\dashboard.html:40
 msgid "签到统计"
 msgstr "Check-in Stats"
 
-#: .\templates\management\activity_list.html:32
+#: .\templates\management\activity_list.html:33
 msgid "确认提前结束该活动？"
 msgstr "End this activity early?"
 
-#: .\templates\management\activity_list.html:34
+#: .\templates\management\activity_list.html:33
+msgid "结束活动"
+msgstr "End Activity"
+
+#: .\templates\management\activity_list.html:35
 msgid "提前结束"
 msgstr "End early"
 
+#: .\templates\management\activity_list.html:38
+msgid "确认删除该活动？删除后将无法恢复。"
+msgstr "Confirm delete this activity? It cannot be recovered after deletion."
+
+#: .\templates\management\activity_list.html:38
+msgid "删除活动"
+msgstr "Delete Activity"
+
 #: .\templates\management\activity_list.html:40
+#: .\templates\management\user_list.html:88
+#: .\templates\management\user_list.html:95
+msgid "删除"
+msgstr "Delete"
+
+#: .\templates\management\activity_list.html:45
 msgid "暂无活动"
 msgstr "No activities"
 
-#: .\templates\management\activity_list.html:48
-#: .\templates\management\activity_list.html:50
-#: .\templates\management\activity_stats.html:46
-#: .\templates\management\activity_stats.html:48
-#: .\templates\management\activity_stats.html:85
-#: .\templates\management\activity_stats.html:87
-#: .\templates\management\user_list.html:107
-#: .\templates\management\user_list.html:109
+#: .\templates\management\activity_list.html:53
+#: .\templates\management\activity_list.html:55
+#: .\templates\management\activity_stats.html:68
+#: .\templates\management\activity_stats.html:70
+#: .\templates\management\activity_stats.html:122
+#: .\templates\management\activity_stats.html:124
+#: .\templates\management\user_list.html:111
+#: .\templates\management\user_list.html:113
 msgid "上一页"
 msgstr "Previous"
 
-#: .\templates\management\activity_list.html:52
-#: .\templates\management\user_list.html:111
+#: .\templates\management\activity_list.html:57
+#: .\templates\management\user_list.html:115
 #, python-format
 msgid "第 %(current)s / %(total)s 页"
 msgstr "Page %(current)s / %(total)s"
 
-#: .\templates\management\activity_list.html:54
-#: .\templates\management\activity_list.html:56
-#: .\templates\management\activity_stats.html:52
-#: .\templates\management\activity_stats.html:54
-#: .\templates\management\activity_stats.html:91
-#: .\templates\management\activity_stats.html:93
-#: .\templates\management\user_list.html:113
-#: .\templates\management\user_list.html:115
+#: .\templates\management\activity_list.html:59
+#: .\templates\management\activity_list.html:61
+#: .\templates\management\activity_stats.html:74
+#: .\templates\management\activity_stats.html:76
+#: .\templates\management\activity_stats.html:128
+#: .\templates\management\activity_stats.html:130
+#: .\templates\management\user_list.html:117
+#: .\templates\management\user_list.html:119
 msgid "下一页"
 msgstr "Next"
 
-#: .\templates\management\activity_stats.html:5
-#, python-format
-msgid "%(activity.name)s 的签到统计"
-msgstr "Check-in stats for %(activity.name)s"
+#: .\templates\management\activity_stats.html:6
+msgid "的签到统计"
+msgstr "'s Check-in Statistics"
 
-#: .\templates\management\activity_stats.html:7
+#: .\templates\management\activity_stats.html:8
 #, python-format
 msgid "总参与: %(total_participants)s"
 msgstr "Total: %(total_participants)s"
 
-#: .\templates\management\activity_stats.html:8
+#: .\templates\management\activity_stats.html:9
 #, python-format
 msgid "已签到: %(checked_count)s"
 msgstr "Checked in: %(checked_count)s"
 
-#: .\templates\management\activity_stats.html:9
+#: .\templates\management\activity_stats.html:10
 #, python-format
 msgid "未签到: %(unchecked_count)s"
 msgstr "Not checked in: %(unchecked_count)s"
 
-#: .\templates\management\activity_stats.html:11
+#: .\templates\management\activity_stats.html:12
 msgid "导出已签到 XLSX"
 msgstr "Export checked-in XLSX"
 
-#: .\templates\management\activity_stats.html:12
+#: .\templates\management\activity_stats.html:13
 msgid "导出已签到 CSV"
 msgstr "Export checked-in CSV"
 
-#: .\templates\management\activity_stats.html:15
+#: .\templates\management\activity_stats.html:16
 msgid "导出未签到 XLSX"
 msgstr "Export unchecked XLSX"
 
-#: .\templates\management\activity_stats.html:16
+#: .\templates\management\activity_stats.html:17
 msgid "导出未签到 CSV"
 msgstr "Export unchecked CSV"
 
-#: .\templates\management\activity_stats.html:38
+# Activity stats manual status controls
+#: .\templates\management\activity_stats.html:55
+msgid "备注(可选)"
+msgstr "Note (optional)"
+
+#: .\templates\management\activity_stats.html:60
 msgid "暂无签到"
 msgstr "No check-ins"
 
-#: .\templates\management\activity_stats.html:43
+#: .\templates\management\activity_stats.html:65
 msgid "已签到分页"
 msgstr "Checked-in pagination"
 
-#: .\templates\management\activity_stats.html:50
-#: .\templates\management\activity_stats.html:89
+#: .\templates\management\activity_stats.html:72
+#: .\templates\management\activity_stats.html:126
 #, python-format
 msgid "%(current)s / %(total)s"
 msgstr "%(current)s / %(total)s"
 
-#: .\templates\management\activity_stats.html:64
+#: .\templates\management\activity_stats.html:86
 msgid "未签到"
 msgstr "Not checked in"
 
-#: .\templates\management\activity_stats.html:77
+#: .\templates\management\activity_stats.html:107
+msgid "设置状态"
+msgstr "Set Status"
+
+#: .\templates\management\activity_stats.html:109
+msgid "备注(可选)，如请假原因"
+msgstr "Note (optional), e.g., leave reason"
+
+#: .\templates\management\activity_stats.html:114
 msgid "全部已签到"
 msgstr "All checked in"
 
-#: .\templates\management\activity_stats.html:82
+#: .\templates\management\activity_stats.html:119
 msgid "未签到分页"
 msgstr "Unchecked pagination"
 
 #: .\templates\management\dashboard.html:10
-#: .\templates\management\user_list.html:3
-#: .\templates\management\user_list.html:5
+#: .\templates\management\user_list.html:4
+#: .\templates\management\user_list.html:6
 msgid "用户管理"
 msgstr "User Management"
 
@@ -677,26 +968,26 @@ msgstr "View users, reset passwords, delete."
 msgid "进入用户列表"
 msgstr "Go to user list"
 
-#: .\templates\management\dashboard.html:19
-#: .\templates\management\user_list.html:126
-msgid "批量创建用户"
-msgstr "Bulk Create Users"
-
 #: .\templates\management\dashboard.html:20
-msgid "在用户列表页进行批量创建并导出初始密码。"
-msgstr "Create in bulk and export initial passwords on user list page."
-
-#: .\templates\management\dashboard.html:21
-msgid "打开用户列表"
-msgstr "Open user list"
-
-#: .\templates\management\dashboard.html:29
 msgid "创建、编辑、分配参与人员。"
 msgstr "Create, edit, assign participants."
 
-#: .\templates\management\dashboard.html:32
+#: .\templates\management\dashboard.html:23
 msgid "查看活动列表"
 msgstr "View activity list"
+
+#: .\templates\management\dashboard.html:31
+#: .\templates\management\user_list.html:130
+msgid "批量创建用户"
+msgstr "Bulk Create Users"
+
+#: .\templates\management\dashboard.html:32
+msgid "在用户列表页进行批量创建并导出初始密码。"
+msgstr "Create in bulk and export initial passwords on user list page."
+
+#: .\templates\management\dashboard.html:33
+msgid "打开用户列表"
+msgstr "Open user list"
 
 #: .\templates\management\dashboard.html:41
 msgid "查看签到情况并导出已签到/未签到名单。"
@@ -726,200 +1017,261 @@ msgstr "Site Logo"
 
 #: .\templates\management\site_settings.html:21
 msgid "技术支持联系方式"
-msgstr "Support contact"
+msgstr "Technical support contact"
 
 #: .\templates\management\site_settings.html:25
+msgid "自定义页脚"
+msgstr "Custom footer"
+
+#: .\templates\management\site_settings.html:27
+msgid "支持 HTML 标签，将显示在技术支持的上方。"
+msgstr "Support HTML tags, which will be displayed above technical support."
+
+#: .\templates\management\site_settings.html:30
 msgid "地图提供商"
 msgstr "Map provider"
 
-#: .\templates\management\site_settings.html:26
+#: .\templates\management\site_settings.html:32
 msgid "前端地图 SDK 选择：高德、腾讯或 Google。"
 msgstr "Front-end map SDK choice: AMap, Tencent, or Google."
 
-#: .\templates\management\site_settings.html:31
+#: .\templates\management\site_settings.html:35
 msgid "地图 API Key"
 msgstr "Map API Key"
 
-#: .\templates\management\site_settings.html:33
+#: .\templates\management\site_settings.html:37
 msgid "用于位置签到前端地图 SDK；可留空禁用。"
 msgstr "For map SDK in location check-in; leave empty to disable."
 
-#: .\templates\management\site_settings.html:37
+#: .\templates\management\site_settings.html:40
+msgid "地图安全密钥"
+msgstr "Map Security Key"
+
+#: .\templates\management\site_settings.html:42
+msgid "高德地图需要填写安全密钥（securityJsCode），其他提供商可留空。"
+msgstr "Required for AMap (securityJsCode); optional for other providers."
+
+#: .\templates\management\site_settings.html:46
 msgid "界面语言"
 msgstr "Interface language"
 
-#: .\templates\management\site_settings.html:39
+#: .\templates\management\site_settings.html:48
 msgid "当前支持：中文（简体）、English (US)。"
 msgstr "Supported: Simplified Chinese, English (US)."
 
-#: .\templates\management\site_settings.html:42
+#: .\templates\management\site_settings.html:51
 msgid "时区"
 msgstr "Timezone"
 
-#: .\templates\management\site_settings.html:44
+#: .\templates\management\site_settings.html:53
 msgid ""
 "常用选项：Asia/Shanghai, Asia/Tokyo, UTC, Europe/London, America/New_York。"
 msgstr ""
 "Common options: Asia/Shanghai, Asia/Tokyo, UTC, Europe/London, America/"
 "New_York."
 
-#: .\templates\management\site_settings.html:49
+#: .\templates\management\site_settings.html:58
+msgid "用户名显示设置"
+msgstr "Username Display Settings"
+
+#: .\templates\management\site_settings.html:61
+msgid "显示模式"
+msgstr "Display Mode"
+
+#: .\templates\management\site_settings.html:63
+msgid "控制用户身份的显示方式（仅学号、仅姓名、或学号+姓名）"
+msgstr ""
+"Control how user identity is displayed (Student ID only, Name only, or both)"
+
+#: .\templates\management\site_settings.html:66
+msgid "脱敏模式"
+msgstr "Masking Mode"
+
+#: .\templates\management\site_settings.html:68
+msgid "控制是否对中间部分进行 * 脱敏（不脱敏、仅前台脱敏、前后台均脱敏）"
+msgstr ""
+"Control whether to mask middle portion with * (No masking, Frontend only, or "
+"Both)"
+
+#: .\templates\management\site_settings.html:74
 msgid "初始密码策略"
 msgstr "Initial password policy"
 
-#: .\templates\management\site_settings.html:52
+#: .\templates\management\site_settings.html:77
 msgid "长度"
 msgstr "Length"
 
-#: .\templates\management\site_settings.html:58
+#: .\templates\management\site_settings.html:83
 msgid "包含大写"
 msgstr "Require uppercase"
 
-#: .\templates\management\site_settings.html:62
+#: .\templates\management\site_settings.html:87
 msgid "包含小写"
 msgstr "Require lowercase"
 
-#: .\templates\management\site_settings.html:66
+#: .\templates\management\site_settings.html:91
 msgid "包含数字"
 msgstr "Require digits"
 
-#: .\templates\management\site_settings.html:70
+#: .\templates\management\site_settings.html:95
 msgid "包含符号"
 msgstr "Require symbols"
 
-#: .\templates\management\site_settings.html:75
+#: .\templates\management\site_settings.html:100
 msgid "符号字符集合"
 msgstr "Symbol set"
 
-#: .\templates\management\site_settings.html:77
+#: .\templates\management\site_settings.html:102
 msgid "仅当勾选“包含符号”时生效"
 msgstr "Applies only when \"Require symbols\" is checked."
 
-#: .\templates\management\user_list.html:15
-#: .\templates\management\user_list.html:17
+#: .\templates\management\user_list.html:16
+#: .\templates\management\user_list.html:18
 msgid "搜索"
 msgstr "Search"
 
-#: .\templates\management\user_list.html:16
+#: .\templates\management\user_list.html:17
 msgid "学号或姓名"
 msgstr "Student ID or name"
 
-#: .\templates\management\user_list.html:20
+#: .\templates\management\user_list.html:21
 msgid "清除选择"
 msgstr "Clear selection"
 
-#: .\templates\management\user_list.html:25
+#: .\templates\management\user_list.html:26
 msgid "已选"
 msgstr "Selected"
 
-#: .\templates\management\user_list.html:25
+#: .\templates\management\user_list.html:26
 msgid "个"
 msgstr "items"
 
-#: .\templates\management\user_list.html:27
-#: .\templates\management\user_list.html:134
+#: .\templates\management\user_list.html:28
+#: .\templates\management\user_list.html:138
 msgid "导出 XLSX"
 msgstr "Export XLSX"
 
-#: .\templates\management\user_list.html:28
-#: .\templates\management\user_list.html:135
+#: .\templates\management\user_list.html:29
+#: .\templates\management\user_list.html:139
 msgid "导出 CSV"
 msgstr "Export CSV"
 
-#: .\templates\management\user_list.html:30
+#: .\templates\management\user_list.html:31
 msgid "批量重置并导出"
 msgstr "Bulk reset & export"
 
-#: .\templates\management\user_list.html:31
+#: .\templates\management\user_list.html:32
 msgid "确认删除选中用户？（管理员不会被删除）"
 msgstr "Delete selected users? (Admins are skipped)"
 
-#: .\templates\management\user_list.html:31
+#: .\templates\management\user_list.html:32
+#: .\templates\management\user_list.html:88
+#: .\templates\management\user_list.html:95
+msgid "删除用户"
+msgstr "Delete User"
+
+#: .\templates\management\user_list.html:32
 msgid "批量删除"
 msgstr "Bulk delete"
 
-#: .\templates\management\user_list.html:33
-#: .\templates\management\user_list.html:53
+#: .\templates\management\user_list.html:34
+#: .\templates\management\user_list.html:55
 msgid "身份"
 msgstr "Role"
 
-#: .\templates\management\user_list.html:35
+#: .\templates\management\user_list.html:36
 msgid "普通用户"
 msgstr "Regular user"
 
-#: .\templates\management\user_list.html:36
-#: .\templates\management\user_list.html:72
+#: .\templates\management\user_list.html:37
+#: .\templates\management\user_list.html:74
 msgid "后台管理员"
 msgstr "Staff admin"
 
-#: .\templates\management\user_list.html:37
-#: .\templates\management\user_list.html:68
+#: .\templates\management\user_list.html:38
 #: .\templates\management\user_list.html:70
+#: .\templates\management\user_list.html:72
 msgid "系统管理员"
 msgstr "System admin"
 
-#: .\templates\management\user_list.html:40
+#: .\templates\management\user_list.html:39
+msgid "测试账号"
+msgstr "Test Account"
+
+#: .\templates\management\user_list.html:42
 msgctxt "action"
 msgid "设置"
 msgstr "Set"
 
-#: .\templates\management\user_list.html:54
+#: .\templates\management\user_list.html:56
 msgid "启用"
 msgstr "Active"
 
-#: .\templates\management\user_list.html:55
+#: .\templates\management\user_list.html:57
 msgid "首次登录"
 msgstr "First login"
 
-#: .\templates\management\user_list.html:74
+#: .\templates\management\user_list.html:76
+msgid "测试"
+msgstr "Test"
+
+#: .\templates\management\user_list.html:78
 msgctxt "role"
 msgid "普通"
 msgstr "Regular"
 
-#: .\templates\management\user_list.html:77
-#: .\templates\management\user_list.html:78
+#: .\templates\management\user_list.html:81
+#: .\templates\management\user_list.html:82
 msgid "是"
 msgstr "Yes"
 
-#: .\templates\management\user_list.html:77
-#: .\templates\management\user_list.html:78
+#: .\templates\management\user_list.html:81
+#: .\templates\management\user_list.html:82
 msgid "否"
 msgstr "No"
 
-#: .\templates\management\user_list.html:81
+#: .\templates\management\user_list.html:85
 msgid "管理员受保护"
 msgstr "Admin protected"
 
-#: .\templates\management\user_list.html:83
-#: .\templates\management\user_list.html:90
+#: .\templates\management\user_list.html:87
+#: .\templates\management\user_list.html:94
 msgid "重置密码"
 msgstr "Reset password"
 
-#: .\templates\management\user_list.html:84
-#: .\templates\management\user_list.html:91
+#: .\templates\management\user_list.html:88
+#: .\templates\management\user_list.html:95
 msgid "确认删除该用户?"
 msgstr "Delete this user?"
 
-#: .\templates\management\user_list.html:84
-#: .\templates\management\user_list.html:91
-msgid "删除"
-msgstr "Delete"
-
-#: .\templates\management\user_list.html:98
+#: .\templates\management\user_list.html:102
 msgid "暂无用户"
 msgstr "No users"
 
-#: .\templates\management\user_list.html:130
+#: .\templates\management\user_list.html:134
 msgid "每行或空格分隔学号，支持 1234567890 张三 格式"
 msgstr "One ID per line or space; supports '1234567890 Zhang San' format"
 
-#: .\templates\management\user_list.html:137
+#: .\templates\management\user_list.html:141
 msgid "生成"
 msgstr "Generate"
 
-#: .\templates\management\user_list.html:139
+#: .\templates\management\user_list.html:143
 msgid "支持上传 CSV（列：学号, 可选姓名）。"
 msgstr "CSV upload supported (columns: student_id, optional name)."
+
+#~ msgid "状态备注"
+#~ msgstr "Status note"
+
+#~ msgid "签到状态"
+#~ msgstr "Check-in status"
+
+#, python-format
+#~ msgid "%(activity.name)s 的签到统计"
+#~ msgstr "Check-in stats for %(activity.name)s"
+
+#~ msgid "手动签到"
+#~ msgstr "Manual"
 
 #~ msgid "导出为 XLSX"
 #~ msgstr "Export as XLSX"

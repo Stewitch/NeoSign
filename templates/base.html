@@ -1,15 +1,104 @@
 {% load i18n %}
+{% load static %}
+{% load display %}
 <!DOCTYPE html>
-<html lang="{{ LANGUAGE_CODE }}">
+<html lang="{{ LANGUAGE_CODE }}" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{{ config.site_title|default:"签到系统" }}{% endblock %}</title>
+    {% if config and config.site_logo %}
+    <link rel="icon" type="image/x-icon" href="{% url 'core:favicon' %}">
+    {% endif %}
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+    /* 覆盖 style.css 中的 padding，使用 Flexbox 布局不需要这个 */
+    body {
+        padding-bottom: 0 !important;
+    }
+    
+    #themeToggleContainer {
+        position: fixed !important;
+        bottom: 20px !important;
+        right: 20px !important;
+        z-index: 1050 !important; /* 高于 navbar (1030) */
+        transition: bottom 0.1s ease-out; /* 添加过渡效果使移动更平滑 */
+    }
+    .theme-toggle-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 1px solid var(--bs-border-color);
+        background: var(--bs-body-bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        padding: 0; /* 确保没有内边距影响大小 */
+    }
+    .theme-toggle-btn:hover {
+        background: var(--bs-secondary-bg);
+    }
+    .theme-options {
+        position: absolute;
+        bottom: 100%;
+        right: 0;
+        margin-bottom: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        background: var(--bs-body-bg);
+        border: 1px solid var(--bs-border-color);
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(10px);
+        transition: all 0.2s;
+        min-width: 120px; /* 确保宽度足够 */
+    }
+    .theme-options.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+    .theme-option-btn {
+        width: 100%;
+        padding: 0.5rem;
+        border: none;
+        background: transparent;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-radius: 0.25rem;
+        white-space: nowrap;
+        color: var(--bs-body-color);
+        text-align: left;
+    }
+    .theme-option-btn:hover {
+        background: var(--bs-secondary-bg);
+    }
+    .theme-option-btn.active {
+        background: var(--bs-primary);
+        color: white;
+    }
+    </style>
     {% block extra_css %}{% endblock %}
+    <script>
+    // 初始化主题，避免闪烁
+    (function() {
+        const theme = localStorage.getItem('theme') || 'auto';
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        const actualTheme = theme === 'auto' ? systemTheme : theme;
+        document.documentElement.setAttribute('data-bs-theme', actualTheme);
+    })();
+    </script>
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
     <div class="container-fluid px-3">
         <a class="navbar-brand d-flex align-items-center" href="{% url 'checkin:dashboard' %}">
@@ -40,7 +129,7 @@
                     {% if user.is_admin or user.is_superuser %}
                         <li class="nav-item"><a class="btn btn-outline-light btn-sm" href="{% url 'management:dashboard' %}">{% trans '管理后台' %}</a></li>
                     {% endif %}
-                    <li class="nav-item"><span class="nav-link text-info">{% trans '学号' %}: {{ user.student_id }}</span></li>
+                    <li class="nav-item"><span class="nav-link text-info">{% trans '用户' %}: {% user_display user 'frontend' config %}</span></li>
                     <li class="nav-item"><a class="btn btn-primary btn-sm" href="{% url 'authentication:logout' %}">{% trans '退出登录' %}</a></li>
                 {% else %}
                     <li class="nav-item"><a class="nav-link" href="{% url 'authentication:login' %}">{% trans '登录' %}</a></li>
@@ -49,7 +138,7 @@
         </div>
     </div>
 </nav>
-<main class="container py-4">
+<main class="container py-4 flex-grow-1">
     {% if messages %}
         {% for message in messages %}
             <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
@@ -60,12 +149,226 @@
     {% endif %}
     {% block content %}{% endblock %}
 </main>
-<footer class="mt-5 py-3 bg-light">
+
+<footer class="mt-auto py-3 bg-body-tertiary border-top">
     <div class="container text-center">
-        <p class="mb-0">{% trans '技术支持' %}: {{ config.technician_contact|default:_('请联系管理员') }}</p>
+        {% if config.custom_footer %}
+            <div class="mb-2">{{ config.custom_footer|safe }}</div>
+        {% endif %}
+        <p class="mb-0 text-muted small">{% trans '技术支持' %}: {{ config.technician_contact|default:_('请联系管理员') }}</p>
     </div>
 </footer>
+
+<!-- 通用确认模态框 -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="confirmModalTitle"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="confirmModalBody"></div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans '取消' %}</button>
+                <button type="button" class="btn btn-danger" id="confirmButton">{% trans '确认' %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 主题切换器 -->
+<div id="themeToggleContainer">
+    <div class="theme-options" id="themeOptions">
+        <button class="theme-option-btn" data-theme="light">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
+            </svg>
+            {% trans '浅色' %}
+        </button>
+        <button class="theme-option-btn" data-theme="dark">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278zM4.858 1.311A7.269 7.269 0 0 0 1.025 7.71c0 4.02 3.279 7.276 7.319 7.276a7.316 7.316 0 0 0 5.205-2.162c-.337.042-.68.063-1.029.063-4.61 0-8.343-3.714-8.343-8.29 0-1.167.242-2.278.681-3.286z"/>
+            </svg>
+            {% trans '深色' %}
+        </button>
+        <button class="theme-option-btn" data-theme="auto">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 15A7 7 0 1 0 8 1v14zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16z"/>
+            </svg>
+            {% trans '跟随系统' %}
+        </button>
+    </div>
+    <button class="theme-toggle-btn" id="themeToggleBtn" title="{% trans '切换主题' %}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16" id="themeIcon">
+            <path d="M8 15A7 7 0 1 0 8 1v14zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16z"/>
+        </svg>
+    </button>
+</div>
+
 <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+<script>
+(function(){
+    const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+    let pendingForm = null;
+    let pendingCallback = null;
+
+    // 处理带 data-confirm 属性的表单和按钮
+    document.addEventListener('submit', function(e) {
+        const form = e.target;
+        const confirmMsg = form.dataset.confirm;
+        const confirmTitle = form.dataset.confirmTitle || '{% trans "请确认操作" %}';
+        
+        if (confirmMsg) {
+            e.preventDefault();
+            pendingForm = form;
+            pendingCallback = null;
+            showConfirmModal(confirmTitle, confirmMsg, () => form.submit());
+        }
+    }, true);
+
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('[data-confirm]');
+        if (!btn) return;
+        
+        const confirmMsg = btn.dataset.confirm;
+        const confirmTitle = btn.dataset.confirmTitle || '{% trans "请确认操作" %}';
+        
+        if (confirmMsg && btn.tagName !== 'FORM') {
+            e.preventDefault();
+            pendingCallback = null;
+            
+            if (btn.type === 'submit' && btn.form) {
+                pendingForm = btn.form;
+                showConfirmModal(confirmTitle, confirmMsg, () => btn.form.submit());
+            } else if (btn.dataset.confirmCallback) {
+                // 支持自定义回调
+                const callbackName = btn.dataset.confirmCallback;
+                if (window[callbackName]) {
+                    showConfirmModal(confirmTitle, confirmMsg, () => window[callbackName](btn));
+                }
+            }
+        }
+    }, true);
+
+    function showConfirmModal(title, message, callback) {
+        document.getElementById('confirmModalTitle').textContent = title;
+        document.getElementById('confirmModalBody').textContent = message;
+        pendingCallback = callback;
+        confirmModal.show();
+    }
+
+    document.getElementById('confirmButton').addEventListener('click', () => {
+        confirmModal.hide();
+        if (pendingCallback) {
+            pendingCallback();
+        }
+    });
+})();
+
+// 主题切换功能
+(function() {
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const themeOptions = document.getElementById('themeOptions');
+    const themeOptionBtns = document.querySelectorAll('.theme-option-btn');
+    const themeIcon = document.getElementById('themeIcon');
+    const html = document.documentElement;
+    
+    // 图标定义
+    const icons = {
+        light: '<path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>',
+        dark: '<path d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278zM4.858 1.311A7.269 7.269 0 0 0 1.025 7.71c0 4.02 3.279 7.276 7.319 7.276a7.316 7.316 0 0 0 5.205-2.162c-.337.042-.68.063-1.029.063-4.61 0-8.343-3.714-8.343-8.29 0-1.167.242-2.278.681-3.286z"/>',
+        auto: '<path d="M8 15A7 7 0 1 0 8 1v14zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16z"/>'
+    };
+
+    function updateIcon(theme) {
+        themeIcon.innerHTML = icons[theme];
+    }
+
+    function setTheme(theme) {
+        localStorage.setItem('theme', theme);
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        const actualTheme = theme === 'auto' ? systemTheme : theme;
+        html.setAttribute('data-bs-theme', actualTheme);
+        
+        // 更新按钮状态
+        themeOptionBtns.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.theme === theme);
+        });
+        
+        // 更新主图标
+        updateIcon(theme);
+        
+        // 关闭选项菜单
+        themeOptions.classList.remove('show');
+    }
+    
+    // 切换菜单显示
+    themeToggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        themeOptions.classList.toggle('show');
+    });
+
+    // 点击外部关闭菜单
+    document.addEventListener('click', (e) => {
+        if (!themeToggleBtn.contains(e.target) && !themeOptions.contains(e.target)) {
+            themeOptions.classList.remove('show');
+        }
+    });
+    
+    // 初始化按钮状态
+    const savedTheme = localStorage.getItem('theme') || 'auto';
+    setTheme(savedTheme); // 初始化时设置主题和图标
+    
+    // 绑定选项点击事件
+    themeOptionBtns.forEach(btn => {
+        btn.addEventListener('click', () => setTheme(btn.dataset.theme));
+    });
+    
+    // 监听系统主题变化（仅当设置为auto时）
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (localStorage.getItem('theme') === 'auto') {
+            html.setAttribute('data-bs-theme', e.matches ? 'dark' : 'light');
+        }
+    });
+})();
+
+// 动态调整主题切换器位置，使其避开 Footer
+(function() {
+    const footer = document.querySelector('footer');
+    const toggleContainer = document.getElementById('themeToggleContainer');
+    
+    function adjustPosition() {
+        if (!footer || !toggleContainer) return;
+        
+        const footerRect = footer.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+        
+        // 计算 Footer 在视口中的可见高度
+        // footerRect.top 是 footer 顶部距离视口顶部的距离
+        let visibleHeight = 0;
+        if (footerRect.top < windowHeight) {
+            visibleHeight = windowHeight - footerRect.top;
+        }
+        
+        // 限制最小为 0
+        visibleHeight = Math.max(0, visibleHeight);
+        
+        // 设置按钮位置：基础间距 20px + Footer 可见高度
+        // 使用 setProperty 并加 important 以覆盖 CSS 中的定义
+        toggleContainer.style.setProperty('bottom', (20 + visibleHeight) + 'px', 'important');
+    }
+
+    window.addEventListener('scroll', adjustPosition);
+    window.addEventListener('resize', adjustPosition);
+    window.addEventListener('load', adjustPosition);
+    
+    // 监听 DOM 变化（如 Footer 内容改变）
+    if (footer) {
+        const observer = new MutationObserver(adjustPosition);
+        observer.observe(footer, { childList: true, subtree: true, attributes: true });
+    }
+})();
+</script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>

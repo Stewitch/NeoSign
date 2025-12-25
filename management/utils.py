@@ -69,13 +69,34 @@ def export_table_to_csv(headers: Sequence[str], rows: Iterable[Sequence[str]], f
     return response
 
 
-def export_table_to_xlsx(headers: Sequence[str], rows: Iterable[Sequence[str]], filename: str) -> HttpResponse:
+def export_table_to_xlsx(headers: Sequence[str], rows: Iterable[Sequence[str]], filename: str, column_widths: Sequence[int] = None) -> HttpResponse:
+    from openpyxl.styles import Alignment
+    
     workbook = Workbook()
     sheet = workbook.active
     sheet.title = '导出'
     sheet.append(list(headers))
     for row in rows:
         sheet.append(list(row))
+    
+    # Set column widths if provided
+    if column_widths:
+        for idx, width in enumerate(column_widths, start=1):
+            column_letter = chr(64 + idx)  # A=65, B=66, etc.
+            sheet.column_dimensions[column_letter].width = width
+    
+    # Format all cells to preserve leading zeros and display as text for student IDs
+    for row in sheet.iter_rows(min_row=2):  # Skip header row
+        for idx, cell in enumerate(row):
+            if idx == 0 and cell.value:  # First column (student_id)
+                # Force text format to preserve leading zeros
+                cell.number_format = '@'
+            # Center align all cells
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+    
+    # Center align header row
+    for cell in sheet[1]:
+        cell.alignment = Alignment(horizontal='center', vertical='center')
 
     response = HttpResponse(
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'

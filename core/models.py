@@ -2,6 +2,7 @@ from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.core.validators import RegexValidator
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 class CustomUserManager(BaseUserManager):
@@ -38,6 +39,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True, verbose_name='是否启用')
     is_staff = models.BooleanField(default=False, verbose_name='后台管理员')
     is_admin = models.BooleanField(default=False, verbose_name='系统管理员')
+    is_test = models.BooleanField(default=False, verbose_name='测试账号')
     first_login = models.BooleanField(default=True, verbose_name='首次登录')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     last_login = models.DateTimeField(null=True, blank=True, verbose_name='上次登录时间')
@@ -60,8 +62,10 @@ class SystemConfig(models.Model):
     site_title = models.CharField(max_length=100, default='签到系统', verbose_name='站点标题')
     site_logo = models.ImageField(upload_to='system/logo/', null=True, blank=True, verbose_name='站点Logo')
     technician_contact = models.CharField(max_length=100, blank=True, verbose_name='技术支持联系方式')
+    custom_footer = models.TextField(blank=True, verbose_name='自定义页脚', help_text='支持 HTML 标签')
     map_provider = models.CharField(max_length=20, blank=True, default='', verbose_name='地图 API 提供商')
     map_api_key = models.CharField(max_length=200, blank=True, verbose_name='地图 API Key')
+    map_security_key = models.CharField(max_length=200, blank=True, verbose_name='地图安全密钥')
     installed = models.BooleanField(default=False, verbose_name='是否已安装')
     db_host = models.CharField(max_length=100, blank=True, verbose_name='数据库地址')
     db_name = models.CharField(max_length=100, blank=True, verbose_name='数据库名称')
@@ -79,6 +83,29 @@ class SystemConfig(models.Model):
         default='!@#$%^&*',
         blank=True,
         verbose_name='符号字符集合'
+    )
+    # 用户名显示设置
+    username_display_mode = models.CharField(
+        max_length=20,
+        default='student_id',
+        choices=[
+            ('student_id', _('仅学号')),
+            ('name', _('仅姓名')),
+            ('both', _('学号+姓名')),
+        ],
+        verbose_name=_('用户名显示模式'),
+        help_text=_('控制界面中用户身份的显示方式')
+    )
+    username_masking_mode = models.CharField(
+        max_length=20,
+        default='frontend',
+        choices=[
+            ('none', _('不脱敏')),
+            ('frontend', _('仅前台脱敏')),
+            ('both', _('前台和后台均脱敏')),
+        ],
+        verbose_name=_('用户名脱敏模式'),
+        help_text=_('控制是否对学号和姓名进行中间部分脱敏处理')
     )
 
     class Meta:

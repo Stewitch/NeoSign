@@ -19,7 +19,12 @@ class CheckInDashboardView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         now = timezone.now()
-        activities = Activity.objects.filter(participants=user, is_active=True).select_related('created_by').prefetch_related('checkins')
+        
+        # Test users see all active activities; regular users see only their assigned activities
+        if user.is_test:
+            activities = Activity.objects.filter(is_active=True).select_related('created_by').prefetch_related('checkins')
+        else:
+            activities = Activity.objects.filter(participants=user, is_active=True).select_related('created_by').prefetch_related('checkins')
 
         activity_list = []
         for activity in activities:
@@ -52,14 +57,16 @@ class CheckInAPIView(LoginRequiredMixin, View):
         if not activity.is_open_for(timezone.now()):
             return JsonResponse({'success': False, 'error': _('活动不在开放时间')})
 
-        allowed = ActivityParticipation.objects.filter(
-            activity=activity, user=request.user, can_participate=True
-        ).exists()
-        if not allowed:
-            return JsonResponse({'success': False, 'error': _('您无权参与此活动')})
+        # Test users always allowed; regular users need participation record
+        if not request.user.is_test:
+            allowed = ActivityParticipation.objects.filter(
+                activity=activity, user=request.user, can_participate=True
+            ).exists()
+            if not allowed:
+                return JsonResponse({'success': False, 'error': _('您无权参与此活动')})
 
-        if CheckInRecord.objects.filter(activity=activity, user=request.user).exists():
-            return JsonResponse({'success': False, 'error': _('您已签到过此活动')})
+            if CheckInRecord.objects.filter(activity=activity, user=request.user).exists():
+                return JsonResponse({'success': False, 'error': _('您已签到过此活动')})
 
         lat = request.POST.get('lat')
         lng = request.POST.get('lng')
@@ -76,6 +83,10 @@ class CheckInAPIView(LoginRequiredMixin, View):
         if activity.qr_enabled and not activity.is_valid_qr_token(token, timezone.now()):
             return JsonResponse({'success': False, 'error': _('二维码已过期或无效')})
 
+        # Test users can check-in multiple times (delete old record)
+        if request.user.is_test:
+            CheckInRecord.objects.filter(activity=activity, user=request.user).delete()
+
         CheckInRecord.objects.create(
             activity=activity,
             user=request.user,
@@ -83,6 +94,7 @@ class CheckInAPIView(LoginRequiredMixin, View):
             user_agent=request.META.get('HTTP_USER_AGENT', ''),
             latitude=float(lat) if lat else None,
             longitude=float(lng) if lng else None,
+            status=CheckInRecord.CheckInStatus.PRESENT,
         )
 
         return JsonResponse({'success': True, 'message': _('签到成功')})
@@ -107,6 +119,20 @@ class CheckInAPIView(LoginRequiredMixin, View):
         c = 2 * asin(sqrt(a))
         distance = R * c
         return distance <= float(activity.location_radius_m or 0)
+
+
+class CheckInResetAPIView(LoginRequiredMixin, View):
+    def post(self, request, activity_id):
+        activity = get_object_or_404(Activity, id=activity_id, is_active=True)
+
+        # 仅允许测试用户使用重置功能
+        if not request.user.is_test:
+            return JsonResponse({'success': False, 'error': _('仅测试用户可重置签到状态')})
+
+        # 重置为未签到：删除该活动下该用户的签到记录
+        CheckInRecord.objects.filter(activity=activity, user=request.user).delete()
+
+        return JsonResponse({'success': True, 'message': _('已重置为未签到')})
 
 
 class PresenterOnlyMixin(UserPassesTestMixin):

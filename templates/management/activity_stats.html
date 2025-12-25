@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load display %}
 {% block title %}{% trans '签到统计' %} - {{ block.super }}{% endblock %}
 {% block content %}
-<h3 class="mb-3">{% blocktrans %}{{ activity.name }} 的签到统计{% endblocktrans %}</h3>
+<h3 class="mb-3">{{ activity.name }} {% trans '的签到统计' %}</h3>
 <div class="d-flex flex-wrap gap-3 mb-3">
     <span class="badge bg-primary">{% blocktrans %}总参与: {{ total_participants }}{% endblocktrans %}</span>
     <span class="badge bg-success">{% blocktrans %}已签到: {{ checked_count }}{% endblocktrans %}</span>
@@ -24,18 +25,39 @@
                 <div class="table-responsive">
                     <table class="table table-sm align-middle">
                         <thead>
-                            <tr><th>{% trans '学号' %}</th><th>{% trans '姓名' %}</th><th>{% trans '时间' %}</th><th>IP</th></tr>
+                            <tr>
+                                <th>{% trans '学号' %}</th>
+                                <th>{% trans '姓名' %}</th>
+                                <th>{% trans '时间' %}</th>
+                                <th>IP</th>
+                                <th>{% trans '状态' %}</th>
+                            </tr>
                         </thead>
                         <tbody>
                             {% for record in checked_page %}
                             <tr>
-                                <td>{{ record.user.student_id }}</td>
-                                <td>{{ record.user.first_name|default:'-' }}</td>
+                                <td>{% mask_field record.user.student_id 'student_id' 'admin' config %}</td>
+                                <td>{% mask_field record.user.first_name 'name' 'admin' config %}</td>
                                 <td>{{ record.checkin_time }}</td>
-                                <td>{{ record.ip_address|default:'-' }}</td>
+                                <td class="small text-muted">{{ record.ip_address|default:'-' }}</td>
+                                <td>
+                                    <form method="post" action="{% url 'management:activity_status_update' activity.id %}" class="d-flex flex-column gap-1">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="user_id" value="{{ record.user.id }}">
+                                        <div class="d-flex gap-1">
+                                            <select name="status" class="form-select form-select-sm" style="height: 31px;">
+                                                {% for code,label in status_choices %}
+                                                    <option value="{{ code }}" {% if record.status == code %}selected{% endif %}>{{ label }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <button type="submit" name="action" value="save" class="btn btn-sm btn-primary" style="height: 31px; padding: 0 8px; flex-shrink: 0; white-space: nowrap;">{% trans '保存' %}</button>
+                                        </div>
+                                        <input type="text" name="note" value="{{ record.status_note }}" class="form-control form-control-sm" placeholder="{% trans '备注(可选)' %}">
+                                    </form>
+                                </td>
                             </tr>
                             {% empty %}
-                            <tr><td colspan="4" class="text-center text-muted">{% trans '暂无签到' %}</td></tr>
+                            <tr><td colspan="5" class="text-center text-muted">{% trans '暂无签到' %}</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -65,16 +87,31 @@
                 <div class="table-responsive">
                     <table class="table table-sm align-middle">
                         <thead>
-                            <tr><th>{% trans '学号' %}</th><th>{% trans '姓名' %}</th></tr>
+                            <tr><th>{% trans '学号' %}</th><th>{% trans '姓名' %}</th><th>{% trans '操作' %}</th></tr>
                         </thead>
                         <tbody>
                             {% for user in unchecked_page %}
                             <tr>
-                                <td>{{ user.student_id }}</td>
-                                <td>{{ user.first_name|default:'-' }}</td>
+                                <td>{% mask_field user.student_id 'student_id' 'admin' config %}</td>
+                                <td>{% mask_field user.first_name 'name' 'admin' config %}</td>
+                                <td>
+                                    <form method="post" action="{% url 'management:activity_status_update' activity.id %}" class="d-flex flex-column gap-1">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                                        <div class="d-flex gap-1">
+                                            <select name="status" class="form-select form-select-sm" style="height: 31px;">
+                                                {% for code,label in status_choices %}
+                                                    <option value="{{ code }}" {% if code == 'proxy' %}selected{% endif %}>{{ label }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <button type="submit" name="action" value="save" class="btn btn-sm btn-primary" style="height: 31px; padding: 0 6px; flex-shrink: 0; white-space: nowrap; font-size: 0.85rem;">{% trans '设置状态' %}</button>
+                                        </div>
+                                        <input type="text" name="note" class="form-control form-control-sm" placeholder="{% trans '备注(可选)，如请假原因' %}">
+                                    </form>
+                                </td>
                             </tr>
                             {% empty %}
-                            <tr><td colspan="2" class="text-center text-muted">{% trans '全部已签到' %}</td></tr>
+                            <tr><td colspan="3" class="text-center text-muted">{% trans '全部已签到' %}</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>

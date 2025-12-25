@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load display %}
 {% block title %}{% trans '活动管理' %} - {{ block.super }}{% endblock %}
 {% block content %}
 <h3 class="mb-4">{% trans '活动管理' %}</h3>
@@ -24,16 +25,20 @@
                 <td>{{ activity.name }}</td>
                 <td>{{ activity.start_time }} - {{ activity.end_time }}</td>
                 <td>{% if activity.is_ongoing %}<span class="badge bg-success">{% trans '进行中' %}</span>{% else %}<span class="badge bg-secondary">{% trans '已结束' %}</span>{% endif %}</td>
-                <td>{{ activity.created_by.first_name|default:activity.created_by.student_id }}</td>
+                <td>{% user_display activity.created_by 'admin' config %}</td>
                 <td class="text-end">
                     <a class="btn btn-sm btn-outline-primary" href="{% url 'management:activity_edit' activity.id %}">{% trans '编辑' %}</a>
                     <a class="btn btn-sm btn-outline-secondary" href="{% url 'management:activity_stats' activity.id %}">{% trans '签到统计' %}</a>
                     {% if activity.is_ongoing %}
-                    <form class="d-inline" method="post" action="{% url 'management:activity_close' activity.id %}" onsubmit="return confirm('{% trans '确认提前结束该活动？' %}');">
+                    <form class="d-inline" method="post" action="{% url 'management:activity_close' activity.id %}" data-confirm="{% trans '确认提前结束该活动？' %}" data-confirm-title="{% trans '结束活动' %}">
                         {% csrf_token %}
                         <button class="btn btn-sm btn-outline-danger" type="submit">{% trans '提前结束' %}</button>
                     </form>
                     {% endif %}
+                    <form class="d-inline" method="post" action="{% url 'management:activity_delete' activity.id %}" data-confirm="{% trans '确认删除该活动？删除后将无法恢复。' %}" data-confirm-title="{% trans '删除活动' %}">
+                        {% csrf_token %}
+                        <button class="btn btn-sm btn-outline-danger" type="submit">{% trans '删除' %}</button>
+                    </form>
                 </td>
             </tr>
             {% empty %}

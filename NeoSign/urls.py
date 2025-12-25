@@ -26,6 +26,7 @@ urlpatterns = [
     path('auth/', include('authentication.urls')),
     path('checkin/', include('checkin.urls')),
     path('manage/', include('management.urls')),
+    path('', include('core.urls')),
     path('', RedirectView.as_view(pattern_name='checkin:dashboard', permanent=False)),
 ]
 

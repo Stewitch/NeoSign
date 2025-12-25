@@ -3,9 +3,11 @@ from django.urls import path
 from .views import (
     ActivityCloseView,
     ActivityCreateView,
+    ActivityDeleteView,
     ActivityListView,
     ActivityStatsExportView,
     ActivityStatsView,
+    ActivityStatusUpdateView,
     ActivityUpdateView,
     UserBulkCreateView,
     UserBulkDeleteView,
@@ -33,11 +35,17 @@ urlpatterns = [
     path('activities/create/', ActivityCreateView.as_view(), name='activity_create'),
     path('activities/<int:pk>/edit/', ActivityUpdateView.as_view(), name='activity_edit'),
     path('activities/<int:pk>/close/', ActivityCloseView.as_view(), name='activity_close'),
+    path('activities/<int:pk>/delete/', ActivityDeleteView.as_view(), name='activity_delete'),
     path('activities/<int:activity_id>/stats/', ActivityStatsView.as_view(), name='activity_stats'),
     path(
         'activities/<int:activity_id>/stats/export/<str:kind>/<str:fmt>/',
         ActivityStatsExportView.as_view(),
         name='activity_stats_export',
+    ),
+    path(
+        'activities/<int:activity_id>/stats/status/',
+        ActivityStatusUpdateView.as_view(),
+        name='activity_status_update',
     ),
     path('site-settings/', SiteSettingsView.as_view(), name='site_settings'),
 ]

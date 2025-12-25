@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinValueValidator
 import hashlib
 import os
@@ -119,6 +120,12 @@ class ActivityParticipation(models.Model):
 
 
 class CheckInRecord(models.Model):
+	class CheckInStatus(models.TextChoices):
+		PRESENT = ('present', _('已签到'))
+		PROXY = ('proxy', _('代签'))
+		EXCUSED = ('excused', _('请假'))
+		ABSENT = ('absent', _('未签'))
+
 	activity = models.ForeignKey(
 		Activity, on_delete=models.CASCADE, related_name='checkins', verbose_name='活动'
 	)
@@ -131,6 +138,13 @@ class CheckInRecord(models.Model):
 	# 位置数据（若启用）
 	latitude = models.FloatField(null=True, blank=True, verbose_name='签到纬度')
 	longitude = models.FloatField(null=True, blank=True, verbose_name='签到经度')
+	status = models.CharField(
+		max_length=20,
+		choices=CheckInStatus.choices,
+		default=CheckInStatus.PRESENT,
+		verbose_name='签到状态',
+	)
+	status_note = models.CharField(max_length=200, blank=True, verbose_name='状态备注')
 
 	class Meta:
 		unique_together = ('activity', 'user')
