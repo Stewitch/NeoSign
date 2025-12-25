@@ -98,6 +98,7 @@ class ForcePasswordChangeMiddleware:
         path = request.path or ''
         allow_paths = (
             '/auth/password-change-required/',
+            '/auth/logout/',
             '/static/',
             '/install/',
         )

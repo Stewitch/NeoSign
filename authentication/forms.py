@@ -42,4 +42,4 @@ class RequiredPasswordChangeForm(PasswordChangeForm):
         new_password1 = self.cleaned_data.get('new_password1')
         if old_password and new_password1 and old_password == new_password1:
             raise ValidationError(_('新密码不能与当前密码相同'))
-        return super().clean_new_password1()
+        return new_password1
