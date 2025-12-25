@@ -213,3 +213,6 @@ _php_references/
 deploy/
 .deploy/
 *.pem
+
+# PowerShell
+fastrun.ps1
