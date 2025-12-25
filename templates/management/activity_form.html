@@ -498,33 +498,15 @@ document.querySelector('input[name="location_radius_m"]')?.addEventListener('cha
 if (mapProvider && mapApiKey) {
     // For AMap, set security config before loading SDK
     if (mapProvider === 'amap') {
-        let securityKey = '{{ config.map_security_key|default:"" }}';
+        // 设置代理服务器（安全密钥由 Nginx 在服务器端附加，不暴露给前端）
+        window._AMapSecurityConfig = {
+            serviceHost: window.location.protocol + '//' + window.location.host + '/_AMapService'
+        };
         
-        // 异步加载安全密钥（优先从代理获取）
-        (async () => {
-            if (!securityKey) {
-                try {
-                    const resp = await fetch('{% url "core:amap_security" %}');
-                    if (resp.ok) {
-                        const data = await resp.json();
-                        securityKey = data.securityJsCode;
-                    }
-                } catch (e) {
-                    console.warn('Failed to fetch security key from proxy:', e);
-                }
-            }
-            
-            if (securityKey) {
-                window._AMapSecurityConfig = {
-                    securityJsCode: securityKey
-                };
-            }
-            
-            const script = document.createElement('script');
-            script.src = `https://webapi.amap.com/maps?v=2.0&key=${mapApiKey}`;
-            script.onload = initMap;
-            document.head.appendChild(script);
-        })();
+        const script = document.createElement('script');
+        script.src = `https://webapi.amap.com/maps?v=2.0&key=${mapApiKey}`;
+        script.onload = initMap;
+        document.head.appendChild(script);
     } else {
         const script = document.createElement('script');
         

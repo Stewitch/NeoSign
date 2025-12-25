@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoSign\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-25 15:32+0800\n"
+"POT-Creation-Date: 2025-12-25 17:14+0800\n"
 "Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -247,7 +247,15 @@ msgstr "Marked as not checked in"
 msgid "状态已更新"
 msgstr "Status updated"
 
-#: .\management\views.py:517
+#: .\management\views.py:497
+msgid "Nginx 代理模式下，安全密钥在 Nginx 配置中设置，此字段无效"
+msgstr "In Nginx proxy mode, the security key is set in Nginx configuration, and this field is invalid"
+
+#: .\management\views.py:499
+msgid "不推荐：密钥将暴露在前端。生产环境请使用 Nginx 代理模式"
+msgstr "Not recommended: The key will be exposed on the front-end. Please use Nginx proxy mode for production environment"
+
+#: .\management\views.py:538
 msgid "网站设置已更新"
 msgstr "Site settings updated."
 
@@ -327,15 +335,11 @@ msgid "确认"
 msgstr "Confirm"
 
 #: .\templates\base.html:186
-#, fuzzy
-#| msgid "浅色主题"
-msgid "浅色"
+msgid "浅色主题"
 msgstr "Light Theme"
 
 #: .\templates\base.html:192
-#, fuzzy
-#| msgid "深色主题"
-msgid "深色"
+msgid "深色主题"
 msgstr "Dark Theme"
 
 #: .\templates\base.html:198
@@ -421,51 +425,54 @@ msgstr "Every %(interval)s seconds"
 msgid "当前没有可签到的活动。"
 msgstr "No activities available for check-in."
 
-#: .\templates\checkin\dashboard.html:182
+#: .\templates\checkin\dashboard.html:168
 msgid "无法显示地图（缺少坐标）"
 msgstr "Cannot display map (missing coordinates)"
 
-#: .\templates\checkin\dashboard.html:457
+#: .\templates\checkin\dashboard.html:443
 msgid "定位精度较差，可能影响签到，建议在手机端或室外重试。"
 msgstr ""
 "Low location accuracy may affect check-in; try again on mobile or outdoors."
 
-#: .\templates\checkin\dashboard.html:458
+#: .\templates\checkin\dashboard.html:444
 msgid "已获取当前位置"
 msgstr "Obtained current location"
 
-#: .\templates\checkin\dashboard.html:459
-#: .\templates\checkin\dashboard.html:507
+#: .\templates\checkin\dashboard.html:445
+#: .\templates\checkin\dashboard.html:493
 msgid "无法获取当前位置，请开启定位或在手机端重试。"
 msgstr "Unable to get current location; enable location or try on mobile."
 
-#: .\templates\checkin\dashboard.html:469
+#: .\templates\checkin\dashboard.html:455
 msgid "精度约"
 msgstr "Accuracy about"
 
-#: .\templates\checkin\dashboard.html:515
+#: .\templates\checkin\dashboard.html:501
 msgid "定位精度提示"
 msgstr "Location Accuracy Notice"
 
-#: .\templates\checkin\dashboard.html:516
+#: .\templates\checkin\dashboard.html:502
 msgid "定位精度较差，可能导致签到失败，继续吗？"
 msgstr "Location accuracy is low and may fail check-in. Continue?"
 
-#: .\templates\checkin\dashboard.html:547
+#: .\templates\checkin\dashboard.html:533
 msgid "需要定位权限以完成签到，请在浏览器中允许定位。"
-msgstr "Location permission is required to check in; please allow it in your browser."
+msgstr ""
+"Location permission is required to check in; please allow it in your browser."
 
-#: .\templates\checkin\dashboard.html:562 .\templates\checkin\qr_scan.html:66
+#: .\templates\checkin\dashboard.html:548 .\templates\checkin\qr_scan.html:66
 msgid "签到失败"
 msgstr "Check-in failed"
 
-#: .\templates\checkin\dashboard.html:565 .\templates\checkin\qr_scan.html:69
+#: .\templates\checkin\dashboard.html:551 .\templates\checkin\qr_scan.html:69
 msgid "网络错误，请重试"
 msgstr "Network error, please try again"
 
-#: .\templates\checkin\dashboard.html:574
+#: .\templates\checkin\dashboard.html:560
 msgid "无法申请定位权限，请在系统设置或浏览器中开启。"
-msgstr "Unable to request location permission; enable it in system settings or your browser."
+msgstr ""
+"Unable to request location permission; enable it in system settings or your "
+"browser."
 
 #: .\templates\checkin\qr_presenter.html:3
 msgid "二维码签到展示"
