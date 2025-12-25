@@ -496,8 +496,6 @@ document.querySelector('input[name="location_radius_m"]')?.addEventListener('cha
 
 // Load map SDK and initialize
 if (mapProvider && mapApiKey) {
-    const script = document.createElement('script');
-    
     // For AMap, set security config before loading SDK
     if (mapProvider === 'amap') {
         let securityKey = '{{ config.map_security_key|default:"" }}';
@@ -522,20 +520,24 @@ if (mapProvider && mapApiKey) {
                 };
             }
             
+            const script = document.createElement('script');
             script.src = `https://webapi.amap.com/maps?v=2.0&key=${mapApiKey}`;
             script.onload = initMap;
             document.head.appendChild(script);
         })();
-        return; // 提前退出，由异步函数处理
-    } else if (mapProvider === 'tencent') {
-        script.src = `https://map.qq.com/api/gljs?v=1.exp&key=${mapApiKey}`;
-    } else if (mapProvider === 'google') {
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${mapApiKey}`;
-    }
-    
-    if (script.src) {
-        script.onload = initMap;
-        document.head.appendChild(script);
+    } else {
+        const script = document.createElement('script');
+        
+        if (mapProvider === 'tencent') {
+            script.src = `https://map.qq.com/api/gljs?v=1.exp&key=${mapApiKey}`;
+        } else if (mapProvider === 'google') {
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${mapApiKey}`;
+        }
+        
+        if (script.src) {
+            script.onload = initMap;
+            document.head.appendChild(script);
+        }
     }
 }
 </script>
