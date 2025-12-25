@@ -45,11 +45,14 @@
                                  data-radius="{{ item.activity.location_radius_m|default:50 }}">
                                 {% trans '正在等待获取当前位置…' %}
                             </div>
+                            <div class="mt-2" data-mobile-only style="display:none;">
+                                <button type="button" class="btn btn-outline-primary btn-sm" data-request-geo data-activity-id="{{ item.activity.id }}">{% trans '获取高精度位置' %}</button>
+                            </div>
                         {% endif %}
                         {% if item.has_checked_in %}
                             <div class="text-muted small">{% trans '签到时间' %}：{{ item.checkin_time }}</div>
                             {% if user.is_test %}
-                                <form method="post" action="{% url 'checkin:checkin_api' item.activity.id %}" data-checkin-form {% if item.activity.location_enabled %}data-location-required="true" data-radius="{{ item.activity.location_radius_m|default:50 }}"{% endif %}>
+                                <form method="post" action="{% url 'checkin:reset_api' item.activity.id %}" data-checkin-form>
                                     {% csrf_token %}
                                     <button class="btn btn-warning w-100 mt-2" type="submit">{% trans '重置签到（测试）' %}</button>
                                 </form>
@@ -93,6 +96,8 @@
     const mapContainers = Array.from(document.querySelectorAll('[data-map]'));
     const mapStates = {};
     let locationPromise = null;
+    let latestLocation = null;
+    let geoWatchId = null;
 
     const isMobile = (navigator.maxTouchPoints > 0) || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     document.querySelectorAll('[data-mobile-only]').forEach(el => { el.style.display = isMobile ? '' : 'none'; });
@@ -401,16 +406,51 @@
     }
 
     function requestLocation(){
+        if (latestLocation) return Promise.resolve(latestLocation);
         if (locationPromise) return locationPromise;
         locationPromise = new Promise(resolve => {
             if (!navigator.geolocation) return resolve(null);
             navigator.geolocation.getCurrentPosition(
-                pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy }),
+                pos => {
+                    latestLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy };
+                    resolve(latestLocation);
+                },
                 () => resolve(null),
-                { enableHighAccuracy: true, timeout: 10000 }
+                { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
             );
         });
         return locationPromise;
+    }
+
+    async function requestGeoPermission(){
+        try{
+            if (navigator.permissions && navigator.permissions.query) {
+                const p = await navigator.permissions.query({ name: 'geolocation' });
+                if (p.state === 'granted') return true;
+                // 触发权限弹窗
+                await requestLocation();
+                return true;
+            }
+            await requestLocation();
+            return true;
+        }catch{
+            return false;
+        }
+    }
+
+    function startGeoWatch(){
+        if (!navigator.geolocation || geoWatchId) return;
+        geoWatchId = navigator.geolocation.watchPosition(
+            pos => {
+                latestLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy };
+                updateStatuses(latestLocation);
+            },
+            err => {
+                // 保持静默，用户可手动重试
+                console.warn('geo watch error', err);
+            },
+            { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 }
+        );
     }
 
     function updateStatuses(loc){
@@ -452,9 +492,10 @@
             // 确保地图创建完成后再请求位置
             await new Promise(resolve => setTimeout(resolve, 100));
         }
-        // 然后请求位置
+        // 移动端启动持续定位，提高精度
+        if (isMobile) startGeoWatch();
+        // 初次获取位置，用于快速反馈
         const loc = await requestLocation();
-        // 获取到位置后，更新所有地图和状态信息
         updateStatuses(loc);
     })();
 
@@ -500,6 +541,14 @@
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             try{
+                if (form.dataset.locationRequired === 'true') {
+                    const ok = await requestGeoPermission();
+                    if (!ok) {
+                        alert('{% trans "需要定位权限以完成签到，请在浏览器中允许定位。" %}');
+                        return;
+                    }
+                    startGeoWatch();
+                }
                 const loc = await getLocationIfNeeded(form);
                 if (form.dataset.locationRequired === 'true' && !loc) return;
                 const fd = new FormData();
@@ -515,6 +564,19 @@
             }catch(err){
                 alert('{% trans "网络错误，请重试" %}');
             }
+        });
+    });
+
+    document.querySelectorAll('[data-request-geo]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const ok = await requestGeoPermission();
+            if (!ok) {
+                alert('{% trans "无法申请定位权限，请在系统设置或浏览器中开启。" %}');
+                return;
+            }
+            startGeoWatch();
+            const loc = await requestLocation();
+            updateStatuses(loc);
         });
     });
 

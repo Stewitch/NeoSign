@@ -121,6 +121,20 @@ class CheckInAPIView(LoginRequiredMixin, View):
         return distance <= float(activity.location_radius_m or 0)
 
 
+class CheckInResetAPIView(LoginRequiredMixin, View):
+    def post(self, request, activity_id):
+        activity = get_object_or_404(Activity, id=activity_id, is_active=True)
+
+        # 仅允许测试用户使用重置功能
+        if not request.user.is_test:
+            return JsonResponse({'success': False, 'error': _('仅测试用户可重置签到状态')})
+
+        # 重置为未签到：删除该活动下该用户的签到记录
+        CheckInRecord.objects.filter(activity=activity, user=request.user).delete()
+
+        return JsonResponse({'success': True, 'message': _('已重置为未签到')})
+
+
 class PresenterOnlyMixin(UserPassesTestMixin):
     def test_func(self):
         activity_id = self.kwargs.get('activity_id')

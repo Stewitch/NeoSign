@@ -216,3 +216,6 @@ deploy/
 
 # PowerShell
 fastrun.ps1
+
+# System logo
+logo/
