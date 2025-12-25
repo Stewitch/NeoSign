@@ -489,12 +489,14 @@ class SiteSettingsView(LoginRequiredMixin, AdminOnlyMixin, UpdateView):
                 ],
                 attrs={'class': 'form-select', 'data-map-provider-select': 'true'}
             )
-        # Disable map_security_key if AMAP_PROXY_MODE is 'nginx'
+        # In nginx proxy mode, security key is configured in Nginx, not used by Django
         if 'map_security_key' in form.fields:
             amap_proxy_mode = getattr(settings, 'AMAP_PROXY_MODE', 'frontend')
             if amap_proxy_mode == 'nginx':
                 form.fields['map_security_key'].disabled = True
-                form.fields['map_security_key'].help_text = _('由 Nginx 代理处理，已禁用')
+                form.fields['map_security_key'].help_text = _('Nginx 代理模式下，安全密钥在 Nginx 配置中设置，此字段无效')
+            else:
+                form.fields['map_security_key'].help_text = _('不推荐：密钥将暴露在前端。生产环境请使用 Nginx 代理模式')
             form.fields['map_security_key'].widget.attrs.update({'data-map-security-key': 'true'})
         if 'language_code' in form.fields:
             form.fields['language_code'].widget = forms.Select(

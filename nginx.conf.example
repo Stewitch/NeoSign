@@ -38,17 +38,35 @@ server {
     client_max_body_size 20M;
     
     # ============================================
-    # 高德地图安全密钥代理 (推荐生产环境启用)
+    # 高德地图 API 代理（强烈推荐生产环境启用）
     # ============================================
-    # 直接返回 JSON，不转发到后端 Django
+    # 通过 Nginx 代理所有 AMAP API 请求，并在服务器端自动附加安全密钥
+    # 密钥永远不会暴露给前端，完全安全
     # 记得设置环境变量 AMAP_PROXY_MODE=nginx
-    location = /api/amap-security/ {
-        default_type application/json;
-        add_header Cache-Control "public, max-age=3600";
-        add_header Access-Control-Allow-Origin *;
+    location /_AMapService/ {
+        # 在服务器端自动附加安全密钥（替换 YOUR_AMAP_SECURITY_KEY 为实际密钥）
+        set $args "$args&jscode=YOUR_AMAP_SECURITY_KEY";
         
-        # 替换 YOUR_AMAP_SECURITY_KEY 为实际的高德地图安全密钥
-        return 200 '{"securityJsCode":"YOUR_AMAP_SECURITY_KEY"}';
+        # 转发到高德服务器
+        proxy_pass https://restapi.amap.com/;
+        proxy_ssl_server_name on;
+        proxy_set_header Host restapi.amap.com;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # 缓存配置
+        add_header Cache-Control "public, max-age=300";
+        
+        # CORS 配置
+        add_header Access-Control-Allow-Origin *;
+        add_header Access-Control-Allow-Methods "GET, POST, OPTIONS";
+        add_header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept";
+        
+        # 处理 OPTIONS 预检请求
+        if ($request_method = OPTIONS) {
+            return 204;
+        }
     }
     
     # ============================================

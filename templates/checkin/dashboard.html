@@ -92,7 +92,6 @@
 (function(){
     const mapProvider = '{{ config.map_provider|default:"" }}';
     const mapApiKey = '{{ config.map_api_key|default:"" }}';
-    const mapSecurityKey = '{{ config.map_security_key|default:"" }}';
     const mapContainers = Array.from(document.querySelectorAll('[data-map]'));
     const mapStates = {};
     let locationPromise = null;
@@ -131,24 +130,11 @@
         return new Promise(async resolve => {
             if (!mapProvider || !mapApiKey || mapContainers.length === 0) return resolve(null);
             
-            // 高德地图：优先尝试从后端代理获取安全密钥
+            // 高德地图：设置代理服务器（安全密钥由 Nginx 在服务器端附加，不暴露给前端）
             if (mapProvider === 'amap') {
-                let securityKey = mapSecurityKey;
-                if (!securityKey) {
-                    try {
-                        const resp = await fetch('{% url "core:amap_security" %}');
-                        if (resp.ok) {
-                            const data = await resp.json();
-                            securityKey = data.securityJsCode;
-                        }
-                    } catch (e) {
-                        // Fallback: 如果代理失败，继续使用前端配置的密钥（如果有）
-                        console.warn('Failed to fetch security key from proxy:', e);
-                    }
-                }
-                if (securityKey) {
-                    window._AMapSecurityConfig = { securityJsCode: securityKey };
-                }
+                window._AMapSecurityConfig = {
+                    serviceHost: window.location.protocol + '//' + window.location.host + '/_AMapService'
+                };
             }
             
             const script = document.createElement('script');
