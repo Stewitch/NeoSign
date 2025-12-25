@@ -61,6 +61,7 @@ class SystemConfig(models.Model):
     site_title = models.CharField(max_length=100, default='签到系统', verbose_name='站点标题')
     site_logo = models.ImageField(upload_to='system/logo/', null=True, blank=True, verbose_name='站点Logo')
     technician_contact = models.CharField(max_length=100, blank=True, verbose_name='技术支持联系方式')
+    custom_footer = models.TextField(blank=True, verbose_name='自定义页脚', help_text='支持 HTML 标签')
     map_provider = models.CharField(max_length=20, blank=True, default='', verbose_name='地图 API 提供商')
     map_api_key = models.CharField(max_length=200, blank=True, verbose_name='地图 API Key')
     map_security_key = models.CharField(max_length=200, blank=True, verbose_name='地图安全密钥')

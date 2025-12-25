@@ -64,7 +64,7 @@ msgstr "Password"
 
 #: .\templates\base.html:65
 msgid "技术支持"
-msgstr "Support"
+msgstr "Technical Support"
 
 #: .\templates\base.html:65
 msgid "请联系管理员"
@@ -854,7 +854,7 @@ msgstr "Site Logo"
 
 #: .\templates\management\site_settings.html:21
 msgid "技术支持联系方式"
-msgstr "Support contact"
+msgstr "Technical support contact"
 
 #: .\templates\management\site_settings.html:25
 msgid "地图提供商"
@@ -891,6 +891,14 @@ msgstr "Supported: Simplified Chinese, English (US)."
 #: .\templates\management\site_settings.html:42
 msgid "时区"
 msgstr "Timezone"
+
+#: .\templates\management\site_settings.html:25
+msgid "自定义页脚"
+msgstr "Custom footer"
+
+#: .\templates\management\site_settings.html:27
+msgid "支持 HTML 标签，将显示在技术支持的上方。"
+msgstr "Support HTML tags, which will be displayed above technical support."
 
 #: .\templates\management\site_settings.html:44
 msgid ""
@@ -1085,6 +1093,18 @@ msgstr "Delete User"
 #: .\templates\checkin\dashboard.html:290
 msgid "定位精度提示"
 msgstr "Location Accuracy Notice"
+
+#: .\templates\base.html:35
+msgid "浅色主题"
+msgstr "Light Theme"
+
+#: .\templates\base.html:40
+msgid "深色主题"
+msgstr "Dark Theme"
+
+#: .\templates\base.html:45
+msgid "跟随系统"
+msgstr "System Default"
 
 #~ msgid "导出为 XLSX"
 #~ msgstr "Export as XLSX"

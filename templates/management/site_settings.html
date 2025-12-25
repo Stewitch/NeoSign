@@ -22,6 +22,11 @@
                         {{ form.technician_contact }}
                     </div>
                     <div>
+                        <label class="form-label fw-semibold">{% trans '自定义页脚' %}</label>
+                        {{ form.custom_footer }}
+                        <div class="form-text">{% trans '支持 HTML 标签，将显示在技术支持的上方。' %}</div>
+                    </div>
+                    <div>
                         <label class="form-label fw-semibold">{% trans '地图提供商' %}</label>
                         {{ form.map_provider }}
                         <div class="form-text">{% trans '前端地图 SDK 选择：高德、腾讯或 Google。' %}</div>

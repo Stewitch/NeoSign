@@ -455,7 +455,7 @@ class SiteSettingsView(LoginRequiredMixin, AdminOnlyMixin, UpdateView):
     model = SystemConfig
     template_name = 'management/site_settings.html'
     fields = [
-        'site_title', 'site_logo', 'technician_contact', 'map_provider', 'map_api_key', 'map_security_key',
+        'site_title', 'site_logo', 'technician_contact', 'custom_footer', 'map_provider', 'map_api_key', 'map_security_key',
         'password_length', 'password_require_uppercase', 'password_require_lowercase',
         'password_require_digits', 'password_require_symbols', 'password_symbols',
         'language_code', 'timezone_str',
@@ -468,7 +468,7 @@ class SiteSettingsView(LoginRequiredMixin, AdminOnlyMixin, UpdateView):
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        text_fields = ['site_title', 'technician_contact', 'map_api_key', 'map_security_key', 'password_symbols']
+        text_fields = ['site_title', 'technician_contact', 'custom_footer', 'map_api_key', 'map_security_key', 'password_symbols']
         for name in text_fields:
             if name in form.fields:
                 form.fields[name].widget.attrs.update({'class': 'form-control'})

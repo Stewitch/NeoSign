@@ -98,6 +98,14 @@
     document.querySelectorAll('[data-desktop-only]').forEach(el => { el.style.display = isMobile ? 'none' : ''; });
     document.querySelectorAll('[data-desktop-location-warning]').forEach(el => { el.classList.toggle('d-none', isMobile); });
 
+    // 调试用：暴露到全局以便在控制台查看缩放级别
+    window.mapStates = mapStates;
+    window.getMapZoom = (activityId) => {
+        const state = mapStates[activityId];
+        if (!state) return null;
+        return state.map.getZoom();
+    };
+
     function statusClass(tone){
         if (tone === 'danger') return 'text-danger';
         if (tone === 'success') return 'text-success';
@@ -156,7 +164,7 @@
             const centerMarker = new AMap.Marker({ position: [lng, lat], content: centerDot(), offset: new AMap.Pixel(-8, -8) });
             const centerCircle = new AMap.Circle({ center: [lng, lat], radius: radius, strokeColor: '#3b82f6', strokeWeight: 2, fillColor: '#3b82f6', fillOpacity: 0.25 });
             map.add([centerMarker, centerCircle]);
-            mapStates[activityId] = { map, centerMarker, centerCircle, userMarker: null, accuracyCircle: null };
+            mapStates[activityId] = { map, center: { lat, lng }, centerMarker, centerCircle, userMarker: null, accuracyCircle: null, distanceLine: null, distanceLabel: null };
         } else if (mapProvider === 'tencent') {
             const map = new TMap.Map(container, { zoom: 16, center: new TMap.LatLng(lat, lng) });
             const centerMarker = new TMap.MultiMarker({
@@ -165,12 +173,12 @@
                 geometries: [{ id: 'center', styleId: 'center', position: new TMap.LatLng(lat, lng) }]
             });
             const centerCircle = new TMap.MultiCircle({ map: map, geometries: [{ id: 'range', center: new TMap.LatLng(lat, lng), radius: radius }], styles: { default: new TMap.CircleStyle({ color: 'rgba(59, 130, 246, 0.25)', borderColor: '#3b82f6', borderWidth: 2 }) } });
-            mapStates[activityId] = { map, centerMarker, centerCircle, userMarker: null, accuracyCircle: null };
+            mapStates[activityId] = { map, center: { lat, lng }, centerMarker, centerCircle, userMarker: null, accuracyCircle: null, distanceLine: null, distanceLabel: null };
         } else if (mapProvider === 'google') {
             const map = new google.maps.Map(container, { zoom: 16, center: { lat, lng } });
             const centerMarker = new google.maps.Marker({ position: { lat, lng }, map: map, icon: { path: google.maps.SymbolPath.CIRCLE, scale: 7, fillColor: '#3b82f6', fillOpacity: 1, strokeColor: '#1d4ed8', strokeWeight: 2 } });
             const centerCircle = new google.maps.Circle({ center: { lat, lng }, radius: radius, map: map, strokeColor: '#3b82f6', strokeWeight: 2, fillColor: '#3b82f6', fillOpacity: 0.25 });
-            mapStates[activityId] = { map, centerMarker, centerCircle, userMarker: null, accuracyCircle: null };
+            mapStates[activityId] = { map, center: { lat, lng }, centerMarker, centerCircle, userMarker: null, accuracyCircle: null, distanceLine: null, distanceLabel: null };
         }
     }
 
@@ -178,6 +186,135 @@
         const state = mapStates[activityId];
         if (!state || !loc || !mapProvider) return;
         const accuracy = Math.min(Math.max(loc.accuracy || 0, 0), 800);
+
+        function distanceMeters(a, b){
+            const toRad = x => x * Math.PI / 180;
+            const R = 6371000;
+            const dLat = toRad(b.lat - a.lat);
+            const dLng = toRad(b.lng - a.lng);
+            const lat1 = toRad(a.lat);
+            const lat2 = toRad(b.lat);
+            const h = Math.sin(dLat/2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng/2) ** 2;
+            return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+        }
+
+        function updateDistanceLine(){
+            const center = state.center;
+            if (!center) return;
+            const dist = distanceMeters(center, { lat: loc.lat, lng: loc.lng });
+            const showLine = dist >= 1000; // 超过 1km 才画线并显示距离
+            const mid = { lat: (center.lat + loc.lat) / 2, lng: (center.lng + loc.lng) / 2 };
+            const labelText = dist >= 1000 ? `${(dist/1000).toFixed(2)} km` : `${dist.toFixed(0)} m`;
+
+            // 清理函数
+            function clearLine(){
+                if (mapProvider === 'amap') {
+                    if (state.distanceLine) state.map.remove(state.distanceLine);
+                    if (state.distanceLabel) state.map.remove(state.distanceLabel);
+                } else if (mapProvider === 'tencent') {
+                    if (state.distanceLine) state.distanceLine.setMap(null);
+                    if (state.distanceLabel) state.distanceLabel.setMap(null);
+                } else if (mapProvider === 'google') {
+                    if (state.distanceLine) state.distanceLine.setMap(null);
+                    if (state.distanceLabel) state.distanceLabel.close();
+                }
+                state.distanceLine = null;
+                state.distanceLabel = null;
+            }
+
+            if (!showLine) {
+                clearLine();
+                return;
+            }
+
+            if (mapProvider === 'amap') {
+                const path = [new AMap.LngLat(center.lng, center.lat), new AMap.LngLat(loc.lng, loc.lat)];
+                if (state.distanceLine) {
+                    state.distanceLine.setPath(path);
+                } else {
+                    state.distanceLine = new AMap.Polyline({ path, strokeColor: '#f97316', strokeWeight: 4, strokeOpacity: 0.9 });
+                    state.map.add(state.distanceLine);
+                }
+                const labelContent = `<div style="background:#fff;border:1px solid #f97316;border-radius:12px;padding:2px 8px;font-size:12px;color:#b45309;box-shadow:0 2px 6px rgba(0,0,0,0.2);">${labelText}</div>`;
+                if (state.distanceLabel) {
+                    state.distanceLabel.setPosition(new AMap.LngLat(mid.lng, mid.lat));
+                    state.distanceLabel.setContent(labelContent);
+                } else {
+                    state.distanceLabel = new AMap.Marker({ position: new AMap.LngLat(mid.lng, mid.lat), content: labelContent, offset: new AMap.Pixel(-20, -20) });
+                    state.map.add(state.distanceLabel);
+                }
+            } else if (mapProvider === 'tencent') {
+                const path = [new TMap.LatLng(center.lat, center.lng), new TMap.LatLng(loc.lat, loc.lng)];
+                if (state.distanceLine) {
+                    state.distanceLine.updateGeometries([{ id: 'dist', paths: path }]);
+                } else {
+                    state.distanceLine = new TMap.MultiPolyline({
+                        map: state.map,
+                        styles: { line: new TMap.PolylineStyle({ color: '#f97316', width: 4, borderWidth: 1, borderColor: '#ea580c', lineCap: 'round' }) },
+                        geometries: [{ id: 'dist', styleId: 'line', paths: path }]
+                    });
+                }
+                if (state.distanceLabel) {
+                    state.distanceLabel.setPosition(new TMap.LatLng(mid.lat, mid.lng));
+                    state.distanceLabel.setContent(labelText);
+                } else {
+                    state.distanceLabel = new TMap.InfoWindow({ map: state.map, position: new TMap.LatLng(mid.lat, mid.lng), content: labelText, offset: { x: 0, y: -10 } });
+                }
+            } else if (mapProvider === 'google') {
+                const path = [ { lat: center.lat, lng: center.lng }, { lat: loc.lat, lng: loc.lng } ];
+                if (state.distanceLine) {
+                    state.distanceLine.setPath(path);
+                } else {
+                    state.distanceLine = new google.maps.Polyline({ path, strokeColor: '#f97316', strokeWeight: 4, strokeOpacity: 0.9, map: state.map });
+                }
+                const midPoint = new google.maps.LatLng(mid.lat, mid.lng);
+                if (state.distanceLabel) {
+                    state.distanceLabel.setPosition(midPoint);
+                    state.distanceLabel.setContent(labelText);
+                } else {
+                    state.distanceLabel = new google.maps.InfoWindow({ position: midPoint, content: labelText, pixelOffset: new google.maps.Size(0, -8) });
+                    state.distanceLabel.open({ map: state.map, anchor: null, position: midPoint });
+                }
+            }
+        }
+
+        // 根据用户位置与签到点，自动调整视图以同时展示两者
+        function fitMapToPoints(){
+            const center = state.center;
+            if (!center) return;
+            
+            // 计算两点距离（单位：km）
+            const dist = distanceMeters(center, { lat: loc.lat, lng: loc.lng }) / 1000;
+            
+            // 根据距离动态计算合适的最大缩放级别
+            // 距离 < 1 km: max zoom = 16
+            // 距离 >= 1 km: max zoom = 16 - (dist - 1) * 1.35
+            const maxZoom = dist < 1 ? 16 : Math.max(10, 16 - (dist - 1) * 1.35);
+            
+            if (mapProvider === 'amap') {
+                const bounds = new AMap.Bounds(
+                    new AMap.LngLat(Math.min(center.lng, loc.lng), Math.min(center.lat, loc.lat)),
+                    new AMap.LngLat(Math.max(center.lng, loc.lng), Math.max(center.lat, loc.lat))
+                );
+                state.map.setBounds(bounds);
+                const z = state.map.getZoom();
+                if (z > maxZoom) state.map.setZoom(maxZoom);
+            } else if (mapProvider === 'tencent') {
+                const bounds = new TMap.LatLngBounds();
+                bounds.extend(new TMap.LatLng(center.lat, center.lng));
+                bounds.extend(new TMap.LatLng(loc.lat, loc.lng));
+                state.map.fitBounds(bounds, { padding: [60, 60, 60, 60] });
+                const z = state.map.getZoom();
+                if (z > maxZoom) state.map.setZoom(maxZoom);
+            } else if (mapProvider === 'google') {
+                const bounds = new google.maps.LatLngBounds();
+                bounds.extend({ lat: center.lat, lng: center.lng });
+                bounds.extend({ lat: loc.lat, lng: loc.lng });
+                state.map.fitBounds(bounds, { top: 60, bottom: 60, left: 60, right: 60 });
+                const z = state.map.getZoom();
+                if (z > maxZoom) state.map.setZoom(maxZoom);
+            }
+        }
 
         if (mapProvider === 'amap') {
             const point = [loc.lng, loc.lat];
@@ -236,6 +373,12 @@
                 }
             }
         }
+
+        // 最后调整视口，确保能同时看到签到点和当前位置
+        fitMapToPoints();
+
+        // 远距离时绘制连线并标注距离
+        updateDistanceLine();
     }
 
     function requestLocation(){
