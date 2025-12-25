@@ -166,6 +166,8 @@ SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'True').lower() == '
 SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '0'))
 SECURE_HSTS_INCLUDE_SUBDOMAINS = os.environ.get('SECURE_HSTS_INCLUDE_SUBDOMAINS', 'False').lower() == 'true'
 SECURE_HSTS_PRELOAD = os.environ.get('SECURE_HSTS_PRELOAD', 'False').lower() == 'true'
+# Allow Referer for cross-origin requests (required for AMAP domain verification)
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 
 # Proxy / SSL termination support (optional)
 _proxy_ssl = os.environ.get('SECURE_PROXY_SSL_HEADER', '').strip()
