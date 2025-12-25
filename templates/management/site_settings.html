@@ -31,12 +31,12 @@
                         {{ form.map_provider }}
                         <div class="form-text">{% trans '前端地图 SDK 选择：高德、腾讯或 Google。' %}</div>
                     </div>
-                    <div>
+                    <div data-map-api-key-wrapper>
                         <label class="form-label fw-semibold">{% trans '地图 API Key' %}</label>
                         {{ form.map_api_key }}
                         <div class="form-text">{% trans '用于位置签到前端地图 SDK；可留空禁用。' %}</div>
                     </div>
-                    <div>
+                    <div data-map-security-key-wrapper>
                         <label class="form-label fw-semibold">{% trans '地图安全密钥' %}</label>
                         {{ form.map_security_key }}
                         <div class="form-text">{% trans '高德地图需要填写安全密钥（securityJsCode），其他提供商可留空。' %}</div>
@@ -110,4 +110,33 @@
         </div>
     </div>
 </div>
+{% endblock %}
+{% block extra_js %}
+<script>
+(function(){
+    const mapProviderSelect = document.querySelector('[data-map-provider-select]');
+    const mapApiKeyWrapper = document.querySelector('[data-map-api-key-wrapper]');
+    const mapSecurityKeyWrapper = document.querySelector('[data-map-security-key-wrapper]');
+    
+    function updateMapFieldsVisibility(){
+        if (!mapProviderSelect) return;
+        const provider = mapProviderSelect.value;
+        
+        // Show/hide map API key section based on whether provider is selected
+        if (mapApiKeyWrapper){
+            mapApiKeyWrapper.style.display = provider ? 'block' : 'none';
+        }
+        
+        // Show/hide security key section based on whether provider is amap
+        if (mapSecurityKeyWrapper){
+            mapSecurityKeyWrapper.style.display = (provider === 'amap') ? 'block' : 'none';
+        }
+    }
+    
+    if (mapProviderSelect){
+        mapProviderSelect.addEventListener('change', updateMapFieldsVisibility);
+        updateMapFieldsVisibility();
+    }
+})();
+</script>
 {% endblock %}
