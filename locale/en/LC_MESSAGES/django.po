@@ -154,6 +154,18 @@ msgstr "Unable to open camera, please check permissions"
 msgid "正在请求摄像头权限..."
 msgstr "Requesting camera permission..."
 
+#: .\templates\management\activity_form.html:308
+msgid "获取中..."
+msgstr "Fetching..."
+
+#: .\templates\management\activity_form.html:318
+msgid "无法获取位置：%s"
+msgstr "Cannot get location: %s"
+
+#: .\templates\management\activity_form.html:351
+msgid "浏览器不支持地理位置"
+msgstr "Browser does not support geolocation"
+
 #: .\templates\checkin\dashboard.html:37
 msgid "发起人二维码（实时刷新）"
 msgstr "Organizer QR Code (auto-refresh)"
@@ -326,6 +338,26 @@ msgstr "Selecting all switches to Daily."
 msgid "位置签到"
 msgstr "Location check-in"
 
+#: .\templates\management\activity_form.html:130
+msgid "签到范围(米)"
+msgstr "Check-in radius (m)"
+
+#: .\templates\management\activity_form.html:132
+msgid "设定允许签到的半径范围，签到时会自动判断是否在范围内。"
+msgstr "Set the allowed check-in radius; system auto-checks if within range."
+
+#: .\templates\management\activity_form.html:136
+msgid "中心位置"
+msgstr "Center location"
+
+#: .\templates\management\activity_form.html:139
+msgid "使用当前位置"
+msgstr "Use current location"
+
+#: .\templates\management\activity_form.html:142
+msgid "清除"
+msgstr "Clear"
+
 #: .\templates\management\activity_form.html:131
 msgid "纬度"
 msgstr "Latitude"
@@ -334,13 +366,17 @@ msgstr "Latitude"
 msgid "经度"
 msgstr "Longitude"
 
-#: .\templates\management\activity_form.html:139
-msgid "范围(米)"
-msgstr "Radius (m)"
+#: .\templates\management\activity_form.html:154
+msgid "点击使用当前位置自动获取坐标。若启用地图SDK，下方将显示可视化地图选点界面。"
+msgstr "Click Use current location button to fetch coordinates. If map SDK enabled, visual map will appear below."
 
-#: .\templates\management\activity_form.html:142
-msgid "前端可接入地图 API 获取坐标，后端按半径校验。"
-msgstr "Frontend can use map API for coords; backend checks radius."
+#: .\templates\management\activity_form.html:160
+msgid "点击地图标记中心位置，自动更新经纬度坐标。"
+msgstr "Click map to mark center position and auto-update coordinates."
+
+#: .\templates\management\activity_form.html:163
+msgid "未配置地图SDK。如需可视化地图选点，请在网站设置中配置地图提供商和API Key。"
+msgstr "Map SDK not configured. To enable visual map picker, configure map provider and API Key in Site Settings."
 
 #: .\templates\management\activity_form.html:147
 msgid "二维码签到"
@@ -538,6 +574,22 @@ msgstr "Manage participants, time, status."
 msgid "状态"
 msgstr "Status"
 
+# Activity stats manual status controls
+msgid "备注(可选)"
+msgstr "Note (optional)"
+
+msgid "备注(可选)，如请假原因"
+msgstr "Note (optional), e.g., leave reason"
+
+msgid "设为已签到/请假"
+msgstr "Mark as checked-in/leave"
+
+msgid "状态备注"
+msgstr "Status note"
+
+msgid "签到状态"
+msgstr "Check-in status"
+
 #: .\templates\management\activity_list.html:18
 #: .\templates\management\user_list.html:56
 msgid "操作"
@@ -659,6 +711,59 @@ msgstr "Not checked in"
 msgid "全部已签到"
 msgstr "All checked in"
 
+# Dashboard location warnings
+msgid "桌面端定位可能不准确，建议在手机端完成位置签到。"
+msgstr "Desktop geolocation may be inaccurate; please complete location check-in on mobile."
+
+msgid "定位精度较差，可能影响签到，建议在手机端或室外重试。"
+msgstr "Low location accuracy may affect check-in; try again on mobile or outdoors."
+
+msgid "无法获取当前位置，请开启定位或在手机端重试。"
+msgstr "Unable to get current location; enable location or try on mobile."
+
+msgid "精度约"
+msgstr "Accuracy about"
+
+msgid "定位精度较差，可能导致签到失败，继续吗？"
+msgstr "Location accuracy is low and may fail check-in. Continue?"
+
+# Activity status backend messages
+msgid "缺少用户信息"
+msgstr "Missing user information"
+
+msgid "该用户不在活动参与名单中"
+msgstr "User is not in this activity's participant list"
+
+msgid "已清除此用户的签到记录，可重新测试或签到。"
+msgstr "Cleared this user's check-in record; can test or check in again."
+
+msgid "无效的状态选择"
+msgstr "Invalid status selection"
+
+msgid "状态已更新"
+msgstr "Status updated"
+
+msgid "手动签到"
+msgstr "Manual"
+
+msgid "代签"
+msgstr "Proxy"
+
+msgid "请假"
+msgstr "Excused"
+
+msgid "未签"
+msgstr "Absent"
+
+msgid "测试账号"
+msgstr "Test Account"
+
+msgid "测试"
+msgstr "Test"
+
+msgid "重置签到（测试）"
+msgstr "Reset Check-in (Test)"
+
 #: .\templates\management\activity_stats.html:82
 msgid "未签到分页"
 msgstr "Unchecked pagination"
@@ -743,6 +848,14 @@ msgstr "Map API Key"
 #: .\templates\management\site_settings.html:33
 msgid "用于位置签到前端地图 SDK；可留空禁用。"
 msgstr "For map SDK in location check-in; leave empty to disable."
+
+#: .\templates\management\site_settings.html:36
+msgid "地图安全密钥"
+msgstr "Map Security Key"
+
+#: .\templates\management\site_settings.html:38
+msgid "高德地图需要填写安全密钥（securityJsCode），其他提供商可留空。"
+msgstr "Required for AMap (securityJsCode); optional for other providers."
 
 #: .\templates\management\site_settings.html:37
 msgid "界面语言"

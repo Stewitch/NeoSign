@@ -24,7 +24,13 @@
                 <div class="table-responsive">
                     <table class="table table-sm align-middle">
                         <thead>
-                            <tr><th>{% trans '学号' %}</th><th>{% trans '姓名' %}</th><th>{% trans '时间' %}</th><th>IP</th></tr>
+                            <tr>
+                                <th>{% trans '学号' %}</th>
+                                <th>{% trans '姓名' %}</th>
+                                <th>{% trans '时间' %}</th>
+                                <th>IP</th>
+                                <th>{% trans '状态' %}</th>
+                            </tr>
                         </thead>
                         <tbody>
                             {% for record in checked_page %}
@@ -32,10 +38,26 @@
                                 <td>{{ record.user.student_id }}</td>
                                 <td>{{ record.user.first_name|default:'-' }}</td>
                                 <td>{{ record.checkin_time }}</td>
-                                <td>{{ record.ip_address|default:'-' }}</td>
+                                <td class="small text-muted">{{ record.ip_address|default:'-' }}</td>
+                                <td>
+                                    <form method="post" action="{% url 'management:activity_status_update' activity.id %}" class="d-flex flex-column gap-1">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="user_id" value="{{ record.user.id }}">
+                                        <div class="d-flex gap-1">
+                                            <select name="status" class="form-select form-select-sm">
+                                                {% for code,label in status_choices %}
+                                                    <option value="{{ code }}" {% if record.status == code %}selected{% endif %}>{{ label }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <button type="submit" name="action" value="save" class="btn btn-sm btn-primary">{% trans '保存' %}</button>
+                                            <button type="submit" name="action" value="clear" class="btn btn-sm btn-outline-danger">{% trans '清除' %}</button>
+                                        </div>
+                                        <input type="text" name="note" value="{{ record.status_note }}" class="form-control form-control-sm" placeholder="{% trans '备注(可选)' %}">
+                                    </form>
+                                </td>
                             </tr>
                             {% empty %}
-                            <tr><td colspan="4" class="text-center text-muted">{% trans '暂无签到' %}</td></tr>
+                            <tr><td colspan="5" class="text-center text-muted">{% trans '暂无签到' %}</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -65,16 +87,31 @@
                 <div class="table-responsive">
                     <table class="table table-sm align-middle">
                         <thead>
-                            <tr><th>{% trans '学号' %}</th><th>{% trans '姓名' %}</th></tr>
+                            <tr><th>{% trans '学号' %}</th><th>{% trans '姓名' %}</th><th>{% trans '操作' %}</th></tr>
                         </thead>
                         <tbody>
                             {% for user in unchecked_page %}
                             <tr>
                                 <td>{{ user.student_id }}</td>
                                 <td>{{ user.first_name|default:'-' }}</td>
+                                <td>
+                                    <form method="post" action="{% url 'management:activity_status_update' activity.id %}" class="d-flex flex-column gap-1">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                                        <div class="d-flex gap-1">
+                                            <select name="status" class="form-select form-select-sm">
+                                                {% for code,label in status_choices %}
+                                                    <option value="{{ code }}" {% if code == 'proxy' %}selected{% endif %}>{{ label }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <button type="submit" name="action" value="save" class="btn btn-sm btn-primary">{% trans '设为已签到/请假' %}</button>
+                                        </div>
+                                        <input type="text" name="note" class="form-control form-control-sm" placeholder="{% trans '备注(可选)，如请假原因' %}">
+                                    </form>
+                                </td>
                             </tr>
                             {% empty %}
-                            <tr><td colspan="2" class="text-center text-muted">{% trans '全部已签到' %}</td></tr>
+                            <tr><td colspan="3" class="text-center text-muted">{% trans '全部已签到' %}</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>

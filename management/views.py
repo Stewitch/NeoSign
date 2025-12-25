@@ -163,9 +163,10 @@ class UserBulkRoleUpdateView(LoginRequiredMixin, AdminOnlyMixin, View):
             return redirect('management:user_list')
 
         role_flags = {
-            'normal': {'is_staff': False, 'is_admin': False, 'is_superuser': False},
-            'staff': {'is_staff': True, 'is_admin': False, 'is_superuser': False},
-            'admin': {'is_staff': True, 'is_admin': True, 'is_superuser': False},
+            'normal': {'is_staff': False, 'is_admin': False, 'is_superuser': False, 'is_test': False},
+            'staff': {'is_staff': True, 'is_admin': False, 'is_superuser': False, 'is_test': False},
+            'admin': {'is_staff': True, 'is_admin': True, 'is_superuser': False, 'is_test': False},
+            'test': {'is_staff': False, 'is_admin': False, 'is_superuser': False, 'is_test': True},
         }.get(role)
 
         if role_flags is None:
@@ -342,9 +343,11 @@ class ActivityStatsView(LoginRequiredMixin, AdminOnlyMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         activity = get_object_or_404(Activity, id=self.kwargs['activity_id'])
-        checked_qs = CheckInRecord.objects.filter(activity=activity).select_related('user')
+        
+        # Exclude test users from stats
+        checked_qs = CheckInRecord.objects.filter(activity=activity).select_related('user').exclude(user__is_test=True)
         checked_users = set(checked_qs.values_list('user_id', flat=True))
-        participants_qs = activity.participants.all()
+        participants_qs = activity.participants.exclude(is_test=True)
         unchecked_qs = participants_qs.exclude(id__in=checked_users)
 
         checked_paginator = Paginator(checked_qs, self.paginate_by)
@@ -355,7 +358,48 @@ class ActivityStatsView(LoginRequiredMixin, AdminOnlyMixin, TemplateView):
         context['checked_count'] = checked_qs.count()
         context['total_participants'] = participants_qs.count()
         context['unchecked_count'] = context['total_participants'] - context['checked_count']
+        context['status_choices'] = CheckInRecord.CheckInStatus.choices
         return context
+
+
+class ActivityStatusUpdateView(LoginRequiredMixin, AdminOnlyMixin, View):
+    def post(self, request, activity_id):
+        activity = get_object_or_404(Activity, id=activity_id)
+        user_id = request.POST.get('user_id')
+        action = request.POST.get('action', 'save')
+        status = request.POST.get('status', CheckInRecord.CheckInStatus.PROXY)
+        note = (request.POST.get('note') or '').strip()[:200]
+
+        if not user_id:
+            messages.warning(request, _('缺少用户信息'))
+            return redirect('management:activity_stats', activity_id=activity_id)
+
+        user = get_object_or_404(User, id=user_id)
+        if not activity.participants.filter(id=user_id).exists():
+            messages.warning(request, _('该用户不在活动参与名单中'))
+            return redirect('management:activity_stats', activity_id=activity_id)
+
+        if action == 'clear':
+            CheckInRecord.objects.filter(activity=activity, user=user).delete()
+            messages.success(request, _('已清除此用户的签到记录，可重新测试或签到。'))
+            return redirect('management:activity_stats', activity_id=activity_id)
+
+        if status not in dict(CheckInRecord.CheckInStatus.choices):
+            messages.warning(request, _('无效的状态选择'))
+            return redirect('management:activity_stats', activity_id=activity_id)
+
+        record, created = CheckInRecord.objects.get_or_create(
+            activity=activity,
+            user=user,
+            defaults={'status': status, 'status_note': note},
+        )
+        record.status = status
+        record.status_note = note
+        record.checkin_time = timezone.now()
+        record.save(update_fields=['status', 'status_note', 'checkin_time'])
+
+        messages.success(request, _('状态已更新'))
+        return redirect('management:activity_stats', activity_id=activity_id)
 
 
 class ActivityStatsExportView(LoginRequiredMixin, AdminOnlyMixin, View):
@@ -363,9 +407,10 @@ class ActivityStatsExportView(LoginRequiredMixin, AdminOnlyMixin, View):
         activity = get_object_or_404(Activity, id=activity_id)
         headers = ['学号', '姓名', '签到时间', 'IP地址']
 
-        checked_qs = CheckInRecord.objects.filter(activity=activity).select_related('user')
+        # Exclude test users from export
+        checked_qs = CheckInRecord.objects.filter(activity=activity).select_related('user').exclude(user__is_test=True)
         checked_ids = set(checked_qs.values_list('user_id', flat=True))
-        participants_qs = activity.participants.all()
+        participants_qs = activity.participants.exclude(is_test=True)
 
         if kind == 'checked':
             rows = [
@@ -393,7 +438,7 @@ class SiteSettingsView(LoginRequiredMixin, AdminOnlyMixin, UpdateView):
     model = SystemConfig
     template_name = 'management/site_settings.html'
     fields = [
-        'site_title', 'site_logo', 'technician_contact', 'map_provider', 'map_api_key',
+        'site_title', 'site_logo', 'technician_contact', 'map_provider', 'map_api_key', 'map_security_key',
         'password_length', 'password_require_uppercase', 'password_require_lowercase',
         'password_require_digits', 'password_require_symbols', 'password_symbols',
         'language_code', 'timezone_str',
@@ -406,7 +451,7 @@ class SiteSettingsView(LoginRequiredMixin, AdminOnlyMixin, UpdateView):
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        text_fields = ['site_title', 'technician_contact', 'map_api_key', 'password_symbols']
+        text_fields = ['site_title', 'technician_contact', 'map_api_key', 'map_security_key', 'password_symbols']
         for name in text_fields:
             if name in form.fields:
                 form.fields[name].widget.attrs.update({'class': 'form-control'})

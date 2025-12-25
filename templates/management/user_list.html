@@ -35,6 +35,7 @@
                             <option value="normal">{% trans '普通用户' %}</option>
                             <option value="staff">{% trans '后台管理员' %}</option>
                             <option value="admin">{% trans '系统管理员' %}</option>
+                            <option value="test">{% trans '测试账号' %}</option>
                         </select>
                     </div>
                     <button class="btn btn-outline-secondary" type="submit" form="user-action-form" formaction="{% url 'management:user_bulk_role' %}">{% trans '设置' context 'action' %}</button>
@@ -70,6 +71,8 @@
                                             <span class="badge bg-primary">{% trans '系统管理员' %}</span>
                                         {% elif user.is_staff %}
                                             <span class="badge bg-info text-dark">{% trans '后台管理员' %}</span>
+                                        {% elif user.is_test %}
+                                            <span class="badge bg-warning text-dark">{% trans '测试' %}</span>
                                         {% else %}
                                             <span class="badge bg-secondary">{% trans '普通' context 'role' %}</span>
                                         {% endif %}

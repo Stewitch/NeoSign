@@ -6,6 +6,7 @@ from .views import (
     ActivityListView,
     ActivityStatsExportView,
     ActivityStatsView,
+    ActivityStatusUpdateView,
     ActivityUpdateView,
     UserBulkCreateView,
     UserBulkDeleteView,
@@ -38,6 +39,11 @@ urlpatterns = [
         'activities/<int:activity_id>/stats/export/<str:kind>/<str:fmt>/',
         ActivityStatsExportView.as_view(),
         name='activity_stats_export',
+    ),
+    path(
+        'activities/<int:activity_id>/stats/status/',
+        ActivityStatusUpdateView.as_view(),
+        name='activity_status_update',
     ),
     path('site-settings/', SiteSettingsView.as_view(), name='site_settings'),
 ]

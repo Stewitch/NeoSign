@@ -209,4 +209,7 @@ __marimo__/
 # PHP Ref
 _php_references/
 
+# Deployment artifacts
 deploy/
+.deploy/
+*.pem

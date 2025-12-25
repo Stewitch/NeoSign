@@ -31,6 +31,11 @@
                         {{ form.map_api_key }}
                         <div class="form-text">{% trans '用于位置签到前端地图 SDK；可留空禁用。' %}</div>
                     </div>
+                    <div>
+                        <label class="form-label fw-semibold">{% trans '地图安全密钥' %}</label>
+                        {{ form.map_security_key }}
+                        <div class="form-text">{% trans '高德地图需要填写安全密钥（securityJsCode），其他提供商可留空。' %}</div>
+                    </div>
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">{% trans '界面语言' %}</label>

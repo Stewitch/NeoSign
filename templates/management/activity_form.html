@@ -126,21 +126,46 @@
                     <hr/>
                     <div id="block-location" class="d-none">
                         <label class="form-label fw-semibold">{% trans '位置签到' %}</label>
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <label class="form-label">{% trans '纬度' %}</label>
-                                <input type="number" step="0.000001" name="location_lat" class="form-control" value="{{ form.instance.location_lat }}">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">{% trans '经度' %}</label>
-                                <input type="number" step="0.000001" name="location_lng" class="form-control" value="{{ form.instance.location_lng }}">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">{% trans '范围(米)' %}</label>
-                                <input type="number" min="0" name="location_radius_m" class="form-control" value="{{ form.instance.location_radius_m }}">
-                            </div>
-                            <div class="form-text">{% trans '前端可接入地图 API 获取坐标，后端按半径校验。' %}</div>
+                        <div class="mb-3">
+                            <label class="form-label">{% trans '签到范围(米)' %}</label>
+                            <input type="number" min="0" name="location_radius_m" class="form-control" value="{{ form.instance.location_radius_m|default:50 }}" required>
+                            <div class="form-text">{% trans '设定允许签到的半径范围，签到时会自动判断是否在范围内。' %}</div>
                         </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">{% trans '中心位置' %}</label>
+                            <div class="d-flex gap-2 mb-2">
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="use-current-location">
+                                    <i class="bi bi-geo-alt-fill"></i> {% trans '使用当前位置' %}
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="clear-location">
+                                    {% trans '清除' %}
+                                </button>
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <label class="form-label small text-muted">{% trans '纬度' %}</label>
+                                    <input type="number" step="0.000001" name="location_lat" id="location_lat" class="form-control form-control-sm" value="{{ form.instance.location_lat }}" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small text-muted">{% trans '经度' %}</label>
+                                    <input type="number" step="0.000001" name="location_lng" id="location_lng" class="form-control form-control-sm" value="{{ form.instance.location_lng }}" readonly>
+                                </div>
+                            </div>
+                            <div class="form-text">{% trans '点击使用当前位置自动获取坐标。若启用地图SDK，下方将显示可视化地图选点界面。' %}</div>
+                        </div>
+
+                        <!-- 地图可视化区域：仅当配置了 map_provider 和 map_api_key 时显示 -->
+                        {% if config.map_provider and config.map_api_key %}
+                        <div id="location-map-container" class="border rounded" style="height: 300px; position: relative;">
+                            <div id="location-map" style="width: 100%; height: 100%;"></div>
+                        </div>
+                        <div class="form-text">{% trans '点击地图标记中心位置，自动更新经纬度坐标。' %}</div>
+                        {% else %}
+                        <div class="alert alert-info small">
+                            {% trans '未配置地图SDK。如需可视化地图选点，请在网站设置中配置地图提供商和API Key。' %}
+                        </div>
+                        {% endif %}
                     </div>
 
                     <div id="block-qr" class="d-none">
@@ -257,6 +282,192 @@ if (allBox) {
     allBox.addEventListener('change', (e) => {
         document.querySelectorAll('input[name="participants"]').forEach(cb => cb.checked = e.target.checked);
     });
+}
+
+// Location handling
+const useCurrentBtn = document.getElementById('use-current-location');
+const clearBtn = document.getElementById('clear-location');
+const latInput = document.getElementById('location_lat');
+const lngInput = document.getElementById('location_lng');
+const mapProvider = '{{ config.map_provider|default:"" }}';
+const mapApiKey = '{{ config.map_api_key|default:"" }}';
+let map, marker, circle;
+
+if (useCurrentBtn) {
+    useCurrentBtn.addEventListener('click', () => {
+        if (!navigator.geolocation) {
+            alert("{% trans '浏览器不支持地理位置' %}");
+            return;
+        }
+        useCurrentBtn.disabled = true;
+        useCurrentBtn.textContent = "{% trans '获取中...' %}";
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+                latInput.value = lat.toFixed(6);
+                lngInput.value = lng.toFixed(6);
+                useCurrentBtn.disabled = false;
+                useCurrentBtn.innerHTML = '<i class="bi bi-geo-alt-fill"></i> {% trans "使用当前位置" %}';
+                
+                // Update map if SDK available
+                if (mapProvider && mapApiKey && map) {
+                    updateMapCenter(lat, lng);
+                }
+            },
+            err => {
+                alert("{% trans '无法获取位置：' %}" + err.message);
+                useCurrentBtn.disabled = false;
+                useCurrentBtn.innerHTML = '<i class="bi bi-geo-alt-fill"></i> {% trans "使用当前位置" %}';
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+    });
+}
+
+if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+        latInput.value = '';
+        lngInput.value = '';
+        if (marker) {
+            if (mapProvider === 'amap') marker.setMap(null);
+            else if (mapProvider === 'tencent') marker.setMap(null);
+            else if (mapProvider === 'google') marker.setMap(null);
+        }
+        if (circle) {
+            if (mapProvider === 'amap') circle.setMap(null);
+            else if (mapProvider === 'tencent') circle.setMap(null);
+            else if (mapProvider === 'google') circle.setMap(null);
+        }
+    });
+}
+
+// Initialize map if SDK configured
+function initMap() {
+    const container = document.getElementById('location-map');
+    if (!container || !mapProvider || !mapApiKey) return;
+    
+    const radius = parseInt(document.querySelector('input[name="location_radius_m"]')?.value || 50);
+    const lat = parseFloat(latInput.value) || 39.9042;
+    const lng = parseFloat(lngInput.value) || 116.4074;
+    
+    if (mapProvider === 'amap') {
+        initAmapMap(lat, lng, radius);
+    } else if (mapProvider === 'tencent') {
+        initTencentMap(lat, lng, radius);
+    } else if (mapProvider === 'google') {
+        initGoogleMap(lat, lng, radius);
+    }
+}
+
+function updateMapCenter(lat, lng) {
+    if (!map) return;
+    const radius = parseInt(document.querySelector('input[name="location_radius_m"]')?.value || 50);
+    
+    if (mapProvider === 'amap') {
+        map.setCenter([lng, lat]);
+        if (marker) marker.setPosition([lng, lat]);
+        else marker = new AMap.Marker({ position: [lng, lat], map: map });
+        if (circle) {
+            circle.setCenter([lng, lat]);
+            circle.setRadius(radius);
+        } else {
+            circle = new AMap.Circle({ center: [lng, lat], radius: radius, map: map, strokeColor: '#3b82f6', strokeWeight: 2, fillColor: '#3b82f6', fillOpacity: 0.25 });
+        }
+    } else if (mapProvider === 'tencent') {
+        map.setCenter(new TMap.LatLng(lat, lng));
+        if (marker) marker.setPosition(new TMap.LatLng(lat, lng));
+        else marker = new TMap.MultiMarker({ map: map, geometries: [{ position: new TMap.LatLng(lat, lng) }] });
+        if (circle) {
+            circle.updateGeometries([{ center: new TMap.LatLng(lat, lng), radius: radius }]);
+        } else {
+            circle = new TMap.MultiCircle({ map: map, geometries: [{ center: new TMap.LatLng(lat, lng), radius: radius }], styles: { default: new TMap.CircleStyle({ color: 'rgba(59, 130, 246, 0.25)', borderColor: '#3b82f6', borderWidth: 2 }) } });
+        }
+    } else if (mapProvider === 'google') {
+        map.setCenter({ lat, lng });
+        if (marker) marker.setPosition({ lat, lng });
+        else { marker = new google.maps.Marker({ position: { lat, lng }, map: map }); }
+        if (circle) {
+            circle.setCenter({ lat, lng });
+            circle.setRadius(radius);
+        } else {
+            circle = new google.maps.Circle({ center: { lat, lng }, radius: radius, map: map, strokeColor: '#3b82f6', strokeWeight: 2, fillColor: '#3b82f6', fillOpacity: 0.25 });
+        }
+    }
+}
+
+function initAmapMap(lat, lng, radius) {
+    if (typeof AMap === 'undefined') return;
+    map = new AMap.Map('location-map', { zoom: 16, center: [lng, lat] });
+    marker = new AMap.Marker({ position: [lng, lat], map: map });
+    circle = new AMap.Circle({ center: [lng, lat], radius: radius, map: map, strokeColor: '#3b82f6', strokeWeight: 2, fillColor: '#3b82f6', fillOpacity: 0.25 });
+    map.on('click', (e) => {
+        latInput.value = e.lnglat.lat.toFixed(6);
+        lngInput.value = e.lnglat.lng.toFixed(6);
+        marker.setPosition([e.lnglat.lng, e.lnglat.lat]);
+        circle.setCenter([e.lnglat.lng, e.lnglat.lat]);
+    });
+}
+
+function initTencentMap(lat, lng, radius) {
+    if (typeof TMap === 'undefined') return;
+    map = new TMap.Map('location-map', { zoom: 16, center: new TMap.LatLng(lat, lng) });
+    marker = new TMap.MultiMarker({ map: map, geometries: [{ position: new TMap.LatLng(lat, lng) }] });
+    circle = new TMap.MultiCircle({ map: map, geometries: [{ center: new TMap.LatLng(lat, lng), radius: radius }], styles: { default: new TMap.CircleStyle({ color: 'rgba(59, 130, 246, 0.25)', borderColor: '#3b82f6', borderWidth: 2 }) } });
+    map.on('click', (e) => {
+        latInput.value = e.latLng.lat.toFixed(6);
+        lngInput.value = e.latLng.lng.toFixed(6);
+        marker.updateGeometries([{ position: e.latLng }]);
+        circle.updateGeometries([{ center: e.latLng, radius: radius }]);
+    });
+}
+
+function initGoogleMap(lat, lng, radius) {
+    if (typeof google === 'undefined') return;
+    map = new google.maps.Map(document.getElementById('location-map'), { zoom: 16, center: { lat, lng } });
+    marker = new google.maps.Marker({ position: { lat, lng }, map: map });
+    circle = new google.maps.Circle({ center: { lat, lng }, radius: radius, map: map, strokeColor: '#3b82f6', strokeWeight: 2, fillColor: '#3b82f6', fillOpacity: 0.25 });
+    map.addListener('click', (e) => {
+        latInput.value = e.latLng.lat().toFixed(6);
+        lngInput.value = e.latLng.lng().toFixed(6);
+        marker.setPosition(e.latLng);
+        circle.setCenter(e.latLng);
+    });
+}
+
+// Update circle radius when input changes
+document.querySelector('input[name="location_radius_m"]')?.addEventListener('change', (e) => {
+    const radius = parseInt(e.target.value) || 50;
+    if (circle) {
+        if (mapProvider === 'amap') circle.setRadius(radius);
+        else if (mapProvider === 'tencent') circle.updateGeometries([{ center: circle.getGeometries()[0].center, radius: radius }]);
+        else if (mapProvider === 'google') circle.setRadius(radius);
+    }
+});
+
+// Load map SDK and initialize
+if (mapProvider && mapApiKey) {
+    const script = document.createElement('script');
+    
+    // For AMap, set security config before loading SDK
+    if (mapProvider === 'amap') {
+        const securityKey = '{{ config.map_security_key|default:"" }}';
+        if (securityKey) {
+            window._AMapSecurityConfig = {
+                securityJsCode: securityKey
+            };
+        }
+        script.src = `https://webapi.amap.com/maps?v=2.0&key=${mapApiKey}`;
+    } else if (mapProvider === 'tencent') {
+        script.src = `https://map.qq.com/api/gljs?v=1.exp&key=${mapApiKey}`;
+    } else if (mapProvider === 'google') {
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${mapApiKey}`;
+    }
+    
+    if (script.src) {
+        script.onload = initMap;
+        document.head.appendChild(script);
+    }
 }
 </script>
 {% endblock %}
