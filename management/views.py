@@ -468,6 +468,7 @@ class SiteSettingsView(LoginRequiredMixin, AdminOnlyMixin, UpdateView):
         return obj
 
     def get_form(self, form_class=None):
+        from django.conf import settings
         form = super().get_form(form_class)
         text_fields = ['site_title', 'technician_contact', 'custom_footer', 'map_api_key', 'map_security_key', 'password_symbols']
         for name in text_fields:
@@ -477,7 +478,7 @@ class SiteSettingsView(LoginRequiredMixin, AdminOnlyMixin, UpdateView):
             form.fields['password_length'].widget.attrs.update({'class': 'form-control', 'min': 6})
         if 'site_logo' in form.fields:
             form.fields['site_logo'].widget.attrs.update({'class': 'form-control'})
-        # Dropdown choices for language/timezone
+        # Dropdown choices for map provider
         if 'map_provider' in form.fields:
             form.fields['map_provider'].widget = forms.Select(
                 choices=[
@@ -486,8 +487,15 @@ class SiteSettingsView(LoginRequiredMixin, AdminOnlyMixin, UpdateView):
                     ('tencent', '腾讯 (QQ 地图)'),
                     ('google', 'Google Maps'),
                 ],
-                attrs={'class': 'form-select'}
+                attrs={'class': 'form-select', 'data-map-provider-select': 'true'}
             )
+        # Disable map_security_key if AMAP_PROXY_MODE is 'nginx'
+        if 'map_security_key' in form.fields:
+            amap_proxy_mode = getattr(settings, 'AMAP_PROXY_MODE', 'frontend')
+            if amap_proxy_mode == 'nginx':
+                form.fields['map_security_key'].disabled = True
+                form.fields['map_security_key'].help_text = _('由 Nginx 代理处理，已禁用')
+            form.fields['map_security_key'].widget.attrs.update({'data-map-security-key': 'true'})
         if 'language_code' in form.fields:
             form.fields['language_code'].widget = forms.Select(
                 choices=[
@@ -512,6 +520,17 @@ class SiteSettingsView(LoginRequiredMixin, AdminOnlyMixin, UpdateView):
         if 'username_masking_mode' in form.fields:
             form.fields['username_masking_mode'].widget.attrs.update({'class': 'form-select'})
         return form
+
+    def post(self, request, *args, **kwargs):
+        """Override to handle file cleanup (logo deletion)."""
+        obj = self.get_object()
+        # Check if user is clearing the logo
+        if 'site_logo-clear' in request.POST and request.POST.get('site_logo-clear'):
+            # Delete the old logo file if it exists
+            if obj.site_logo:
+                if obj.site_logo.storage.exists(obj.site_logo.name):
+                    obj.site_logo.delete(save=False)
+        return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
         messages.success(self.request, _('网站设置已更新'))

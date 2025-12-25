@@ -38,7 +38,9 @@ class FaviconView(View):
                 buffer.seek(0)
                 
                 response = HttpResponse(buffer.getvalue(), content_type='image/x-icon')
-                response['Cache-Control'] = 'public, max-age=3600'  # 缓存1小时
+                # 设置缓存控制头：验证器驱动的缓存，确保更新时立即刷新
+                response['Cache-Control'] = 'public, max-age=86400, must-revalidate'
+                response['ETag'] = f'"{config.site_logo.name}:{hash(config.site_logo.name)}"'
                 return response
                 
         except Exception as e:
