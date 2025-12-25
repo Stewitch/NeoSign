@@ -388,6 +388,12 @@ class ActivityStatusUpdateView(LoginRequiredMixin, AdminOnlyMixin, View):
             messages.warning(request, _('无效的状态选择'))
             return redirect('management:activity_stats', activity_id=activity_id)
 
+        # If status is ABSENT, delete the record (same as clear)
+        if status == CheckInRecord.CheckInStatus.ABSENT:
+            CheckInRecord.objects.filter(activity=activity, user=user).delete()
+            messages.success(request, _('已设为未签到状态'))
+            return redirect('management:activity_stats', activity_id=activity_id)
+
         record, created = CheckInRecord.objects.get_or_create(
             activity=activity,
             user=user,
@@ -405,7 +411,7 @@ class ActivityStatusUpdateView(LoginRequiredMixin, AdminOnlyMixin, View):
 class ActivityStatsExportView(LoginRequiredMixin, AdminOnlyMixin, View):
     def get(self, request, activity_id, kind, fmt):
         activity = get_object_or_404(Activity, id=activity_id)
-        headers = ['学号', '姓名', '签到时间', 'IP地址']
+        headers = ['学号', '姓名', '签到时间', 'IP地址', '状态']
 
         # Exclude test users from export
         checked_qs = CheckInRecord.objects.filter(activity=activity).select_related('user').exclude(user__is_test=True)
@@ -419,19 +425,21 @@ class ActivityStatsExportView(LoginRequiredMixin, AdminOnlyMixin, View):
                     record.user.first_name,
                     record.checkin_time.strftime('%Y-%m-%d %H:%M:%S'),
                     record.ip_address,
+                    record.get_status_display(),
                 ]
                 for record in checked_qs
             ]
         else:
             rows = [
-                [user.student_id, user.first_name, '', '']
+                [user.student_id, user.first_name, '', '', '']
                 for user in participants_qs.exclude(id__in=checked_ids)
             ]
 
         filename = f'activity_{activity_id}_{kind}_export'
         if fmt == 'csv':
             return export_table_to_csv(headers, rows, filename)
-        return export_table_to_xlsx(headers, rows, filename)
+        # Set column widths: student_id(12), name(12), time(20), ip(18), status(10)
+        return export_table_to_xlsx(headers, rows, filename, column_widths=[12, 12, 20, 18, 10])
 
 
 class SiteSettingsView(LoginRequiredMixin, AdminOnlyMixin, UpdateView):

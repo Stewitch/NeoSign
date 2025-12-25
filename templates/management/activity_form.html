@@ -366,13 +366,18 @@ function updateMapCenter(lat, lng) {
     
     if (mapProvider === 'amap') {
         map.setCenter([lng, lat]);
-        if (marker) marker.setPosition([lng, lat]);
-        else marker = new AMap.Marker({ position: [lng, lat], map: map });
+        if (marker) {
+            marker.setPosition([lng, lat]);
+        } else {
+            marker = new AMap.Marker({ position: [lng, lat] });
+            map.add(marker);
+        }
         if (circle) {
             circle.setCenter([lng, lat]);
             circle.setRadius(radius);
         } else {
-            circle = new AMap.Circle({ center: [lng, lat], radius: radius, map: map, strokeColor: '#3b82f6', strokeWeight: 2, fillColor: '#3b82f6', fillOpacity: 0.25 });
+            circle = new AMap.Circle({ center: [lng, lat], radius: radius, strokeColor: '#3b82f6', strokeWeight: 2, fillColor: '#3b82f6', fillOpacity: 0.25 });
+            map.add(circle);
         }
     } else if (mapProvider === 'tencent') {
         map.setCenter(new TMap.LatLng(lat, lng));
@@ -399,39 +404,82 @@ function updateMapCenter(lat, lng) {
 function initAmapMap(lat, lng, radius) {
     if (typeof AMap === 'undefined') return;
     map = new AMap.Map('location-map', { zoom: 16, center: [lng, lat] });
-    marker = new AMap.Marker({ position: [lng, lat], map: map });
-    circle = new AMap.Circle({ center: [lng, lat], radius: radius, map: map, strokeColor: '#3b82f6', strokeWeight: 2, fillColor: '#3b82f6', fillOpacity: 0.25 });
+    // Only create marker and circle if we have real coordinates
+    if (latInput.value && lngInput.value) {
+        marker = new AMap.Marker({ position: [lng, lat] });
+        circle = new AMap.Circle({ center: [lng, lat], radius: radius, strokeColor: '#3b82f6', strokeWeight: 2, fillColor: '#3b82f6', fillOpacity: 0.25 });
+        map.add([marker, circle]);
+    }
     map.on('click', (e) => {
-        latInput.value = e.lnglat.lat.toFixed(6);
-        lngInput.value = e.lnglat.lng.toFixed(6);
-        marker.setPosition([e.lnglat.lng, e.lnglat.lat]);
-        circle.setCenter([e.lnglat.lng, e.lnglat.lat]);
+        const newLat = e.lnglat.lat;
+        const newLng = e.lnglat.lng;
+        const currentRadius = parseInt(document.querySelector('input[name="location_radius_m"]')?.value || '50');
+        latInput.value = newLat.toFixed(6);
+        lngInput.value = newLng.toFixed(6);
+        if (!marker) {
+            marker = new AMap.Marker({ position: [newLng, newLat] });
+            map.add(marker);
+        } else {
+            marker.setPosition([newLng, newLat]);
+        }
+        if (!circle) {
+            circle = new AMap.Circle({ center: [newLng, newLat], radius: currentRadius, strokeColor: '#3b82f6', strokeWeight: 2, fillColor: '#3b82f6', fillOpacity: 0.25 });
+            map.add(circle);
+        } else {
+            circle.setCenter([newLng, newLat]);
+            circle.setRadius(currentRadius);
+        }
     });
 }
 
 function initTencentMap(lat, lng, radius) {
     if (typeof TMap === 'undefined') return;
     map = new TMap.Map('location-map', { zoom: 16, center: new TMap.LatLng(lat, lng) });
-    marker = new TMap.MultiMarker({ map: map, geometries: [{ position: new TMap.LatLng(lat, lng) }] });
-    circle = new TMap.MultiCircle({ map: map, geometries: [{ center: new TMap.LatLng(lat, lng), radius: radius }], styles: { default: new TMap.CircleStyle({ color: 'rgba(59, 130, 246, 0.25)', borderColor: '#3b82f6', borderWidth: 2 }) } });
+    // Only create marker and circle if we have real coordinates
+    if (latInput.value && lngInput.value) {
+        marker = new TMap.MultiMarker({ map: map, geometries: [{ position: new TMap.LatLng(lat, lng) }] });
+        circle = new TMap.MultiCircle({ map: map, geometries: [{ center: new TMap.LatLng(lat, lng), radius: radius }], styles: { default: new TMap.CircleStyle({ color: 'rgba(59, 130, 246, 0.25)', borderColor: '#3b82f6', borderWidth: 2 }) } });
+    }
     map.on('click', (e) => {
+        const currentRadius = parseInt(document.querySelector('input[name="location_radius_m"]')?.value || '50');
         latInput.value = e.latLng.lat.toFixed(6);
         lngInput.value = e.latLng.lng.toFixed(6);
-        marker.updateGeometries([{ position: e.latLng }]);
-        circle.updateGeometries([{ center: e.latLng, radius: radius }]);
+        if (!marker) {
+            marker = new TMap.MultiMarker({ map: map, geometries: [{ position: e.latLng }] });
+        } else {
+            marker.updateGeometries([{ position: e.latLng }]);
+        }
+        if (!circle) {
+            circle = new TMap.MultiCircle({ map: map, geometries: [{ center: e.latLng, radius: currentRadius }], styles: { default: new TMap.CircleStyle({ color: 'rgba(59, 130, 246, 0.25)', borderColor: '#3b82f6', borderWidth: 2 }) } });
+        } else {
+            circle.updateGeometries([{ center: e.latLng, radius: currentRadius }]);
+        }
     });
 }
 
 function initGoogleMap(lat, lng, radius) {
     if (typeof google === 'undefined') return;
     map = new google.maps.Map(document.getElementById('location-map'), { zoom: 16, center: { lat, lng } });
-    marker = new google.maps.Marker({ position: { lat, lng }, map: map });
-    circle = new google.maps.Circle({ center: { lat, lng }, radius: radius, map: map, strokeColor: '#3b82f6', strokeWeight: 2, fillColor: '#3b82f6', fillOpacity: 0.25 });
+    // Only create marker and circle if we have real coordinates
+    if (latInput.value && lngInput.value) {
+        marker = new google.maps.Marker({ position: { lat, lng }, map: map });
+        circle = new google.maps.Circle({ center: { lat, lng }, radius: radius, map: map, strokeColor: '#3b82f6', strokeWeight: 2, fillColor: '#3b82f6', fillOpacity: 0.25 });
+    }
     map.addListener('click', (e) => {
+        const currentRadius = parseInt(document.querySelector('input[name="location_radius_m"]')?.value || '50');
         latInput.value = e.latLng.lat().toFixed(6);
         lngInput.value = e.latLng.lng().toFixed(6);
-        marker.setPosition(e.latLng);
-        circle.setCenter(e.latLng);
+        if (!marker) {
+            marker = new google.maps.Marker({ position: e.latLng, map: map });
+        } else {
+            marker.setPosition(e.latLng);
+        }
+        if (!circle) {
+            circle = new google.maps.Circle({ center: e.latLng, radius: currentRadius, map: map, strokeColor: '#3b82f6', strokeWeight: 2, fillColor: '#3b82f6', fillOpacity: 0.25 });
+        } else {
+            circle.setCenter(e.latLng);
+            circle.setRadius(currentRadius);
+        }
     });
 }
 

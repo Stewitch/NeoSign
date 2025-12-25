@@ -581,9 +581,6 @@ msgstr "Note (optional)"
 msgid "备注(可选)，如请假原因"
 msgstr "Note (optional), e.g., leave reason"
 
-msgid "设为已签到/请假"
-msgstr "Mark as checked-in/leave"
-
 msgid "状态备注"
 msgstr "Status note"
 
@@ -727,6 +724,12 @@ msgstr "Accuracy about"
 msgid "定位精度较差，可能导致签到失败，继续吗？"
 msgstr "Location accuracy is low and may fail check-in. Continue?"
 
+msgid "已获取当前位置"
+msgstr "Obtained current location"
+
+msgid "正在等待获取当前位置…"
+msgstr "Waiting to obtain current location..."
+
 # Activity status backend messages
 msgid "缺少用户信息"
 msgstr "Missing user information"
@@ -736,6 +739,9 @@ msgstr "User is not in this activity's participant list"
 
 msgid "已清除此用户的签到记录，可重新测试或签到。"
 msgstr "Cleared this user's check-in record; can test or check in again."
+
+msgid "设置状态"
+msgstr "Set Status"
 
 msgid "无效的状态选择"
 msgstr "Invalid status selection"
@@ -763,6 +769,15 @@ msgstr "Test"
 
 msgid "重置签到（测试）"
 msgstr "Reset Check-in (Test)"
+
+msgid "新密码不能与当前密码相同"
+msgstr "New password cannot be the same as current password"
+
+msgid "已设为未签到状态"
+msgstr "Marked as not checked in"
+
+msgid "的签到统计"
+msgstr "'s Check-in Statistics"
 
 #: .\templates\management\activity_stats.html:82
 msgid "未签到分页"
