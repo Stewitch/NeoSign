@@ -88,7 +88,7 @@ def export_table_to_xlsx(headers: Sequence[str], rows: Iterable[Sequence[str]], 
     # Format all cells to preserve leading zeros and display as text for student IDs
     for row in sheet.iter_rows(min_row=2):  # Skip header row
         for idx, cell in enumerate(row):
-            if idx == 0 and cell.value:  # First column (student_id)
+            if idx == 0 and cell.value:  # First column (username)
                 # Force text format to preserve leading zeros
                 cell.number_format = '@'
             # Center align all cells
@@ -112,7 +112,7 @@ def parse_users_from_text(text: str) -> dict[str, str]:
     - "1234567890"
     - "1234567890 张三"
     - "1234567890,张三" or "1234567890，张三"
-    Returns dict {student_id: name_or_empty}
+    Returns dict {username: name_or_empty}
     """
     if not text:
         return {}
@@ -144,8 +144,8 @@ def parse_users_from_text(text: str) -> dict[str, str]:
 
 
 def parse_users_from_csv_upload(file) -> dict[str, str]:
-    """Parse uploaded CSV file to {student_id: name}.
-    Assumes first column is student_id, second optional is name.
+    """Parse uploaded CSV file to {username: name}.
+    Assumes first column is username, second optional is name.
     Skips header row if first cell looks like a label.
     """
     result: dict[str, str] = {}
@@ -162,7 +162,7 @@ def parse_users_from_csv_upload(file) -> dict[str, str]:
             if not row:
                 continue
             cell0 = (row[0] or '').strip()
-            if row_idx == 1 and re.search(r"username|学号|用户", cell0, re.I):
+            if row_idx == 1 and re.search(r"username|用户名|用户", cell0, re.I):
                 continue
             if re.match(r"^\d{4,23}$", cell0):
                 name = (row[1] or '').strip() if len(row) > 1 else ''

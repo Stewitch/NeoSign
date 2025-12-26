@@ -8,29 +8,35 @@ from .models import CustomUser, SystemConfig
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
-    list_display = ('student_id', 'first_name', 'is_active', 'is_admin', 'is_staff', 'first_login')
+    list_display = ('username', 'first_name', 'is_active', 'is_admin', 'is_staff', 'first_login')
     list_filter = ('is_active', 'is_admin', 'is_staff', 'first_login')
-    ordering = ('student_id',)
-    search_fields = ('student_id', 'first_name')
+    ordering = ('username',)
+    search_fields = ('username', 'first_name')
     readonly_fields = ('created_at', 'last_login')
 
     fieldsets = (
-        (None, {'fields': ('student_id', 'password')}),
-        (_('Personal info'), {'fields': ('first_name',)}),
-        (_('Permissions'), {
+        (None, {'fields': ('username', 'password')}),
+        (_('个人信息'), {'fields': ('first_name',)}),
+        (_('权限'), {
             'fields': (
                 'is_active', 'is_staff', 'is_admin', 'is_superuser', 'groups', 'user_permissions'
             )
         }),
-        (_('Important dates'), {'fields': ('last_login', 'created_at')}),
+        (_('重要日期'), {'fields': ('last_login', 'created_at')}),
     )
 
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('student_id', 'password1', 'password2', 'is_admin', 'is_staff', 'is_superuser'),
+            'fields': ('username', 'password1', 'password2', 'is_admin', 'is_staff', 'is_superuser'),
         }),
     )
+
+    def get_ordering(self, request):  # runtime-safe ordering
+        return ('username',)
+
+    def get_list_display(self, request):
+        return ('username', 'first_name', 'is_active', 'is_admin', 'is_staff', 'first_login')
 
 
 @admin.register(SystemConfig)

@@ -19,4 +19,4 @@ class ActivityParticipationAdmin(admin.ModelAdmin):
 @admin.register(CheckInRecord)
 class CheckInRecordAdmin(admin.ModelAdmin):
 	list_display = ('activity', 'user', 'checkin_time', 'ip_address')
-	search_fields = ('user__student_id', 'activity__name')
+	search_fields = ('user__username', 'activity__name')

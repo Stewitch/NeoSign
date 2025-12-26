@@ -2,54 +2,66 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoSign\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-26 11:25+0800\n"
+"POT-Creation-Date: 2025-12-26 19:01+0800\n"
 "Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: .\authentication\forms.py:29
+#: .\authentication\forms.py:11
+msgid "无效的用户名或密码"
+msgstr "Invalid username or password."
+
+#: .\authentication\forms.py:13
+msgid "该账户已被禁用"
+msgstr "This account has been disabled."
+
+#: .\authentication\forms.py:25
+msgid "无法解密密码，请重试或联系管理员。"
+msgstr "Cannot decrypt password; please try again or contact administrator."
+
+#: .\authentication\forms.py:49
 #: .\templates\authentication\password_change_required.html:14
 msgid "当前密码"
 msgstr "Current password"
 
-#: .\authentication\forms.py:33
+#: .\authentication\forms.py:53
 #: .\templates\authentication\password_change_required.html:18
 msgid "新密码"
 msgstr "New password"
 
-#: .\authentication\forms.py:37
+#: .\authentication\forms.py:57
 #: .\templates\authentication\password_change_required.html:22
 msgid "确认新密码"
 msgstr "Confirm new password"
 
-#: .\authentication\forms.py:44
+#: .\authentication\forms.py:64
 msgid "新密码不能与当前密码相同"
 msgstr "New password cannot be the same as current password"
 
-#: .\authentication\views.py:26
+#: .\authentication\views.py:32
 msgid "首次登录，请修改密码"
 msgstr "First login, please change your password."
 
-#: .\authentication\views.py:56
+#: .\authentication\views.py:62
 msgid "密码修改成功"
 msgstr "Password updated successfully."
 
-#: .\checkin\models.py:124 .\templates\checkin\dashboard.html:23
+#: .\checkin\models.py:131 .\templates\checkin\dashboard.html:23
 #: .\templates\management\activity_stats.html:24
 msgid "已签到"
 msgstr "Checked in"
 
-#: .\checkin\models.py:125
+#: .\checkin\models.py:132
 msgid "代签"
 msgstr "Proxy"
 
-#: .\checkin\models.py:126
+#: .\checkin\models.py:133
 msgid "请假"
 msgstr "Excused"
 
-#: .\checkin\models.py:127
+#: .\checkin\models.py:134
 msgid "未签"
 msgstr "Absent"
 
@@ -92,28 +104,28 @@ msgid "已重置为未签到"
 msgstr "Marked as not checked in"
 
 #: .\core\admin.py:19
-msgid "Personal info"
-msgstr ""
+msgid "个人信息"
+msgstr "Personal Information"
 
 #: .\core\admin.py:20
-msgid "Permissions"
-msgstr ""
+msgid "权限"
+msgstr "Permissions"
 
 #: .\core\admin.py:25
-msgid "Important dates"
-msgstr ""
+msgid "重要日期"
+msgstr "Important Dates"
 
 #: .\core\models.py:92
-msgid "仅学号"
-msgstr "Student ID Only"
+msgid "仅用户名"
+msgstr "Username Only"
 
 #: .\core\models.py:93
 msgid "仅姓名"
 msgstr "Name Only"
 
 #: .\core\models.py:94
-msgid "学号+姓名"
-msgstr "Student ID + Name"
+msgid "用户名+姓名"
+msgstr "Username + Name"
 
 #: .\core\models.py:96
 msgid "用户名显示模式"
@@ -140,8 +152,8 @@ msgid "用户名脱敏模式"
 msgstr "Username Masking Mode"
 
 #: .\core\models.py:108
-msgid "控制是否对学号和姓名进行中间部分脱敏处理"
-msgstr "Control whether to mask the middle portion of student ID and name"
+msgid "控制是否对用户名和姓名进行中间部分脱敏处理"
+msgstr "Control whether to mask the middle portion of username and name"
 
 #: .\installation\views.py:28
 msgid "安装完成，您现在可以登录系统"
@@ -205,80 +217,104 @@ msgstr "Updated roles for %(updated)s users."
 msgid "成功创建 0 个用户（全部为重复或输入为空）"
 msgstr "Created 0 users (all duplicates or empty input)."
 
+#: .\management\views.py:278
+msgid "单次活动需要开始和结束时间"
+msgstr "Single event requires start and end times"
+
 #: .\management\views.py:280
+msgid "结束时间必须晚于开始时间"
+msgstr "The end time must be later than the start time"
+
+#: .\management\views.py:285
+msgid "请填写重复起始日期"
+msgstr "Please select the start date"
+
+#: .\management\views.py:287
+msgid "请填写开始时间"
+msgstr "Please select the start time"
+
+#: .\management\views.py:291
+msgid "请填写结束时间"
+msgstr "Please select the end time"
+
+#: .\management\views.py:295
+msgid "请填写持续分钟数"
+msgstr "Please enter the duration in minutes"
+
+#: .\management\views.py:301
+msgid "持续分钟数必须为正整数"
+msgstr "Duration must be a positive integer"
+
+#: .\management\views.py:330
 msgid "活动创建成功"
 msgstr "Activity created successfully."
 
-#: .\management\views.py:325
+#: .\management\views.py:370
 msgid "活动已更新"
 msgstr "Activity updated."
 
-#: .\management\views.py:335
+#: .\management\views.py:380
 msgid "活动已提前结束"
 msgstr "Activity closed early."
 
-#: .\management\views.py:344
+#: .\management\views.py:389
 #, python-format
 msgid "活动 \"%(name)s\" 已删除"
 msgstr "Activity \"%(name)s\" has been deleted."
 
 # Activity status backend messages
-#: .\management\views.py:383
+#: .\management\views.py:428
 msgid "缺少用户信息"
 msgstr "Missing user information"
 
-#: .\management\views.py:388
+#: .\management\views.py:433
 msgid "该用户不在活动参与名单中"
 msgstr "User is not in this activity's participant list"
 
-#: .\management\views.py:393
+#: .\management\views.py:438
 msgid "已清除此用户的签到记录，可重新测试或签到。"
 msgstr "Cleared this user's check-in record; can test or check in again."
 
-#: .\management\views.py:397
+#: .\management\views.py:442
 msgid "无效的状态选择"
 msgstr "Invalid status selection"
 
-#: .\management\views.py:403
+#: .\management\views.py:448
 msgid "已设为未签到状态"
 msgstr "Marked as not checked in"
 
-#: .\management\views.py:416
+#: .\management\views.py:461
 msgid "状态已更新"
 msgstr "Status updated"
 
-#: .\management\views.py:497
+#: .\management\views.py:542
 msgid "Nginx 代理模式下，安全密钥在 Nginx 配置中设置，此字段无效"
 msgstr ""
 "In Nginx proxy mode, the security key is set in Nginx configuration, and "
 "this field is invalid"
 
-#: .\management\views.py:499
+#: .\management\views.py:544
 msgid "不推荐：密钥将暴露在前端。生产环境请使用 Nginx 代理模式"
 msgstr ""
 "Not recommended: The key will be exposed on the front-end. Please use Nginx "
 "proxy mode for production environment"
 
-#: .\management\views.py:538
+#: .\management\views.py:583
 msgid "网站设置已更新"
 msgstr "Site settings updated."
 
 #: .\templates\authentication\login.html:9
-#: .\templates\authentication\login.html:21 .\templates\base.html:135
+#: .\templates\authentication\login.html:52 .\templates\base.html:135
 msgid "登录"
 msgstr "Log in"
 
-#: .\templates\authentication\login.html:14
-#: .\templates\authentication\login.html:15
-#: .\templates\management\activity_form.html:218
-#: .\templates\management\activity_stats.html:29
-#: .\templates\management\activity_stats.html:90
-#: .\templates\management\user_list.html:53
-msgid "学号"
-msgstr "Student ID"
+#: .\templates\authentication\login.html:28
+#: .\templates\authentication\login.html:30
+msgid "用户名(学号)"
+msgstr "Username (Student ID)"
 
-#: .\templates\authentication\login.html:18
-#: .\templates\authentication\login.html:19
+#: .\templates\authentication\login.html:44
+#: .\templates\authentication\login.html:45
 msgid "密码"
 msgstr "Password"
 
@@ -352,7 +388,7 @@ msgstr "System Default"
 
 #: .\templates\base.html:201
 msgid "切换主题"
-msgstr ""
+msgstr "Switch Theme"
 
 #: .\templates\base.html:219 .\templates\base.html:234
 msgid "请确认操作"
@@ -768,6 +804,13 @@ msgstr "Participants"
 msgid "全选"
 msgstr "Select all"
 
+#: .\templates\management\activity_form.html:218
+#: .\templates\management\activity_stats.html:29
+#: .\templates\management\activity_stats.html:90
+#: .\templates\management\user_list.html:53
+msgid "用户名"
+msgstr "Username"
+
 #: .\templates\management\activity_form.html:219
 #: .\templates\management\activity_stats.html:30
 #: .\templates\management\activity_stats.html:90
@@ -1094,9 +1137,9 @@ msgid "显示模式"
 msgstr "Display Mode"
 
 #: .\templates\management\site_settings.html:63
-msgid "控制用户身份的显示方式（仅学号、仅姓名、或学号+姓名）"
+msgid "控制用户身份的显示方式（仅用户名、仅姓名、或用户名+姓名）"
 msgstr ""
-"Control how user identity is displayed (Student ID only, Name only, or both)"
+"Control how user identity is displayed (Username only, Name only, or both)"
 
 #: .\templates\management\site_settings.html:66
 msgid "脱敏模式"
@@ -1146,8 +1189,8 @@ msgid "搜索"
 msgstr "Search"
 
 #: .\templates\management\user_list.html:17
-msgid "学号或姓名"
-msgstr "Student ID or name"
+msgid "用户名或姓名"
+msgstr "Username or name"
 
 #: .\templates\management\user_list.html:21
 msgid "清除选择"
@@ -1264,16 +1307,16 @@ msgid "暂无用户"
 msgstr "No users"
 
 #: .\templates\management\user_list.html:134
-msgid "每行或空格分隔学号，支持 1234567890 张三 格式"
-msgstr "One ID per line or space; supports '1234567890 Zhang San' format"
+msgid "每行或空格分隔用户名，支持 1234567890 张三 格式"
+msgstr "One username per line or space; supports '1234567890 Zhang San' format"
 
 #: .\templates\management\user_list.html:141
 msgid "生成"
 msgstr "Generate"
 
 #: .\templates\management\user_list.html:143
-msgid "支持上传 CSV（列：学号, 可选姓名）。"
-msgstr "CSV upload supported (columns: student_id, optional name)."
+msgid "支持上传 CSV（列：用户名, 可选姓名）。"
+msgstr "CSV upload supported (columns: username, optional name)."
 
 #~ msgid "状态备注"
 #~ msgstr "Status note"
