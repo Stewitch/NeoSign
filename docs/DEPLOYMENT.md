@@ -1,11 +1,59 @@
-# NeoSign Nginx 配置示例
-# 适用于生产环境部署
+# Deployment
 
+## Environment variables (production)
+Create a `.env` with production settings:
+
+```env
+# Core
+DEBUG=False
+SECRET_KEY=change-me-to-a-strong-random-string
+ALLOWED_HOSTS=example.com,www.example.com
+CSRF_TRUSTED_ORIGINS=https://example.com,https://www.example.com
+
+# HTTPS & proxy
+SECURE_SSL_REDIRECT=True
+CSRF_COOKIE_SECURE=True
+SESSION_COOKIE_SECURE=True
+SECURE_PROXY_SSL_HEADER=HTTP_X_FORWARDED_PROTO,https
+USE_X_FORWARDED_HOST=True
+
+# Database (PostgreSQL)
+DB_NAME=neosign
+DB_USER=postgres
+DB_PASSWORD=your-password
+DB_HOST=127.0.0.1
+DB_PORT=5432
+
+# Map Security (AMap)
+# Set to 'nginx' to proxy security key via nginx (recommended)
+# Set to 'frontend' to send key directly to frontend (simpler but less secure)
+AMAP_PROXY_MODE=nginx
+```
+
+## Production checklist
+1) Set env vars as shown above: `DEBUG=False`, strong `SECRET_KEY`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`, secure cookie flags.
+2) Install dependencies in a virtualenv: `pip install -e .`.
+3) Database: ensure PostgreSQL reachable; run `python manage.py migrate`.
+4) Static files: enable manifest storage and compression (recommended):
+   - In settings, set `STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"` and add `whitenoise.middleware.WhiteNoiseMiddleware` after `SecurityMiddleware`.
+   - Run `python manage.py collectstatic`.
+5) Translations: `python manage.py compilemessages -l en` (and other locales as needed).
+6) Create admin: `python manage.py createsuperuser`.
+7) Run app behind a WSGI/ASGI server (gunicorn/uvicorn) with a reverse proxy for TLS; serve `/media` and `/static` either via proxy or WhiteNoise.
+8) Verify deployment with `python manage.py check --deploy`.
+
+## Database backup/restore
+- Backup: `pg_dump -Fc -f neosign.dump neosign`
+- Restore: `pg_restore -d neosign neosign.dump`
+
+## Nginx configuration example
+Complete Nginx config with HTTPS, security headers, AMap proxy, and Django upstream:
+
+```nginx
+# HTTP 重定向到 HTTPS
 server {
     listen 80;
     server_name your-domain.com www.your-domain.com;
-    
-    # HTTP 重定向到 HTTPS
     return 301 https://$server_name$request_uri;
 }
 
@@ -34,20 +82,13 @@ server {
     access_log /var/log/nginx/neosign_access.log;
     error_log /var/log/nginx/neosign_error.log;
     
-    # 客户端上传限制
     client_max_body_size 20M;
     
-    # ============================================
-    # 高德地图 API 代理（强烈推荐生产环境启用）
-    # ============================================
-    # 通过 Nginx 代理所有 AMAP API 请求，并在服务器端自动附加安全密钥
-    # 密钥永远不会暴露给前端，完全安全
-    # 记得设置环境变量 AMAP_PROXY_MODE=nginx
+    # 高德地图 API 代理（生产环境推荐）
     location /_AMapService/ {
-        # 在服务器端自动附加安全密钥（替换 YOUR_AMAP_SECURITY_KEY 为实际密钥）
+        # 在服务器端自动附加安全密钥（替换为实际密钥）
         set $args "$args&jscode=YOUR_AMAP_SECURITY_KEY";
         
-        # 转发到高德服务器
         proxy_pass https://restapi.amap.com/;
         proxy_ssl_server_name on;
         proxy_set_header Host restapi.amap.com;
@@ -55,23 +96,17 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         
-        # 缓存配置
         add_header Cache-Control "public, max-age=300";
-        
-        # CORS 配置
         add_header Access-Control-Allow-Origin *;
         add_header Access-Control-Allow-Methods "GET, POST, OPTIONS";
         add_header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept";
         
-        # 处理 OPTIONS 预检请求
         if ($request_method = OPTIONS) {
             return 204;
         }
     }
     
-    # ============================================
     # 静态文件服务
-    # ============================================
     location /static/ {
         alias /path/to/your/project/staticfiles/;
         expires 30d;
@@ -84,9 +119,7 @@ server {
         add_header Cache-Control "public";
     }
     
-    # ============================================
     # Django 应用代理
-    # ============================================
     location / {
         proxy_pass http://127.0.0.1:8000;
         proxy_set_header Host $host;
@@ -106,3 +139,10 @@ server {
         proxy_read_timeout 60s;
     }
 }
+```
+
+Also see [NGINX_AMAP_PROXY.md](NGINX_AMAP_PROXY.md) for detailed AMap proxy setup.
+
+## Map SDK integration
+- General setup: [MAP_SDK_GUIDE.md](MAP_SDK_GUIDE.md)
+- AMap quick start: [AMAP_QUICK_START.md](AMAP_QUICK_START.md)
