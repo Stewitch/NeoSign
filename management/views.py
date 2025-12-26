@@ -317,6 +317,13 @@ class ActivityCreateView(LoginRequiredMixin, AdminOnlyMixin, CreateView):
         context['weekday_selected'] = []
         return context
 
+    def form_invalid(self, form):
+        messages.error(self.request, _('保存失败，请检查表单错误。'))
+        context = self.get_context_data(form=form)
+        context['selected_user_ids'] = [int(uid) for uid in self.request.POST.getlist('participants') if uid]
+        context['weekday_selected'] = [int(x) for x in self.request.POST.getlist('repeat_weekdays') if x]
+        return self.render_to_response(context)
+
     def form_valid(self, form):
         form.instance.created_by = self.request.user
         apply_repeat_and_time(self.request, form)
@@ -351,6 +358,13 @@ class ActivityUpdateView(LoginRequiredMixin, AdminOnlyMixin, UpdateView):
         context['is_edit'] = True
         context['weekday_selected'] = self.object.repeat_weekdays or []
         return context
+
+    def form_invalid(self, form):
+        messages.error(self.request, _('保存失败，请检查表单错误。'))
+        context = self.get_context_data(form=form)
+        context['selected_user_ids'] = [int(uid) for uid in self.request.POST.getlist('participants') if uid]
+        context['weekday_selected'] = [int(x) for x in self.request.POST.getlist('repeat_weekdays') if x]
+        return self.render_to_response(context)
 
     def form_valid(self, form):
         apply_repeat_and_time(self.request, form)

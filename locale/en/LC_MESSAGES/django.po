@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoSign\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-26 19:01+0800\n"
+"POT-Creation-Date: 2025-12-26 19:32+0800\n"
 "Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -17,26 +17,26 @@ msgstr "Invalid username or password."
 msgid "该账户已被禁用"
 msgstr "This account has been disabled."
 
-#: .\authentication\forms.py:25
+#: .\authentication\forms.py:29
 msgid "无法解密密码，请重试或联系管理员。"
 msgstr "Cannot decrypt password; please try again or contact administrator."
 
-#: .\authentication\forms.py:49
+#: .\authentication\forms.py:39
 #: .\templates\authentication\password_change_required.html:14
 msgid "当前密码"
 msgstr "Current password"
 
-#: .\authentication\forms.py:53
+#: .\authentication\forms.py:43
 #: .\templates\authentication\password_change_required.html:18
 msgid "新密码"
 msgstr "New password"
 
-#: .\authentication\forms.py:57
+#: .\authentication\forms.py:47
 #: .\templates\authentication\password_change_required.html:22
 msgid "确认新密码"
 msgstr "Confirm new password"
 
-#: .\authentication\forms.py:64
+#: .\authentication\forms.py:54
 msgid "新密码不能与当前密码相同"
 msgstr "New password cannot be the same as current password"
 
@@ -168,18 +168,20 @@ msgid "管理员账号请单独处理，无法在此重置"
 msgstr "Administrator accounts must be handled separately; cannot reset here."
 
 #: .\management\views.py:85
-#, python-format
-msgid "已为 %(student_id)s 重置密码，新密码：%(password)s"
-msgstr "Password reset for %(student_id)s. New password: %(password)s"
+#, fuzzy, python-format
+#| msgid "已为 %(username)s 重置密码，新密码：%(password)s"
+msgid "已为 %(username)s 重置密码，新密码：%(password)s"
+msgstr "Password reset for %(username)s. New password: %(password)s"
 
 #: .\management\views.py:97
 msgid "管理员账号请单独处理，无法在此删除"
 msgstr "Administrator accounts must be handled separately; cannot delete here."
 
 #: .\management\views.py:102
-#, python-format
-msgid "已删除用户 %(student_id)s"
-msgstr "Deleted user %(student_id)s."
+#, fuzzy, python-format
+#| msgid "已删除用户 %(username)s"
+msgid "已删除用户 %(username)s"
+msgstr "Deleted user %(username)s."
 
 #: .\management\views.py:113 .\management\views.py:162
 msgid "未选择用户"
@@ -245,61 +247,65 @@ msgstr "Please enter the duration in minutes"
 msgid "持续分钟数必须为正整数"
 msgstr "Duration must be a positive integer"
 
-#: .\management\views.py:330
+#: .\management\views.py:321 .\management\views.py:363
+msgid "保存失败，请检查表单错误。"
+msgstr "Save failed; please check form errors."
+
+#: .\management\views.py:337
 msgid "活动创建成功"
 msgstr "Activity created successfully."
 
-#: .\management\views.py:370
+#: .\management\views.py:384
 msgid "活动已更新"
 msgstr "Activity updated."
 
-#: .\management\views.py:380
+#: .\management\views.py:394
 msgid "活动已提前结束"
 msgstr "Activity closed early."
 
-#: .\management\views.py:389
+#: .\management\views.py:403
 #, python-format
 msgid "活动 \"%(name)s\" 已删除"
 msgstr "Activity \"%(name)s\" has been deleted."
 
 # Activity status backend messages
-#: .\management\views.py:428
+#: .\management\views.py:442
 msgid "缺少用户信息"
 msgstr "Missing user information"
 
-#: .\management\views.py:433
+#: .\management\views.py:447
 msgid "该用户不在活动参与名单中"
 msgstr "User is not in this activity's participant list"
 
-#: .\management\views.py:438
+#: .\management\views.py:452
 msgid "已清除此用户的签到记录，可重新测试或签到。"
 msgstr "Cleared this user's check-in record; can test or check in again."
 
-#: .\management\views.py:442
+#: .\management\views.py:456
 msgid "无效的状态选择"
 msgstr "Invalid status selection"
 
-#: .\management\views.py:448
+#: .\management\views.py:462
 msgid "已设为未签到状态"
 msgstr "Marked as not checked in"
 
-#: .\management\views.py:461
+#: .\management\views.py:475
 msgid "状态已更新"
 msgstr "Status updated"
 
-#: .\management\views.py:542
+#: .\management\views.py:556
 msgid "Nginx 代理模式下，安全密钥在 Nginx 配置中设置，此字段无效"
 msgstr ""
 "In Nginx proxy mode, the security key is set in Nginx configuration, and "
 "this field is invalid"
 
-#: .\management\views.py:544
+#: .\management\views.py:558
 msgid "不推荐：密钥将暴露在前端。生产环境请使用 Nginx 代理模式"
 msgstr ""
 "Not recommended: The key will be exposed on the front-end. Please use Nginx "
 "proxy mode for production environment"
 
-#: .\management\views.py:583
+#: .\management\views.py:597
 msgid "网站设置已更新"
 msgstr "Site settings updated."
 
@@ -584,253 +590,257 @@ msgstr "Edit Activity"
 msgid "创建活动"
 msgstr "Create Activity"
 
-#: .\templates\management\activity_form.html:15
+#: .\templates\management\activity_form.html:16
+msgid "保存失败，请检查以下错误："
+msgstr "Save failed; please check the errors below:"
+
+#: .\templates\management\activity_form.html:31
 msgid "签到形式"
 msgstr "Check-in mode"
 
-#: .\templates\management\activity_form.html:17
+#: .\templates\management\activity_form.html:35
 msgctxt "mode"
 msgid "普通"
 msgstr "Basic"
 
-#: .\templates\management\activity_form.html:18
+#: .\templates\management\activity_form.html:36
 msgid "位置"
 msgstr "Location"
 
-#: .\templates\management\activity_form.html:19
+#: .\templates\management\activity_form.html:37
 msgid "二维码"
 msgstr "QR"
 
-#: .\templates\management\activity_form.html:20
+#: .\templates\management\activity_form.html:38
 msgid "位置 + 二维码"
 msgstr "Location + QR"
 
-#: .\templates\management\activity_form.html:25
+#: .\templates\management\activity_form.html:45
 #: .\templates\management\activity_list.html:15
 msgid "名称"
 msgstr "Name"
 
 # Duplicate of "名称"; keep single translation defined earlier.
 # (Removed to avoid msgfmt duplicate error.)
-#: .\templates\management\activity_form.html:29
+#: .\templates\management\activity_form.html:49
 msgid "描述"
 msgstr "Description"
 
-#: .\templates\management\activity_form.html:35
+#: .\templates\management\activity_form.html:55
 msgid "重复方式"
 msgstr "Repeat type"
 
-#: .\templates\management\activity_form.html:37
+#: .\templates\management\activity_form.html:58
 msgid "不重复"
 msgstr "None"
 
-#: .\templates\management\activity_form.html:38
+#: .\templates\management\activity_form.html:59
 msgid "每日"
 msgstr "Daily"
 
-#: .\templates\management\activity_form.html:39
+#: .\templates\management\activity_form.html:60
 msgid "每周"
 msgstr "Weekly"
 
-#: .\templates\management\activity_form.html:46
-#: .\templates\management\activity_form.html:80
+#: .\templates\management\activity_form.html:68
+#: .\templates\management\activity_form.html:102
 msgid "开始时间"
 msgstr "Start time"
 
-#: .\templates\management\activity_form.html:50
-#: .\templates\management\activity_form.html:84
+#: .\templates\management\activity_form.html:72
+#: .\templates\management\activity_form.html:106
 msgid "结束时间"
 msgstr "End time"
 
-#: .\templates\management\activity_form.html:57
+#: .\templates\management\activity_form.html:79
 msgid "重复起止日期"
 msgstr "Repeat date range"
 
-#: .\templates\management\activity_form.html:59
+#: .\templates\management\activity_form.html:81
 msgid "开始"
 msgstr "Start"
 
-#: .\templates\management\activity_form.html:61
+#: .\templates\management\activity_form.html:83
 msgid "结束"
 msgstr "End"
 
-#: .\templates\management\activity_form.html:64
+#: .\templates\management\activity_form.html:86
 msgid "结束日期可空，空则长期重复。"
 msgstr "End date optional; empty means no end."
 
-#: .\templates\management\activity_form.html:67
+#: .\templates\management\activity_form.html:89
 msgid "时间窗模式"
 msgstr "Window mode"
 
-#: .\templates\management\activity_form.html:71
+#: .\templates\management\activity_form.html:93
 msgid "开始-结束时段"
 msgstr "Start-End range"
 
-#: .\templates\management\activity_form.html:75
+#: .\templates\management\activity_form.html:97
 msgid "开始时间 + 持续分钟"
 msgstr "Start + duration (min)"
 
-#: .\templates\management\activity_form.html:88
+#: .\templates\management\activity_form.html:110
 msgid "持续分钟"
 msgstr "Duration (minutes)"
 
-#: .\templates\management\activity_form.html:89
+#: .\templates\management\activity_form.html:111
 msgid "如 60"
 msgstr "eg. 60"
 
-#: .\templates\management\activity_form.html:92
+#: .\templates\management\activity_form.html:114
 msgid "每周重复日"
 msgstr "Weekly days"
 
-#: .\templates\management\activity_form.html:96
+#: .\templates\management\activity_form.html:118
 msgid "周一"
 msgstr "Mon"
 
-#: .\templates\management\activity_form.html:100
+#: .\templates\management\activity_form.html:122
 msgid "周二"
 msgstr "Tue"
 
-#: .\templates\management\activity_form.html:104
+#: .\templates\management\activity_form.html:126
 msgid "周三"
 msgstr "Wed"
 
-#: .\templates\management\activity_form.html:108
+#: .\templates\management\activity_form.html:130
 msgid "周四"
 msgstr "Thu"
 
-#: .\templates\management\activity_form.html:112
+#: .\templates\management\activity_form.html:134
 msgid "周五"
 msgstr "Fri"
 
-#: .\templates\management\activity_form.html:116
+#: .\templates\management\activity_form.html:138
 msgid "周六"
 msgstr "Sat"
 
-#: .\templates\management\activity_form.html:120
+#: .\templates\management\activity_form.html:142
 msgid "周日"
 msgstr "Sun"
 
-#: .\templates\management\activity_form.html:123
+#: .\templates\management\activity_form.html:145
 msgid "全选则自动转为每日。"
 msgstr "Selecting all switches to Daily."
 
-#: .\templates\management\activity_form.html:129
+#: .\templates\management\activity_form.html:151
 msgid "位置签到"
 msgstr "Location check-in"
 
-#: .\templates\management\activity_form.html:131
+#: .\templates\management\activity_form.html:153
 msgid "签到范围(米)"
 msgstr "Check-in radius (m)"
 
-#: .\templates\management\activity_form.html:133
+#: .\templates\management\activity_form.html:155
 msgid "设定允许签到的半径范围，签到时会自动判断是否在范围内。"
 msgstr "Set the allowed check-in radius; system auto-checks if within range."
 
-#: .\templates\management\activity_form.html:137
+#: .\templates\management\activity_form.html:159
 msgid "中心位置"
 msgstr "Center location"
 
-#: .\templates\management\activity_form.html:140
-#: .\templates\management\activity_form.html:312
-#: .\templates\management\activity_form.html:322
+#: .\templates\management\activity_form.html:162
+#: .\templates\management\activity_form.html:367
+#: .\templates\management\activity_form.html:377
 msgid "使用当前位置"
 msgstr "Use current location"
 
-#: .\templates\management\activity_form.html:143
+#: .\templates\management\activity_form.html:165
 msgid "清除"
 msgstr "Clear"
 
-#: .\templates\management\activity_form.html:148
+#: .\templates\management\activity_form.html:170
 msgid "纬度"
 msgstr "Latitude"
 
-#: .\templates\management\activity_form.html:152
+#: .\templates\management\activity_form.html:174
 msgid "经度"
 msgstr "Longitude"
 
-#: .\templates\management\activity_form.html:156
+#: .\templates\management\activity_form.html:178
 msgid ""
 "点击使用当前位置自动获取坐标。若启用地图SDK，下方将显示可视化地图选点界面。"
 msgstr ""
 "Click Use current location button to fetch coordinates. If map SDK enabled, "
 "visual map will appear below."
 
-#: .\templates\management\activity_form.html:164
+#: .\templates\management\activity_form.html:186
 msgid "点击地图标记中心位置，自动更新经纬度坐标。"
 msgstr "Click map to mark center position and auto-update coordinates."
 
-#: .\templates\management\activity_form.html:167
+#: .\templates\management\activity_form.html:189
 msgid ""
 "未配置地图SDK。如需可视化地图选点，请在网站设置中配置地图提供商和API Key。"
 msgstr ""
 "Map SDK not configured. To enable visual map picker, configure map provider "
 "and API Key in Site Settings."
 
-#: .\templates\management\activity_form.html:173
+#: .\templates\management\activity_form.html:195
 msgid "二维码签到"
 msgstr "QR check-in"
 
-#: .\templates\management\activity_form.html:176
+#: .\templates\management\activity_form.html:198
 msgid "刷新周期(秒, ≥10)"
 msgstr "Refresh interval (s, ≥10)"
 
-#: .\templates\management\activity_form.html:178
+#: .\templates\management\activity_form.html:200
 msgid "发起者可在二维码展示页实时显示。"
 msgstr "Organizer can show QR on presenter page."
 
-#: .\templates\management\activity_form.html:182
+#: .\templates\management\activity_form.html:204
 msgid "打开二维码展示页"
 msgstr "Open QR presenter"
 
-#: .\templates\management\activity_form.html:191
+#: .\templates\management\activity_form.html:213
 msgid "活动启用"
 msgstr "Activate"
 
-#: .\templates\management\activity_form.html:196
+#: .\templates\management\activity_form.html:218
 #: .\templates\management\activity_stats.html:53
 #: .\templates\management\site_settings.html:106
 msgid "保存"
 msgstr "Save"
 
-#: .\templates\management\activity_form.html:197
+#: .\templates\management\activity_form.html:219
 msgid "返回"
 msgstr "Back"
 
-#: .\templates\management\activity_form.html:206
+#: .\templates\management\activity_form.html:228
 msgid "参与用户"
 msgstr "Participants"
 
-#: .\templates\management\activity_form.html:209
+#: .\templates\management\activity_form.html:231
 msgid "全选"
 msgstr "Select all"
 
-#: .\templates\management\activity_form.html:218
+#: .\templates\management\activity_form.html:240
 #: .\templates\management\activity_stats.html:29
 #: .\templates\management\activity_stats.html:90
 #: .\templates\management\user_list.html:53
 msgid "用户名"
 msgstr "Username"
 
-#: .\templates\management\activity_form.html:219
+#: .\templates\management\activity_form.html:241
 #: .\templates\management\activity_stats.html:30
 #: .\templates\management\activity_stats.html:90
 #: .\templates\management\user_list.html:54
 msgid "姓名"
 msgstr "Name"
 
-#: .\templates\management\activity_form.html:235
+#: .\templates\management\activity_form.html:257
 msgid "勾选参与用户，保存后生效。"
 msgstr "Select participants; takes effect after save."
 
-#: .\templates\management\activity_form.html:300
+#: .\templates\management\activity_form.html:355
 msgid "浏览器不支持地理位置"
 msgstr "Browser does not support geolocation"
 
-#: .\templates\management\activity_form.html:304
+#: .\templates\management\activity_form.html:359
 msgid "获取中..."
 msgstr "Fetching..."
 
-#: .\templates\management\activity_form.html:320
+#: .\templates\management\activity_form.html:375
 #, fuzzy
 #| msgid "无法获取位置：%s"
 msgid "无法获取位置："
