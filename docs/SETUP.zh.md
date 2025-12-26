@@ -31,23 +31,33 @@ DB_PORT=5432
 生产环境配置请参考 [DEPLOYMENT.zh.md](DEPLOYMENT.zh.md)。
 
 ## 本地开发
-1) 创建虚拟环境并安装依赖:
-```
-python -m venv .venv
-.venv/Scripts/activate
-pip install -U pip
-pip install -e .
-```
-2) 迁移数据库并创建管理员:
-```
-python manage.py migrate
-python manage.py createsuperuser
-python manage.py compilemessages -l en
-```
-3) 运行开发服务器:
-```
-python manage.py runserver
-```
+1. 安装 uv 并创建虚拟环境：
+   ```bash
+   # 安装 uv (如果未安装)
+   pip install uv
+   
+   # 创建虚拟环境
+   uv venv
+   
+   # 激活环境
+   # Windows
+   .venv\Scripts\activate
+   # Linux/macOS
+   source .venv/bin/activate
+   
+   # 安装依赖
+   uv pip install -e .
+   ```
+2. 迁移数据库并创建管理员：
+   ```bash
+   python manage.py migrate
+   python manage.py createsuperuser
+   python manage.py compilemessages -l en
+   ```
+3. 运行开发服务器：
+   ```bash
+   python manage.py runserver
+   ```
 
 ### 局域网访问（手机同网络测试）
 - 在所有网络接口上运行: `python manage.py runserver 0.0.0.0:8000`
@@ -88,25 +98,25 @@ SECURE_SSL_REDIRECT=False
 
 **替代方案:** 使用 ngrok 或类似的隧道服务，无需本地证书管理。
 
-## 快速启动脚本
-快速迭代开发的脚本示例，自动执行迁移、编译消息和启动服务器：
+## 快速启动脚本（可选）
+用于快速迭代开发的脚本示例，会自动执行迁移、编译消息并启动服务器：
 
-**PowerShell（启用 SSL）:**
+**PowerShell（启用 HTTPS）:**
 ```powershell
 .\.venv\Scripts\activate.ps1
-uv run .\manage.py makemigrations
-uv run .\manage.py migrate
-uv run .\manage.py compilemessages -l en
-uv run .\manage.py runserver_plus 0.0.0.0:8443 --cert-file=./localhost+2.pem --key-file=./localhost+2-key.pem
+python .\manage.py makemigrations
+python .\manage.py migrate
+python .\manage.py compilemessages -l en
+python .\manage.py runserver_plus 0.0.0.0:8443 --cert-file=./localhost+2.pem --key-file=./localhost+2-key.pem
 ```
 
-**PowerShell（无 SSL）:**
+**PowerShell（仅 HTTP）:**
 ```powershell
 .\.venv\Scripts\activate.ps1
-uv run .\manage.py makemigrations
-uv run .\manage.py migrate
-uv run .\manage.py compilemessages -l en
-uv run .\manage.py runserver 0.0.0.0:8000
+python .\manage.py makemigrations
+python .\manage.py migrate
+python .\manage.py compilemessages -l en
+python .\manage.py runserver 0.0.0.0:8000
 ```
 
 ## 常用命令

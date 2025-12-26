@@ -31,16 +31,16 @@ AMAP_PROXY_MODE=nginx
 ```
 
 ## Production checklist
-1) Set env vars as shown above: `DEBUG=False`, strong `SECRET_KEY`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`, secure cookie flags.
-2) Install dependencies in a virtualenv: `pip install -e .`.
-3) Database: ensure PostgreSQL reachable; run `python manage.py migrate`.
-4) Static files: enable manifest storage and compression (recommended):
-   - In settings, set `STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"` and add `whitenoise.middleware.WhiteNoiseMiddleware` after `SecurityMiddleware`.
-   - Run `python manage.py collectstatic`.
-5) Translations: `python manage.py compilemessages -l en` (and other locales as needed).
-6) Create admin: `python manage.py createsuperuser`.
-7) Run app behind a WSGI/ASGI server (gunicorn/uvicorn) with a reverse proxy for TLS; serve `/media` and `/static` either via proxy or WhiteNoise.
-8) Verify deployment with `python manage.py check --deploy`.
+1. Set env vars as shown above: `DEBUG=False`, strong `SECRET_KEY`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`, secure cookie flags.
+2. Install dependencies in a virtualenv: `uv pip install -e .` (ensure `uv` is installed).
+3. Database: ensure PostgreSQL reachable; run `python manage.py migrate`.
+4. Static files: enable manifest storage and compression (recommended):
+    - In settings, set `STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"` and add `whitenoise.middleware.WhiteNoiseMiddleware` after `SecurityMiddleware`.
+    - Run `python manage.py collectstatic`.
+5. Translations: `python manage.py compilemessages -l en` (and other locales as needed).
+6. Create admin: `python manage.py createsuperuser`.
+7. Run app behind a WSGI/ASGI server (gunicorn/uvicorn) with a reverse proxy for TLS; serve `/media` and `/static` either via proxy or WhiteNoise.
+8. Verify deployment with `python manage.py check --deploy`.
 
 ## Database backup/restore
 - Backup: `pg_dump -Fc -f neosign.dump neosign`

@@ -31,16 +31,16 @@ AMAP_PROXY_MODE=nginx
 ```
 
 ## 生产环境检查清单
-1) 按上述配置设置环境变量: `DEBUG=False`、强 `SECRET_KEY`、`ALLOWED_HOSTS`、`CSRF_TRUSTED_ORIGINS`、安全 cookie 标志
-2) 在虚拟环境中安装依赖: `pip install -e .`
-3) 数据库: 确保 PostgreSQL 可访问；运行 `python manage.py migrate`
-4) 静态文件: 启用清单存储和压缩（推荐）:
-   - 在 settings 中设置 `STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"` 并在 `SecurityMiddleware` 后添加 `whitenoise.middleware.WhiteNoiseMiddleware`
-   - 运行 `python manage.py collectstatic`
-5) 翻译: `python manage.py compilemessages -l en`（以及其他需要的语言）
-6) 创建管理员: `python manage.py createsuperuser`
-7) 在 WSGI/ASGI 服务器（gunicorn/uvicorn）后运行应用，配合反向代理处理 TLS；通过代理或 WhiteNoise 提供 `/media` 和 `/static`
-8) 验证部署: `python manage.py check --deploy`
+1. 按上述配置设置环境变量：`DEBUG=False`、强 `SECRET_KEY`、`ALLOWED_HOSTS`、`CSRF_TRUSTED_ORIGINS`、安全 cookie 标志
+2. 在虚拟环境中安装依赖：`uv pip install -e .`（确保已安装 `uv`）
+3. 数据库：确保 PostgreSQL 可访问；运行 `python manage.py migrate`
+4. 静态文件：启用清单存储和压缩（推荐）：
+    - 在 settings 中设置 `STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"` 并在 `SecurityMiddleware` 后添加 `whitenoise.middleware.WhiteNoiseMiddleware`
+    - 运行 `python manage.py collectstatic`
+5. 翻译：`python manage.py compilemessages -l en`（以及其他需要的语言）
+6. 创建管理员：`python manage.py createsuperuser`
+7. 在 WSGI/ASGI 服务器（gunicorn/uvicorn）后运行应用，配合反向代理处理 TLS；通过代理或 WhiteNoise 提供 `/media` 和 `/static`
+8. 验证部署：`python manage.py check --deploy`
 
 ## 数据库备份/恢复
 - 备份: `pg_dump -Fc -f neosign.dump neosign`
