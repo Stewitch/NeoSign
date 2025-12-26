@@ -9,14 +9,45 @@
                 <h2 class="mb-4 text-center">{% trans '登录' %}</h2>
                 <form method="post" novalidate class="vstack gap-3">
                     {% csrf_token %}
-                    {{ form.non_field_errors }}
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {% for err in form.non_field_errors %}
+                            <div>{{ err }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <input type="hidden" name="enc" id="enc-flag" value="0">
                     <div class="form-floating">
-                        <input type="text" name="username" id="username" class="form-control" maxlength="24" required placeholder="{% trans '学号' %}">
-                        <label for="username">{% trans '学号' %}</label>
+                        <input type="text"
+                               name="username"
+                               id="username"
+                               class="form-control{% if form.username.errors %} is-invalid{% endif %}"
+                               maxlength="24"
+                               required
+                               autocomplete="username"
+                               placeholder="{% trans '用户名(学号)' %}"
+                               value="{{ form.username.value|default_if_none:'' }}">
+                        <label for="username">{% trans '用户名(学号)' %}</label>
+                        {% if form.username.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.username.errors|join:', ' }}
+                        </div>
+                        {% endif %}
                     </div>
                     <div class="form-floating">
-                        <input type="password" name="password" id="password" class="form-control" required placeholder="{% trans '密码' %}">
+                        <input type="password"
+                               name="password"
+                               id="password"
+                               class="form-control{% if form.password.errors %} is-invalid{% endif %}"
+                               required
+                               autocomplete="current-password"
+                               placeholder="{% trans '密码' %}">
                         <label for="password">{% trans '密码' %}</label>
+                        {% if form.password.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.password.errors|join:', ' }}
+                        </div>
+                        {% endif %}
                     </div>
                     <button type="submit" class="btn btn-primary w-100 py-2">{% trans '登录' %}</button>
                 </form>
@@ -24,4 +55,61 @@
         </div>
     </div>
 </div>
+{% if login_public_key %}
+<script>
+// Encrypt password with RSA-OAEP using server-provided public key before submit
+(function() {
+    const pem = `{{ login_public_key|escapejs }}`;
+    const form = document.querySelector('form');
+    const passwordInput = document.getElementById('password');
+    const encFlag = document.getElementById('enc-flag');
+
+    function pemToArrayBuffer(pemString) {
+        const b64 = pemString.replace(/-----[^-]+-----/g, '').replace(/\s+/g, '');
+        const binary = atob(b64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        return bytes.buffer;
+    }
+
+    async function importKey(pemString) {
+        const keyData = pemToArrayBuffer(pemString);
+        return await crypto.subtle.importKey(
+            'spki',
+            keyData,
+            { name: 'RSA-OAEP', hash: 'SHA-256' },
+            false,
+            ['encrypt']
+        );
+    }
+
+    async function encryptPassword(pubKey, plaintext) {
+        const encoded = new TextEncoder().encode(plaintext);
+        const cipher = await crypto.subtle.encrypt({ name: 'RSA-OAEP' }, pubKey, encoded);
+        const bytes = new Uint8Array(cipher);
+        let b64 = '';
+        for (let i = 0; i < bytes.length; i++) b64 += String.fromCharCode(bytes[i]);
+        return btoa(b64);
+    }
+
+    importKey(pem).then(pubKey => {
+        if (!form || !passwordInput || !encFlag) return;
+        form.addEventListener('submit', async (e) => {
+            try {
+                const plain = passwordInput.value || '';
+                if (!plain) return; // let required validation handle empty
+                const cipherB64 = await encryptPassword(pubKey, plain);
+                passwordInput.value = cipherB64;
+                encFlag.value = '1';
+            } catch (err) {
+                console.error('Password encryption failed', err);
+                encFlag.value = '0';
+            }
+        });
+    }).catch(err => {
+        console.error('Public key import failed', err);
+    });
+})();
+</script>
+{% endif %}
 {% endblock %}

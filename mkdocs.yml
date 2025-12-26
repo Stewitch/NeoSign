@@ -1,0 +1,66 @@
+site_name: NeoSign Docs
+site_url: https://stewitch.github.io/NeoSign
+repo_url: https://github.com/Stewitch/NeoSign
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+plugins:
+  - search
+  - i18n:
+      docs_structure: suffix
+      languages:
+        - locale: en
+          default: true
+          name: English
+          build: true
+        - locale: zh
+          name: 中文
+          build: true
+          nav_translations:
+            Home: 首页
+            Setup: 配置指南
+            Deployment: 部署指南
+            Map Guides: 地图指南
+            Map SDK Guide: 地图 SDK 指南
+            AMap Quick Start: 高德地图快速开始
+            NGINX AMap Proxy: Nginx 高德地图代理
+
+nav:
+  - Home: index.md
+  - Setup: SETUP.md
+  - Deployment: DEPLOYMENT.md
+  - Map Guides:
+      - Map SDK Guide: MAP_SDK_GUIDE.md
+      - AMap Quick Start: AMAP_QUICK_START.md
+      - NGINX AMap Proxy: NGINX_AMAP_PROXY.md
+
+extra:
+  alternate:
+    - name: English
+      link: /
+      lang: en
+    - name: 中文
+      link: /zh/
+      lang: zh

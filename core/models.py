@@ -6,16 +6,16 @@ from django.utils.translation import gettext_lazy as _
 
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, student_id: str, password: str | None = None, **extra_fields):
-        if not student_id or not student_id.isdigit() or not (4 <= len(student_id) <= 23):
-            raise ValueError('学号必须是4-23位数字')
+    def create_user(self, username: str, password: str | None = None, **extra_fields):
+        if not username or not username.isdigit() or not (4 <= len(username) <= 23):
+            raise ValueError('用户名必须是4-23位数字')
 
-        user = self.model(student_id=student_id, **extra_fields)
+        user = self.model(username=username, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, student_id: str, password: str | None = None, **extra_fields):
+    def create_superuser(self, username: str, password: str | None = None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_admin', True)
@@ -25,15 +25,15 @@ class CustomUserManager(BaseUserManager):
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
 
-        return self.create_user(student_id, password, **extra_fields)
+        return self.create_user(username, password, **extra_fields)
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
-    student_id = models.CharField(
+    username = models.CharField(
         max_length=23,
         unique=True,
-        validators=[RegexValidator(r'^\d{4,23}$', '学号必须是4-23位数字')],
-        verbose_name='学号',
+        validators=[RegexValidator(r'^\d{4,23}$', '用户名必须是4-23位数字')],
+        verbose_name='用户名',
     )
     first_name = models.CharField(max_length=50, blank=True, verbose_name='姓名')
     is_active = models.BooleanField(default=True, verbose_name='是否启用')
@@ -46,7 +46,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     objects = CustomUserManager()
 
-    USERNAME_FIELD = 'student_id'
+    USERNAME_FIELD = 'username'
     REQUIRED_FIELDS: list[str] = []
 
     class Meta:
@@ -55,7 +55,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         ordering = ['-created_at']
 
     def __str__(self) -> str:  # pragma: no cover - simple display
-        return self.student_id
+        return self.username
 
 
 class SystemConfig(models.Model):
@@ -87,11 +87,11 @@ class SystemConfig(models.Model):
     # 用户名显示设置
     username_display_mode = models.CharField(
         max_length=20,
-        default='student_id',
+        default='username',
         choices=[
-            ('student_id', _('仅学号')),
+            ('username', _('仅用户名')),
             ('name', _('仅姓名')),
-            ('both', _('学号+姓名')),
+            ('both', _('用户名+姓名')),
         ],
         verbose_name=_('用户名显示模式'),
         help_text=_('控制界面中用户身份的显示方式')
@@ -105,7 +105,7 @@ class SystemConfig(models.Model):
             ('both', _('前台和后台均脱敏')),
         ],
         verbose_name=_('用户名脱敏模式'),
-        help_text=_('控制是否对学号和姓名进行中间部分脱敏处理')
+        help_text=_('控制是否对用户名和姓名进行中间部分脱敏处理')
     )
 
     class Meta:

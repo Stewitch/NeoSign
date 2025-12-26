@@ -61,7 +61,7 @@ class UserListView(LoginRequiredMixin, AdminOnlyMixin, TemplateView):
         query = self.request.GET.get('q', '').strip()
         users = User.objects.all().order_by('-created_at')
         if query:
-            users = users.filter(Q(student_id__icontains=query) | Q(first_name__icontains=query))
+            users = users.filter(Q(username__icontains=query) | Q(first_name__icontains=query))
         paginator = Paginator(users, self.paginate_by)
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
@@ -82,8 +82,8 @@ class UserResetView(LoginRequiredMixin, AdminOnlyMixin, View):
         user.save(update_fields=['password', 'first_login'])
         messages.success(
             request,
-            _('已为 %(student_id)s 重置密码，新密码：%(password)s') % {
-                'student_id': user.student_id,
+            _('已为 %(username)s 重置密码，新密码：%(password)s') % {
+                'username': user.username,
                 'password': new_password,
             },
         )
@@ -99,7 +99,7 @@ class UserDeleteView(LoginRequiredMixin, AdminOnlyMixin, View):
         user.delete()
         messages.success(
             request,
-            _('已删除用户 %(student_id)s') % {'student_id': user.student_id},
+            _('已删除用户 %(username)s') % {'username': user.username},
         )
         return redirect('management:user_list')
 
@@ -119,9 +119,9 @@ class UserBulkResetView(LoginRequiredMixin, AdminOnlyMixin, View):
             user.set_password(password)
             user.first_login = True
             user.save(update_fields=['password', 'first_login'])
-            rows.append([user.student_id, password])
+            rows.append([user.username, password])
 
-        headers = ['学号', '新密码']
+        headers = ['用户名', '新密码']
         filename = 'user_password_reset'
         if fmt == 'csv':
             return export_table_to_csv(headers, rows, filename)
@@ -189,7 +189,7 @@ class UserBulkRoleUpdateView(LoginRequiredMixin, AdminOnlyMixin, View):
 class UserBulkCreateView(LoginRequiredMixin, AdminOnlyMixin, View):
     def post(self, request):
         fmt = request.POST.get('format', 'xlsx')
-        text = request.POST.get('student_ids', '')
+        text = request.POST.get('usernames', '')
         user_map = parse_users_from_text(text)
 
         file = request.FILES.get('csv_file')
@@ -202,15 +202,15 @@ class UserBulkCreateView(LoginRequiredMixin, AdminOnlyMixin, View):
 
         incoming_ids = list(user_map.keys())
         existing_ids = set(
-            User.objects.filter(student_id__in=incoming_ids).values_list('student_id', flat=True)
+            User.objects.filter(username__in=incoming_ids).values_list('username', flat=True)
         )
 
         pending = []
-        for student_id, name in user_map.items():
-            if student_id in existing_ids:
+        for username, name in user_map.items():
+            if username in existing_ids:
                 continue
             password = generate_random_password()
-            pending.append((student_id, name or '', password))
+            pending.append((username, name or '', password))
 
         if not pending:
             messages.success(request, _('成功创建 0 个用户（全部为重复或输入为空）'))
@@ -218,7 +218,7 @@ class UserBulkCreateView(LoginRequiredMixin, AdminOnlyMixin, View):
 
         users_to_create = [
             User(
-                student_id=sid,
+                username=sid,
                 first_name=name,
                 password=_bulk_hash_password(pwd),
                 first_login=True,
@@ -227,7 +227,7 @@ class UserBulkCreateView(LoginRequiredMixin, AdminOnlyMixin, View):
         ]
         User.objects.bulk_create(users_to_create, batch_size=1000)
 
-        headers = ['学号', '初始密码']
+        headers = ['用户名', '初始密码']
         rows = [[sid, pwd] for sid, _, pwd in pending]
         filename = 'users_export'
         if fmt == 'csv':
@@ -311,11 +311,18 @@ class ActivityCreateView(LoginRequiredMixin, AdminOnlyMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['users'] = User.objects.all().order_by('student_id')
+        context['users'] = User.objects.all().order_by('username')
         context['selected_user_ids'] = []
         context['is_edit'] = False
         context['weekday_selected'] = []
         return context
+
+    def form_invalid(self, form):
+        messages.error(self.request, _('保存失败，请检查表单错误。'))
+        context = self.get_context_data(form=form)
+        context['selected_user_ids'] = [int(uid) for uid in self.request.POST.getlist('participants') if uid]
+        context['weekday_selected'] = [int(x) for x in self.request.POST.getlist('repeat_weekdays') if x]
+        return self.render_to_response(context)
 
     def form_valid(self, form):
         form.instance.created_by = self.request.user
@@ -339,18 +346,25 @@ class ActivityUpdateView(LoginRequiredMixin, AdminOnlyMixin, UpdateView):
 
     def get_initial(self):
         initial = super().get_initial()
-        participants = self.object.participants.values_list('student_id', flat=True)
+        participants = self.object.participants.values_list('username', flat=True)
         initial['participants'] = ' '.join(participants)
         return initial
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         participants = self.object.participants.values_list('id', flat=True)
-        context['users'] = User.objects.all().order_by('student_id')
+        context['users'] = User.objects.all().order_by('username')
         context['selected_user_ids'] = list(participants)
         context['is_edit'] = True
         context['weekday_selected'] = self.object.repeat_weekdays or []
         return context
+
+    def form_invalid(self, form):
+        messages.error(self.request, _('保存失败，请检查表单错误。'))
+        context = self.get_context_data(form=form)
+        context['selected_user_ids'] = [int(uid) for uid in self.request.POST.getlist('participants') if uid]
+        context['weekday_selected'] = [int(x) for x in self.request.POST.getlist('repeat_weekdays') if x]
+        return self.render_to_response(context)
 
     def form_valid(self, form):
         apply_repeat_and_time(self.request, form)
@@ -465,7 +479,7 @@ class ActivityStatusUpdateView(LoginRequiredMixin, AdminOnlyMixin, View):
 class ActivityStatsExportView(LoginRequiredMixin, AdminOnlyMixin, View):
     def get(self, request, activity_id, kind, fmt):
         activity = get_object_or_404(Activity, id=activity_id)
-        headers = ['学号', '姓名', '签到时间', 'IP地址', '状态']
+        headers = ['用户名', '姓名', '签到时间', 'IP地址', '状态']
 
         # Exclude test users from export
         checked_qs = CheckInRecord.objects.filter(activity=activity).select_related('user').exclude(user__is_test=True)
@@ -475,7 +489,7 @@ class ActivityStatsExportView(LoginRequiredMixin, AdminOnlyMixin, View):
         if kind == 'checked':
             rows = [
                 [
-                    record.user.student_id,
+                    record.user.username,
                     record.user.first_name,
                     record.checkin_time.strftime('%Y-%m-%d %H:%M:%S'),
                     record.ip_address,
@@ -485,14 +499,14 @@ class ActivityStatsExportView(LoginRequiredMixin, AdminOnlyMixin, View):
             ]
         else:
             rows = [
-                [user.student_id, user.first_name, '', '', '']
+                [user.username, user.first_name, '', '', '']
                 for user in participants_qs.exclude(id__in=checked_ids)
             ]
 
         filename = f'activity_{activity_id}_{kind}_export'
         if fmt == 'csv':
             return export_table_to_csv(headers, rows, filename)
-        # Set column widths: student_id(12), name(12), time(20), ip(18), status(10)
+        # Set column widths: username(12), name(12), time(20), ip(18), status(10)
         return export_table_to_xlsx(headers, rows, filename, column_widths=[12, 12, 20, 18, 10])
 
 

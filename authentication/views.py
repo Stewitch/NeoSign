@@ -8,11 +8,17 @@ from django.utils.translation import gettext as _
 from django.contrib.auth import logout
 
 from .forms import CustomAuthenticationForm, RequiredPasswordChangeForm
+from .utils import get_login_public_key_pem
 
 
 class CustomLoginView(LoginView):
     template_name = 'authentication/login.html'
     form_class = CustomAuthenticationForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['login_public_key'] = get_login_public_key_pem()
+        return context
 
     def form_valid(self, form):
         response = super().form_valid(form)

@@ -11,14 +11,32 @@
                 <div class="card-body">
                     <h3 class="mb-3">{% if is_edit %}{% trans '编辑活动' %}{% else %}{% trans '创建活动' %}{% endif %}</h3>
 
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <div class="fw-semibold mb-1">{% trans '保存失败，请检查以下错误：' %}</div>
+                        <ul class="mb-0">
+                            {% for field, errors in form.errors.items %}
+                                {% for err in errors %}
+                                    <li>{{ field }}: {{ err }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for err in form.non_field_errors %}
+                                <li>{{ err }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
                     <div class="mb-3">
                         <label class="form-label fw-semibold">{% trans '签到形式' %}</label>
+                        {% with mode_selected=form.data.checkin_mode|default_if_none:'' %}
                         <select name="checkin_mode" id="checkin_mode" class="form-select">
-                            <option value="basic" {% if not form.instance.location_enabled and not form.instance.qr_enabled %}selected{% endif %}>{% trans '普通' context 'mode' %}</option>
-                            <option value="location" {% if form.instance.location_enabled and not form.instance.qr_enabled %}selected{% endif %}>{% trans '位置' %}</option>
-                            <option value="qr" {% if form.instance.qr_enabled and not form.instance.location_enabled %}selected{% endif %}>{% trans '二维码' %}</option>
-                            <option value="both" {% if form.instance.qr_enabled and form.instance.location_enabled %}selected{% endif %}>{% trans '位置 + 二维码' %}</option>
+                            <option value="basic" {% if mode_selected == 'basic' or mode_selected == '' and not form.instance.location_enabled and not form.instance.qr_enabled %}selected{% endif %}>{% trans '普通' context 'mode' %}</option>
+                            <option value="qr" {% if mode_selected == 'qr' or mode_selected == '' and form.instance.qr_enabled and not form.instance.location_enabled %}selected{% endif %}>{% trans '二维码' %}</option>
+                            <option value="location" {% if mode_selected == 'location' or mode_selected == '' and form.instance.location_enabled and not form.instance.qr_enabled %}selected{% endif %}>{% trans '位置' %}</option>
+                            <option value="both" {% if mode_selected == 'both' or mode_selected == '' and form.instance.qr_enabled and form.instance.location_enabled %}selected{% endif %}>{% trans '位置 + 二维码' %}</option>
                         </select>
+                        {% endwith %}
                     </div>
 
                     <div class="mb-3">
@@ -33,22 +51,24 @@
                     <div class="row g-3 mb-2">
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">{% trans '重复方式' %}</label>
+                            {% with rt=form.data.repeat_type|default:form.instance.repeat_type %}
                             <select name="repeat_type" id="repeat_type" class="form-select">
-                                <option value="none" {% if form.instance.repeat_type == 'none' %}selected{% endif %}>{% trans '不重复' %}</option>
-                                <option value="daily" {% if form.instance.repeat_type == 'daily' %}selected{% endif %}>{% trans '每日' %}</option>
-                                <option value="weekly" {% if form.instance.repeat_type == 'weekly' %}selected{% endif %}>{% trans '每周' %}</option>
+                                <option value="none" {% if rt == 'none' %}selected{% endif %}>{% trans '不重复' %}</option>
+                                <option value="daily" {% if rt == 'daily' %}selected{% endif %}>{% trans '每日' %}</option>
+                                <option value="weekly" {% if rt == 'weekly' %}selected{% endif %}>{% trans '每周' %}</option>
                             </select>
+                            {% endwith %}
                         </div>
                     </div>
 
                     <div class="row g-3" id="block-once">
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">{% trans '开始时间' %}</label>
-                            <input type="datetime-local" name="start_time" class="form-control" value="{{ form.instance.start_time|date:'Y-m-d\\TH:i' }}">
+                            <input type="datetime-local" name="start_time" class="form-control" value="{{ form.data.start_time|default:form.instance.start_time|date:'Y-m-d\\TH:i' }}">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">{% trans '结束时间' %}</label>
-                            <input type="datetime-local" name="end_time" class="form-control" value="{{ form.instance.end_time|date:'Y-m-d\\TH:i' }}">
+                            <input type="datetime-local" name="end_time" class="form-control" value="{{ form.data.end_time|default:form.instance.end_time|date:'Y-m-d\\TH:i' }}">
                         </div>
                     </div>
 
@@ -57,9 +77,9 @@
                             <label class="form-label fw-semibold">{% trans '重复起止日期' %}</label>
                             <div class="input-group">
                                 <span class="input-group-text">{% trans '开始' %}</span>
-                                <input type="date" name="repeat_start_date" class="form-control" value="{{ form.instance.start_time|date:'Y-m-d' }}">
+                                <input type="date" name="repeat_start_date" class="form-control" value="{{ form.data.repeat_start_date|default:form.instance.start_time|date:'Y-m-d' }}">
                                 <span class="input-group-text">{% trans '结束' %}</span>
-                                <input type="date" name="repeat_end_date" class="form-control" value="{% if form.instance.repeat_type != 'none' %}{{ form.instance.end_time|date:'Y-m-d' }}{% endif %}">
+                                <input type="date" name="repeat_end_date" class="form-control" value="{% if form.data.repeat_end_date %}{{ form.data.repeat_end_date }}{% elif form.instance.repeat_type != 'none' %}{{ form.instance.end_time|date:'Y-m-d' }}{% endif %}">
                             </div>
                             <div class="form-text">{% trans '结束日期可空，空则长期重复。' %}</div>
                         </div>
@@ -78,15 +98,15 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">{% trans '开始时间' %}</label>
-                            <input type="time" name="window_start_time" class="form-control" value="{{ form.instance.window_start_time|time:'H:i' }}">
+                            <input type="time" name="window_start_time" class="form-control" value="{{ form.data.window_start_time|default:form.instance.window_start_time|time:'H:i' }}">
                         </div>
                         <div class="col-md-6" id="window-end-group">
                             <label class="form-label fw-semibold">{% trans '结束时间' %}</label>
-                            <input type="time" name="window_end_time" class="form-control" value="{{ form.instance.window_end_time|time:'H:i' }}">
+                            <input type="time" name="window_end_time" class="form-control" value="{{ form.data.window_end_time|default:form.instance.window_end_time|time:'H:i' }}">
                         </div>
                         <div class="col-md-6 d-none" id="window-duration-group">
                             <label class="form-label fw-semibold">{% trans '持续分钟' %}</label>
-                            <input type="number" min="1" name="window_duration_minutes" class="form-control" placeholder="{% trans '如 60' %}">
+                            <input type="number" min="1" name="window_duration_minutes" class="form-control" placeholder="{% trans '如 60' %}" value="{{ form.data.window_duration_minutes }}">
                         </div>
                         <div class="col-12" id="weekly-days">
                             <label class="form-label fw-semibold">{% trans '每周重复日' %}</label>
@@ -129,7 +149,7 @@
                         <label class="form-label fw-semibold">{% trans '位置签到' %}</label>
                         <div class="mb-3">
                             <label class="form-label">{% trans '签到范围(米)' %}</label>
-                            <input type="number" min="0" name="location_radius_m" class="form-control" value="{{ form.instance.location_radius_m|default:50 }}" required>
+                            <input type="number" min="0" name="location_radius_m" class="form-control" value="{{ form.data.location_radius_m|default:form.instance.location_radius_m|default:50 }}" required>
                             <div class="form-text">{% trans '设定允许签到的半径范围，签到时会自动判断是否在范围内。' %}</div>
                         </div>
                         
@@ -146,11 +166,11 @@
                             <div class="row g-2">
                                 <div class="col-md-6">
                                     <label class="form-label small text-muted">{% trans '纬度' %}</label>
-                                    <input type="number" step="0.000001" name="location_lat" id="location_lat" class="form-control form-control-sm" value="{{ form.instance.location_lat }}" readonly>
+                                    <input type="number" step="0.000001" name="location_lat" id="location_lat" class="form-control form-control-sm" value="{{ form.data.location_lat|default:form.instance.location_lat }}" readonly>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label small text-muted">{% trans '经度' %}</label>
-                                    <input type="number" step="0.000001" name="location_lng" id="location_lng" class="form-control form-control-sm" value="{{ form.instance.location_lng }}" readonly>
+                                    <input type="number" step="0.000001" name="location_lng" id="location_lng" class="form-control form-control-sm" value="{{ form.data.location_lng|default:form.instance.location_lng }}" readonly>
                                 </div>
                             </div>
                             <div class="form-text">{% trans '点击使用当前位置自动获取坐标。若启用地图SDK，下方将显示可视化地图选点界面。' %}</div>
@@ -174,7 +194,7 @@
                         <div class="row g-3 mt-2">
                             <div class="col-md-6">
                                 <label class="form-label">{% trans '刷新周期(秒, ≥10)' %}</label>
-                                <input type="number" min="10" name="qr_refresh_interval_s" class="form-control" value="{{ form.instance.qr_refresh_interval_s|default:30 }}">
+                                <input type="number" min="10" name="qr_refresh_interval_s" class="form-control" value="{{ form.data.qr_refresh_interval_s|default:form.instance.qr_refresh_interval_s|default:30 }}">
                                 <div class="form-text">{% trans '发起者可在二维码展示页实时显示。' %}</div>
                             </div>
                             <div class="col-md-6 d-flex align-items-end">
@@ -215,7 +235,7 @@
                             <thead>
                                 <tr>
                                     <th style="width:48px;"><!-- checkbox column --></th>
-                                    <th>{% trans '学号' %}</th>
+                                    <th>{% trans '用户名' %}</th>
                                     <th>{% trans '姓名' %}</th>
                                 </tr>
                             </thead>
@@ -264,10 +284,43 @@ function toggleWindowMode() {
     document.getElementById('window-duration-group')?.classList.toggle('d-none', mode !== 'duration');
 }
 
+let mapScriptLoaded = false;
+
+function loadMapIfNeeded() {
+    const mode = document.getElementById('checkin_mode')?.value || 'basic';
+    if (!(mode === 'location' || mode === 'both')) return;
+    if (mapScriptLoaded) return;
+    if (!mapProvider || !mapApiKey) return;
+
+    mapScriptLoaded = true;
+    if (mapProvider === 'amap') {
+        window._AMapSecurityConfig = {
+            serviceHost: window.location.protocol + '//' + window.location.host + '/_AMapService'
+        };
+        const script = document.createElement('script');
+        script.src = `https://webapi.amap.com/maps?v=2.0&key=${mapApiKey}`;
+        script.onload = initMap;
+        document.head.appendChild(script);
+    } else {
+        const script = document.createElement('script');
+        if (mapProvider === 'tencent') {
+            script.src = `https://map.qq.com/api/gljs?v=1.exp&key=${mapApiKey}`;
+        } else if (mapProvider === 'google') {
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${mapApiKey}`;
+        }
+        if (script.src) {
+            script.onload = initMap;
+            document.head.appendChild(script);
+        }
+    }
+}
+
 function toggleCheckinMode() {
     const mode = document.getElementById('checkin_mode')?.value || 'basic';
-    document.getElementById('block-location')?.classList.toggle('d-none', !(mode === 'location' || mode === 'both'));
+    const showLocation = (mode === 'location' || mode === 'both');
+    document.getElementById('block-location')?.classList.toggle('d-none', !showLocation);
     document.getElementById('block-qr')?.classList.toggle('d-none', !(mode === 'qr' || mode === 'both'));
+    if (showLocation) loadMapIfNeeded();
 }
 
 document.getElementById('repeat_type')?.addEventListener('change', toggleSections);
@@ -494,33 +547,7 @@ document.querySelector('input[name="location_radius_m"]')?.addEventListener('cha
     }
 });
 
-// Load map SDK and initialize
-if (mapProvider && mapApiKey) {
-    // For AMap, set security config before loading SDK
-    if (mapProvider === 'amap') {
-        // 设置代理服务器（安全密钥由 Nginx 在服务器端附加，不暴露给前端）
-        window._AMapSecurityConfig = {
-            serviceHost: window.location.protocol + '//' + window.location.host + '/_AMapService'
-        };
-        
-        const script = document.createElement('script');
-        script.src = `https://webapi.amap.com/maps?v=2.0&key=${mapApiKey}`;
-        script.onload = initMap;
-        document.head.appendChild(script);
-    } else {
-        const script = document.createElement('script');
-        
-        if (mapProvider === 'tencent') {
-            script.src = `https://map.qq.com/api/gljs?v=1.exp&key=${mapApiKey}`;
-        } else if (mapProvider === 'google') {
-            script.src = `https://maps.googleapis.com/maps/api/js?key=${mapApiKey}`;
-        }
-        
-        if (script.src) {
-            script.onload = initMap;
-            document.head.appendChild(script);
-        }
-    }
-}
+// Lazy load map only when location mode is shown
+loadMapIfNeeded();
 </script>
 {% endblock %}

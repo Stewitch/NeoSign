@@ -21,8 +21,8 @@ def mask_field(value, field_type, context, config):
     """通用字段脱敏标签，支持上下文感知
     
     Args:
-        value: 要处理的值（学号或姓名）
-        field_type: 'student_id' 或 'name'
+        value: 要处理的值（用户名或姓名）
+        field_type: 'username' 或 'name'
         context: 'frontend' 或 'admin'
         config: SystemConfig 实例
     """
@@ -47,7 +47,7 @@ def mask_field(value, field_type, context, config):
 
 
 def _build_display(user, config, context: str) -> str:
-    display_mode = getattr(config, 'username_display_mode', 'student_id') if config else 'student_id'
+    display_mode = getattr(config, 'username_display_mode', 'username') if config else 'username'
     mask_mode = getattr(config, 'username_masking_mode', 'frontend') if config else 'frontend'
 
     def _should_mask():
@@ -60,12 +60,12 @@ def _build_display(user, config, context: str) -> str:
         return False
 
     parts = []
-    if display_mode == 'student_id':
-        parts.append(user.student_id)
+    if display_mode == 'username':
+        parts.append(user.username)
     elif display_mode == 'name':
         parts.append(user.first_name or '')
     else:  # both
-        parts.append(user.student_id)
+        parts.append(user.username)
         parts.append(user.first_name or '')
 
     joined = ' '.join(p for p in parts if p)

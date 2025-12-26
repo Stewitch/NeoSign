@@ -2,22 +2,32 @@ from django import forms
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+from .utils import decrypt_login_password
 
 
 class CustomAuthenticationForm(AuthenticationForm):
-    def clean_password(self):
-        password = self.cleaned_data.get('password')
-        if not password:
-            return password
-        if len(password) < 8:
-            raise ValidationError('密码长度至少8位')
-        if not any(char.isdigit() for char in password):
-            raise ValidationError('密码必须包含数字')
-        if not any(char.isalpha() for char in password):
-            raise ValidationError('密码必须包含字母')
-        if not any(char in '!@#$%^&*()_+-=[]{}|;:,.<>?/' for char in password):
-            raise ValidationError('密码必须包含特殊字符')
-        return password
+    error_messages = {
+        "invalid_login": _(
+            "无效的用户名或密码"
+        ),
+        "inactive": _("该账户已被禁用"),
+    }
+
+    def clean(self):
+        enc_flag = (self.data.get('enc', '') or '').strip() == '1'
+        password_cipher = (self.data.get('password') or '').strip()
+        if enc_flag and password_cipher:
+            try:
+                plaintext = decrypt_login_password(password_cipher)
+                # Overwrite both data and cleaned_data so AuthenticationForm authenticates plaintext
+                mutable_data = self.data.copy()
+                mutable_data['password'] = plaintext
+                self.data = mutable_data
+                if hasattr(self, 'cleaned_data'):
+                    self.cleaned_data['password'] = plaintext
+            except Exception as exc:  # pragma: no cover - decrypt failures
+                raise ValidationError(_('无法解密密码，请重试或联系管理员。')) from exc
+        return super().clean()
 
 
 class RequiredPasswordChangeForm(PasswordChangeForm):
