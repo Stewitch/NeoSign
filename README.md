@@ -1,6 +1,9 @@
 # NeoSign
 [中文文档](README.CN.md)
 
+> [!WARNING]
+> This project is in early development stage and may contain issues. Version updates may be frequent.
+
 A sign-in system built with Django 6 and PostgreSQL 18.
 
 ## Features

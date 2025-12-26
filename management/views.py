@@ -248,15 +248,65 @@ class ActivityListView(LoginRequiredMixin, AdminOnlyMixin, TemplateView):
         return context
 
 
+class ActivityForm(forms.ModelForm):
+    class Meta:
+        model = Activity
+        fields = [
+            'name', 'description', 'start_time', 'end_time', 'is_active',
+            'repeat_type', 'window_start_time', 'window_end_time',
+            'location_enabled', 'location_lat', 'location_lng', 'location_radius_m',
+            'qr_enabled', 'qr_refresh_interval_s',
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Allow repeat-mode submissions without datetime-local values; validated below.
+        self.fields['start_time'].required = False
+        self.fields['end_time'].required = False
+        if 'is_active' in self.fields:
+            self.fields['is_active'].required = False
+
+    def clean(self):
+        data = super().clean()
+        repeat_type = data.get('repeat_type') or 'none'
+        window_mode = (self.data.get('window_mode') or 'range').strip()
+
+        if repeat_type == 'none':
+            start_dt = data.get('start_time')
+            end_dt = data.get('end_time')
+            if not start_dt or not end_dt:
+                raise forms.ValidationError(_('单次活动需要开始和结束时间'))
+            if end_dt <= start_dt:
+                raise forms.ValidationError(_('结束时间必须晚于开始时间'))
+            return data
+
+        # Repeating activities: require repeat window and time window inputs
+        if not self.data.get('repeat_start_date'):
+            raise forms.ValidationError(_('请填写重复起始日期'))
+        if not self.data.get('window_start_time'):
+            raise forms.ValidationError(_('请填写开始时间'))
+
+        if window_mode == 'range':
+            if not self.data.get('window_end_time'):
+                raise forms.ValidationError(_('请填写结束时间'))
+        else:
+            duration = (self.data.get('window_duration_minutes') or '').strip()
+            if not duration:
+                raise forms.ValidationError(_('请填写持续分钟数'))
+            try:
+                minutes = int(duration)
+                if minutes <= 0:
+                    raise ValueError()
+            except ValueError:
+                raise forms.ValidationError(_('持续分钟数必须为正整数'))
+
+        return data
+
+
 class ActivityCreateView(LoginRequiredMixin, AdminOnlyMixin, CreateView):
     model = Activity
     template_name = 'management/activity_form.html'
-    fields = [
-        'name', 'description', 'start_time', 'end_time',
-        'repeat_type', 'window_start_time', 'window_end_time',
-        'location_enabled', 'location_lat', 'location_lng', 'location_radius_m',
-        'qr_enabled', 'qr_refresh_interval_s',
-    ]
+    form_class = ActivityForm
     success_url = reverse_lazy('management:activity_list')
 
     def get_context_data(self, **kwargs):
@@ -284,12 +334,7 @@ class ActivityCreateView(LoginRequiredMixin, AdminOnlyMixin, CreateView):
 class ActivityUpdateView(LoginRequiredMixin, AdminOnlyMixin, UpdateView):
     model = Activity
     template_name = 'management/activity_form.html'
-    fields = [
-        'name', 'description', 'start_time', 'end_time', 'is_active',
-        'repeat_type', 'window_start_time', 'window_end_time',
-        'location_enabled', 'location_lat', 'location_lng', 'location_radius_m',
-        'qr_enabled', 'qr_refresh_interval_s',
-    ]
+    form_class = ActivityForm
     success_url = reverse_lazy('management:activity_list')
 
     def get_initial(self):
@@ -542,6 +587,11 @@ class SiteSettingsView(LoginRequiredMixin, AdminOnlyMixin, UpdateView):
 def apply_repeat_and_time(request, form):
     tz = timezone.get_current_timezone()
 
+    def _make_aware(dt):
+        if timezone.is_naive(dt):
+            return timezone.make_aware(dt, tz)
+        return dt.astimezone(tz)
+
     repeat_type = form.cleaned_data.get('repeat_type') or 'none'
     weekdays = [int(x) for x in request.POST.getlist('repeat_weekdays') if x]
     if repeat_type == 'weekly' and len(weekdays) >= 7:
@@ -573,13 +623,13 @@ def apply_repeat_and_time(request, form):
     end_date_str = request.POST.get('repeat_end_date')
     if start_date_str:
         dt = datetime.fromisoformat(start_date_str)
-        form.instance.start_time = tz.localize(datetime.combine(dt.date(), time(0, 0)))
+        form.instance.start_time = _make_aware(datetime.combine(dt.date(), time(0, 0)))
     if end_date_str:
         dt = datetime.fromisoformat(end_date_str)
-        form.instance.end_time = tz.localize(datetime.combine(dt.date(), time(23, 59, 59)))
+        form.instance.end_time = _make_aware(datetime.combine(dt.date(), time(23, 59, 59)))
     else:
         # no end date -> far future
-        form.instance.end_time = tz.localize(datetime.combine(form.instance.start_time.date(), time(23, 59, 59))) + timedelta(days=3650)
+        form.instance.end_time = _make_aware(datetime.combine(form.instance.start_time.date(), time(23, 59, 59))) + timedelta(days=3650)
 
 
 def apply_checkin_mode(request, form):

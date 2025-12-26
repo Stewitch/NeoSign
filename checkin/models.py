@@ -3,6 +3,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinValueValidator
+from datetime import time as dt_time
 import hashlib
 import os
 
@@ -74,11 +75,17 @@ class Activity(models.Model):
 			return False
 		if end_date and current_date > end_date:
 			return False
-		if not (self.window_start_time and self.window_end_time):
-			return False
+		# 时间窗：缺失则退化为全天
+		start_window = self.window_start_time or dt_time(0, 0)
+		end_window = self.window_end_time or dt_time(23, 59, 59)
 		current_time = dt.time()
-		if not (self.window_start_time <= current_time <= self.window_end_time):
-			return False
+		if start_window <= end_window:
+			if not (start_window <= current_time <= end_window):
+				return False
+		else:
+			# 跨午夜窗口，例如 23:00-01:00
+			if not (current_time >= start_window or current_time <= end_window):
+				return False
 		if self.repeat_type == 'weekly':
 			weekday = dt.isoweekday()  # 1-7
 			return weekday in (self.repeat_weekdays or [])

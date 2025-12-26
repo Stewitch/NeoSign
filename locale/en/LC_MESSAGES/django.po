@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NeoSign\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-25 17:14+0800\n"
+"POT-Creation-Date: 2025-12-26 11:25+0800\n"
 "Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -249,11 +249,15 @@ msgstr "Status updated"
 
 #: .\management\views.py:497
 msgid "Nginx 代理模式下，安全密钥在 Nginx 配置中设置，此字段无效"
-msgstr "In Nginx proxy mode, the security key is set in Nginx configuration, and this field is invalid"
+msgstr ""
+"In Nginx proxy mode, the security key is set in Nginx configuration, and "
+"this field is invalid"
 
 #: .\management\views.py:499
 msgid "不推荐：密钥将暴露在前端。生产环境请使用 Nginx 代理模式"
-msgstr "Not recommended: The key will be exposed on the front-end. Please use Nginx proxy mode for production environment"
+msgstr ""
+"Not recommended: The key will be exposed on the front-end. Please use Nginx "
+"proxy mode for production environment"
 
 #: .\management\views.py:538
 msgid "网站设置已更新"
@@ -633,6 +637,10 @@ msgstr "Start + duration (min)"
 #: .\templates\management\activity_form.html:88
 msgid "持续分钟"
 msgstr "Duration (minutes)"
+
+#: .\templates\management\activity_form.html:89
+msgid "如 60"
+msgstr "eg. 60"
 
 #: .\templates\management\activity_form.html:92
 msgid "每周重复日"
