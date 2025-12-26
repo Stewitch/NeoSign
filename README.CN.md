@@ -1,6 +1,9 @@
 # NeoSign
 [English](README.md)
 
+> [!WARNING]
+> 该项目仍在早期开发阶段，可能存在若干问题，并且版本更新可能较快。
+
 一个基于 Django 6 和 PostgreSQL 18 的签到系统。
 
 ## 功能特性
