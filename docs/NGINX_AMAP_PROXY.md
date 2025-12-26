@@ -3,6 +3,7 @@
 This document solves one problem: **Using AMap securityJsCode securely in production** without exposing it to the frontend.
 
 Core Concept:
+
 - The security key is stored only in Nginx configuration.
 - The frontend only knows a `serviceHost`.
 - All requests are proxied via `/_AMapService/` to `restapi.amap.com`, with Nginx appending the `jscode`.
@@ -63,6 +64,7 @@ server {
 ```
 
 Key Points:
+
 - Replace `YOUR_AMAP_SECURITY_KEY` with your actual `securityJsCode`.
 - The path prefix must be `/_AMapService/` (AMap requirement).
 - `proxy_pass` must end with `/`: `https://restapi.amap.com/`.
@@ -80,6 +82,7 @@ window._AMapSecurityConfig = {
 ```
 
 Checkpoints:
+
 - `securityJsCode` field **should not** exist.
 - AMap JS SDK will send requests to `https://sign.example.com/_AMapService/...`, which Nginx forwards to `restapi.amap.com`.
 

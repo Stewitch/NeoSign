@@ -30,6 +30,7 @@ NeoSign supports optional Map SDK integration for visual location check-ins. The
 ### 1. AMap (Gaode) - Recommended for China
 
 **Steps:**
+
 1. Visit [AMap Open Platform](https://lbs.amap.com/).
 2. Register and log in to the console.
 3. Create Application -> Add Key.
@@ -38,17 +39,20 @@ NeoSign supports optional Map SDK integration for visual location check-ins. The
 6. **Important:** Find and copy the **Security Key (securityJsCode)** in the Key Management page.
 
 **Configuration Example:**
+
 - Map Provider: `amap` or `AMap (Gaode)`
 - Map API Key: `your-amap-key-here` (App Key)
 - Map Security Key: `your-security-jscode-here` (Security Key)
 
 **Notes:**
+
 - **Keys applied after Dec 02, 2021 must be used with a Security Key.**
 - The Security Key is viewed in "Application Management -> Key Management" in the AMap console.
 - This system uses **plaintext** setting for the Security Key (suitable for dev and small projects).
 - For production, it is recommended to use Nginx proxy forwarding (see AMap official docs).
 
 **Official Docs:**
+
 - [JavaScript API Docs](https://lbs.amap.com/api/jsapi-v2/summary)
 - [Key Application Guide](https://lbs.amap.com/api/jsapi-v2/guide/abc/prepare)
 - [Security Key Usage](https://lbs.amap.com/api/javascript-api-v2/guide/abc/jscode)
@@ -58,6 +62,7 @@ NeoSign supports optional Map SDK integration for visual location check-ins. The
 ### 2. Tencent Maps
 
 **Steps:**
+
 1. Visit [Tencent Location Service](https://lbs.qq.com/).
 2. Register and log in to the console.
 3. My Applications -> Create Application -> Add Key.
@@ -65,10 +70,12 @@ NeoSign supports optional Map SDK integration for visual location check-ins. The
 5. Copy the generated **Key**.
 
 **Configuration Example:**
+
 - Map Provider: `tencent` or `Tencent (QQ Maps)`
 - Map API Key: `your-tencent-key-here`
 
 **Official Docs:**
+
 - [JavaScript API GL Docs](https://lbs.qq.com/webApi/javascriptGL/glGuide/glBasic)
 - [Key Application Guide](https://lbs.qq.com/dev/console/application/mine)
 
@@ -77,6 +84,7 @@ NeoSign supports optional Map SDK integration for visual location check-ins. The
 ### 3. Google Maps
 
 **Steps:**
+
 1. Visit [Google Cloud Console](https://console.cloud.google.com/).
 2. Create Project.
 3. Enable **Maps JavaScript API**.
@@ -85,10 +93,12 @@ NeoSign supports optional Map SDK integration for visual location check-ins. The
 6. Copy the generated **API Key**.
 
 **Configuration Example:**
+
 - Map Provider: `google` or `Google Maps`
 - Map API Key: `your-google-maps-key-here`
 
 **Official Docs:**
+
 - [Maps JavaScript API](https://developers.google.com/maps/documentation/javascript)
 - [Get API Key](https://developers.google.com/maps/documentation/javascript/get-api-key)
 
@@ -99,9 +109,11 @@ NeoSign supports optional Map SDK integration for visual location check-ins. The
 ## Configuration Steps
 
 1. **Apply for API Key**
+
    - Get the Key from the corresponding platform according to the guide above.
 
 2. **Configure System**
+
    - Login to Admin Panel.
    - Go to **Site Settings** page.
    - Select **Map Provider** (AMap/Tencent/Google).
@@ -110,6 +122,7 @@ NeoSign supports optional Map SDK integration for visual location check-ins. The
    - Click Save.
 
 3. **Create Location Check-in Activity**
+
    - New Activity -> Check-in Type select **Location** or **Location + QR Code**.
    - Click "Use Current Location" to get coordinates.
    - If SDK is configured, a visual map will appear below.
@@ -117,6 +130,7 @@ NeoSign supports optional Map SDK integration for visual location check-ins. The
    - Save Activity.
 
 4. **Test Check-in**
+
    - When user checks in, the system automatically gets location and verifies range.
    - For debugging, test in HTTPS environment (Browser security requirement).
 
@@ -135,6 +149,7 @@ It is recommended to choose the appropriate provider based on actual user volume
 ## Troubleshooting
 
 **Issue: Map does not show**
+
 - Check if API Key is filled correctly.
 - **AMap Users**: Confirm Security Key (securityJsCode) is filled correctly.
   - **Production Recommendation**: Use Nginx proxy mode, see [Nginx AMap Proxy Configuration](NGINX_AMAP_PROXY.md).
@@ -143,11 +158,13 @@ It is recommended to choose the appropriate provider based on actual user volume
 - Common Error: `INVALID_USER_SCODE` means Security Key is wrong or missing.
 
 **Issue: Check-in fails with "Not in range"**
+
 - Confirm the activity center coordinates are accurate.
 - Check if range radius is reasonable.
 - Test in HTTPS environment to ensure browser can get precise location.
 
 **Issue: Camera/Location permission denied**
+
 - Must use HTTPS or localhost.
 - Check browser permission settings.
 - Refer to HTTPS development environment config in README.
@@ -166,6 +183,7 @@ It is recommended to choose the appropriate provider based on actual user volume
 ## More Help
 
 For further assistance, please refer to:
+
 - "Setup" and "Deployment" sections in the project documentation site.
 - Official documentation of each map platform (links above).
-- Submit an Issue on the code hosting platform.
+- Submit an [Issue](https://github.com/Stewitch/NeoSign/issues) on GitHub

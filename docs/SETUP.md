@@ -34,29 +34,24 @@ For production settings, see [DEPLOYMENT.md](DEPLOYMENT.md).
 1. Install uv and create venv:
    ```bash
    # Install uv (if not installed)
+   # ref: https://docs.astral.sh/uv/getting-started/installation/
    pip install uv
    
    # Create virtualenv
    uv venv
    
-   # Activate
-   # Windows
-   .venv\Scripts\activate
-   # Linux/macOS
-   source .venv/bin/activate
-   
    # Install dependencies
-   uv pip install -e .
+   uv sync
    ```
 2. Migrate and create admin:
    ```bash
-   python manage.py migrate
-   python manage.py createsuperuser
-   python manage.py compilemessages -l en
+   uv run manage.py migrate
+   uv run manage.py createsuperuser --username <4 ~ 23 length integer ID>
+   uv run manage.py compilemessages -l en
    ```
 3. Run server:
    ```bash
-   python manage.py runserver
+   uv run manage.py runserver
    ```
 
 ### LAN access (mobile on same network)
@@ -103,23 +98,21 @@ If you prefer a one-liner script for local development:
 
 **PowerShell (HTTPS, assuming mkcert certificates are present):**
 ```powershell
-.\.venv\Scripts\activate.ps1
-python .\manage.py makemigrations
-python .\manage.py migrate
-python .\manage.py compilemessages -l en
-python .\manage.py runserver_plus 0.0.0.0:8443 --cert-file=./localhost+2.pem --key-file=./localhost+2-key.pem
+uv run .\manage.py makemigrations
+uv run .\manage.py migrate
+uv run .\manage.py compilemessages -l en
+uv run .\manage.py runserver_plus 0.0.0.0:8443 --cert-file=./localhost+2.pem --key-file=./localhost+2-key.pem
 ```
 
 **PowerShell (HTTP only):**
 ```powershell
-.\.venv\Scripts\activate.ps1
-python .\manage.py makemigrations
-python .\manage.py migrate
-python .\manage.py compilemessages -l en
-python .\manage.py runserver 0.0.0.0:8000
+uv run .\manage.py makemigrations
+uv run .\manage.py migrate
+uv run .\manage.py compilemessages -l en
+uv run .\manage.py runserver 0.0.0.0:8000
 ```
 
 ## Useful commands
-- Run tests: `python manage.py test`
+- Run tests: `uv run manage.py test`
 - Lint (if configured): `ruff check .`
-- Shell: `python manage.py shell`
+- Shell: `uv run manage.py shell`
