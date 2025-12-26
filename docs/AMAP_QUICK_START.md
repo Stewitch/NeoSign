@@ -1,133 +1,100 @@
-# 高德地图快速配置指南
+# AMap Quick Start Guide
 
-本文档帮助你快速配置高德地图实现可视化位置签到。
+This guide helps you quickly configure AMap (Gaode Map) for visual location check-ins.
 
-## 第一步：申请高德地图密钥
+## Step 1: Apply for AMap Keys
 
-1. **注册账号**
-   - 访问 [高德开放平台](https://lbs.amap.com/)
-   - 注册并完成开发者认证（个人开发者即可）
+1. **Register Account**
+   - Visit [AMap Open Platform](https://lbs.amap.com/)
+   - Register and complete developer verification (Individual developer is sufficient).
 
-2. **创建应用**
-   - 进入控制台 → 应用管理 → 我的应用
-   - 点击"创建新应用"
-   - 填写应用名称（如：NeoSign 签到系统）
-   - 应用类型：其他
+2. **Create Application**
+   - Go to Console -> Application Management -> My Applications.
+   - Click "Create New Application".
+   - Fill in App Name (e.g., NeoSign).
+   - App Type: Other.
 
-3. **添加 Key**
-   - 在创建好的应用下，点击"添加"
-   - Key 名称：任意（如：Web 端）
-   - 服务平台：**Web端(JS API)**
-   - 提交后会生成：
-     - ✅ **应用 Key**（一串字母数字）
-     - ✅ **安全密钥 (securityJsCode)**（一串字母数字）
+3. **Add Key**
+   - Under the created app, click "Add".
+   - Key Name: Any (e.g., Web).
+   - Service Platform: **Web (JS API)**.
+   - After submission, you will get:
+     - ✅ **App Key** (alphanumeric string)
+     - ✅ **Security Key (securityJsCode)** (alphanumeric string)
 
-4. **复制两个密钥**
+4. **Copy Both Keys**
    ```
-   应用 Key: 类似 abc123def456...
-   安全密钥: 类似 xyz789abc123...
+   App Key: e.g., abc123def456...
+   Security Key: e.g., xyz789abc123...
    ```
 
-## 第二步：在 NeoSign 中配置
+## Step 2: Configure in NeoSign
 
-1. **登录管理后台**
-   - 使用管理员账号登录系统
+1. **Login to Admin Panel**
+   - Log in with an administrator account.
 
-2. **进入网站设置**
-   - 点击顶部导航 → 设置
+2. **Go to Site Settings**
+   - Click Top Navigation -> Settings.
 
-3. **填写地图配置**
-   - **地图提供商**：选择 `高德 (AMap)`
-   - **地图 API Key**：粘贴你的**应用 Key**
-   - **地图安全密钥**：粘贴你的**安全密钥 (securityJsCode)**
-   - 点击"保存"
+3. **Fill Map Configuration**
+   - **Map Provider**: Select `AMap (Gaode)`.
+   - **Map API Key**: Paste your **App Key**.
+   - **Map Security Key**: Paste your **Security Key (securityJsCode)**.
+   - Click "Save".
 
-## 第三步：创建位置签到活动
+## Step 3: Create Location Check-in Activity
 
-1. **新建活动**
-   - 进入"活动管理" → 点击"创建活动"
+1. **New Activity**
+   - Go to "Activity Management" -> Click "Create Activity".
 
-2. **设置签到形式**
-   - 签到形式选择：**位置** 或 **位置 + 二维码**
+2. **Set Check-in Type**
+   - Select: **Location** or **Location + QR Code**.
 
-3. **设置签到范围**
-   - 签到范围：输入允许签到的半径（如 `50` 米）
-   - 点击"使用当前位置"按钮自动获取你的坐标
+3. **Set Check-in Range**
+   - Range: Enter radius (e.g., `50` meters).
+   - Click "Use Current Location" to auto-fill your coordinates.
 
-4. **查看可视化地图**
-   - 如果配置正确，下方会显示高德地图
-   - 可以看到：
-     - 📍 中心标记点（签到参考位置）
-     - 🔵 蓝色圆圈（签到范围）
-   - 点击地图可以调整中心位置
+4. **View Visual Map**
+   - If configured correctly, an AMap instance will appear below.
+   - You will see:
+     - 📍 Center Marker (Check-in reference point)
+     - 🔵 Blue Circle (Check-in range)
+   - Click on the map to adjust the center.
 
-5. **保存活动**
-   - 添加参与用户
-   - 点击"保存"
+5. **Save Activity**
+   - Add participants.
+   - Click "Save".
 
-## 第四步：测试签到
+## Step 4: Test Check-in
 
-1. **用户签到**
-   - 普通用户登录后进入签到页面
-   - 点击"立即签到"
-   - 系统会自动获取用户位置并判断是否在范围内
+1. **User Check-in**
+   - Log in as a user and go to the check-in page.
+   - Click "Check-in Now".
+   - The system will auto-detect location and verify range.
 
-2. **查看效果**
-   - 管理员可以在活动统计中查看签到记录
+2. **View Results**
+   - Admins can view check-in records in activity stats.
 
-## 常见问题
+## FAQ
 
-### Q: 地图不显示怎么办？
-**A:** 请检查：
-1. 两个密钥是否都填写了
-2. 应用 Key 和安全密钥是否来自同一个应用
-3. 浏览器开发者工具（F12）→ Console 是否有错误提示
-4. 常见错误：
-   - `INVALID_USER_KEY`: Key 填写错误
-   - `INVALID_USER_SCODE`: 安全密钥错误或缺失
+### Q: Map does not show up?
+**A:** Check:
+1. Are both keys filled in?
+2. Do the App Key and Security Key belong to the same application?
+3. Check Browser Console (F12) for errors.
+4. Common errors:
+   - `INVALID_USER_KEY`: Key is incorrect.
+   - `INVALID_USER_SCODE`: Security key is incorrect or missing.
 
-### Q: 如何验证配置是否成功？
-**A:** 
-1. 创建测试活动，选择位置签到
-2. 点击"使用当前位置"后，下方应该显示地图
-3. 如果看到地图和蓝色圆圈，说明配置成功
-
-### Q: 安全密钥在哪里找？
+### Q: How to verify configuration?
 **A:**
-1. 登录高德控制台
-2. 应用管理 → 我的应用
-3. 找到对应应用，点击查看
-4. 在 Key 列表中，每个 Key 旁边都有"安全密钥"按钮
-5. 点击即可查看和复制
+1. Create a test activity with location check-in.
+2. Click "Use Current Location". The map should appear.
+3. If you see the map and blue circle, it works.
 
-### Q: 需要绑定域名吗？
-**A:** 
-- 开发阶段：不需要
-- 生产环境：建议在控制台设置"域名白名单"，提升安全性
-
-## 高级配置（可选）
-
-### 1. 设置域名白名单
-1. 控制台 → Key 管理 → 设置
-2. 填写你的域名（如：`neosign.example.com`）
-3. 这样只有从该域名发起的请求才有效
-
-### 2. 查看使用量
-- 控制台 → 数据统计
-- 可以查看每日调用次数
-- 免费配额通常够用（每日数万次）
-
-### 3. Nginx 代理方式（更安全）
-如果你的应用规模较大，可以参考高德官方文档配置 Nginx 代理转发，避免在前端暴露安全密钥：
-- [安全密钥使用说明](https://lbs.amap.com/api/javascript-api-v2/guide/abc/jscode)
-
-## 相关链接
-
-- [高德开放平台](https://lbs.amap.com/)
-- [控制台](https://console.amap.com/)
-- [JavaScript API 文档](https://lbs.amap.com/api/jsapi-v2/summary)
-- [完整地图 SDK 集成指南](MAP_SDK_GUIDE.md)
-
----
-
-配置完成后，你就可以使用可视化地图选点创建位置签到活动了！如有问题，请参考 [故障排查](MAP_SDK_GUIDE.md#故障排查--troubleshooting) 或提交 Issue。
+### Q: Where to find the Security Key?
+**A:**
+1. Login to AMap Console.
+2. Application Management -> My Applications.
+3. Find your app, click View.
+4. In the Key list, each Key has a "Security Key" button.

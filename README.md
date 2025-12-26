@@ -7,7 +7,7 @@
 
 A Django 6 + PostgreSQL sign-in system for QR/geofence attendance with admin dashboards.
 
-[Documentations](https://stewitch.github.io/NeoSign)
+[Documentation site](https://stewitch.github.io/NeoSign)
 
 ## Features
 - QR/geofence check-ins with optional map SDKs (AMap/Tencent/Google)
@@ -21,29 +21,35 @@ A Django 6 + PostgreSQL sign-in system for QR/geofence attendance with admin das
 - PostgreSQL 14+ (tested with 18)
 
 ## Quickstart
-1) Create a `.env` file at project root (see environment variables in [docs/SETUP.md](docs/SETUP.md)).
-2) Install dependencies and bootstrap the database:
-```
-python -m venv .venv
-.venv/Scripts/activate
-pip install -U pip
-pip install -e .
+1. Create a `.env` file at project root (see environment variables in [Setup guide](https://stewitch.github.io/NeoSign/SETUP)).
+2. Install dependencies and bootstrap the database:
+```bash
+# Install uv
+pip install uv
+
+# Create and activate venv
+uv venv
+.venv/Scripts/activate  # Windows
+# source .venv/bin/activate  # Linux/macOS
+
+# Install dependencies
+uv pip install -e .
+
+# Setup DB
 python manage.py migrate
 python manage.py createsuperuser
 python manage.py compilemessages -l en
 ```
-3) Run dev server: `python manage.py runserver`
+3. Run dev server: `python manage.py runserver`
 
 ## Documentation
-- Docs home: [docs/index.md](docs/index.md)
-- Setup, LAN/HTTPS dev, env vars: [docs/SETUP.md](docs/SETUP.md)
-- Production and backup/restore: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
-- Map SDK integration and AMap proxying:
-  - [docs/MAP_SDK_GUIDE.md](docs/MAP_SDK_GUIDE.md)
-  - [docs/AMAP_QUICK_START.md](docs/AMAP_QUICK_START.md)
-  - [docs/NGINX_AMAP_PROXY.md](docs/NGINX_AMAP_PROXY.md)
-
-The GitHub Pages workflow at [.github/workflows/docs.yml](.github/workflows/docs.yml) builds the MkDocs site defined in [mkdocs.yml](mkdocs.yml).
+- Online docs: [Documentation site](https://stewitch.github.io/NeoSign)
+- Setup & local/LAN/HTTPS dev: [Setup guide](https://stewitch.github.io/NeoSign/SETUP)
+- Production deployment & backup/restore: [Deployment guide](https://stewitch.github.io/NeoSign/DEPLOYMENT)
+- Map SDK integration:
+  - [Map SDK integration guide](https://stewitch.github.io/NeoSign/MAP_SDK_GUIDE)
+  - [AMap quick start](https://stewitch.github.io/NeoSign/AMAP_QUICK_START)
+  - [Nginx AMap proxy configuration](https://stewitch.github.io/NeoSign/NGINX_AMAP_PROXY)
 
 ## License
-[LICENSE](LICENSE)
+NeoSign is under [Apache 2.0 LICENSE](LICENSE)
