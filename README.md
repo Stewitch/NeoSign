@@ -1,7 +1,13 @@
 # NeoSign
-[中文文档](README.CN.md)
+[中文 README](README.CN.md)
+
+> [!WARNING]
+> The project is still in the early development stage,
+> there may be several issues, and version updates may be fast.
 
 A Django 6 + PostgreSQL sign-in system for QR/geofence attendance with admin dashboards.
+
+[Documentations](https://stewitch.github.io/NeoSign)
 
 ## Features
 - QR/geofence check-ins with optional map SDKs (AMap/Tencent/Google)

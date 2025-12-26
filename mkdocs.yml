@@ -59,8 +59,8 @@ nav:
 extra:
   alternate:
     - name: English
-      link: /
+      link: /NeoSign/
       lang: en
     - name: 中文
-      link: /zh/
+      link: /NeoSign/zh/
       lang: zh
