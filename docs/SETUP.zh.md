@@ -34,29 +34,24 @@ DB_PORT=5432
 1. 安装 uv 并创建虚拟环境：
    ```bash
    # 安装 uv (如果未安装)
+   # 参考：https://uv.doczh.com/getting-started/installation/
    pip install uv
    
    # 创建虚拟环境
    uv venv
    
-   # 激活环境
-   # Windows
-   .venv\Scripts\activate
-   # Linux/macOS
-   source .venv/bin/activate
-   
    # 安装依赖
-   uv pip install -e .
+   uv sync
    ```
 2. 迁移数据库并创建管理员：
    ```bash
-   python manage.py migrate
-   python manage.py createsuperuser
-   python manage.py compilemessages -l en
+   uv run manage.py migrate
+   uv run manage.py createsuperuser --username <4 ~ 23 位纯数字 ID>
+   uv run manage.py compilemessages -l en
    ```
 3. 运行开发服务器：
    ```bash
-   python manage.py runserver
+   uv run manage.py runserver
    ```
 
 ### 局域网访问（手机同网络测试）
@@ -103,23 +98,21 @@ SECURE_SSL_REDIRECT=False
 
 **PowerShell（启用 HTTPS）:**
 ```powershell
-.\.venv\Scripts\activate.ps1
-python .\manage.py makemigrations
-python .\manage.py migrate
-python .\manage.py compilemessages -l en
-python .\manage.py runserver_plus 0.0.0.0:8443 --cert-file=./localhost+2.pem --key-file=./localhost+2-key.pem
+uv run .\manage.py makemigrations
+uv run .\manage.py migrate
+uv run .\manage.py compilemessages -l en
+uv run .\manage.py runserver_plus 0.0.0.0:8443 --cert-file=./localhost+2.pem --key-file=./localhost+2-key.pem
 ```
 
 **PowerShell（仅 HTTP）:**
 ```powershell
-.\.venv\Scripts\activate.ps1
-python .\manage.py makemigrations
-python .\manage.py migrate
-python .\manage.py compilemessages -l en
-python .\manage.py runserver 0.0.0.0:8000
+uv run .\manage.py makemigrations
+uv run .\manage.py migrate
+uv run .\manage.py compilemessages -l en
+uv run .\manage.py runserver 0.0.0.0:8000
 ```
 
 ## 常用命令
-- 运行测试: `python manage.py test`
+- 运行测试: `uv run manage.py test`
 - 代码检查（如已配置）: `ruff check .`
-- Django Shell: `python manage.py shell`
+- Django Shell: `uv run manage.py shell`

@@ -3,6 +3,7 @@
 本文档只解决一件事：**在生产环境安全地使用高德 securityJsCode**，不把密钥丢到前端。
 
 核心思路：
+
 - 安全密钥只写在 Nginx 配置里；
 - 前端只知道一个 `serviceHost`；
 - 所有请求通过 `/_AMapService/` 代理到 `restapi.amap.com`，由 Nginx 自动拼上 `jscode`。
@@ -12,6 +13,7 @@
 ## 1. 环境准备
 
 前提：
+
 - 已有一个通过 Nginx 暴露的 HTTPS 站点（例如 `https://sign.example.com`）；
 - 已在高德控制台申请 **JavaScript API Key** 和 **securityJsCode**；
 - NeoSign 后端版本支持 `AMAP_PROXY_MODE` 环境变量。
@@ -64,6 +66,7 @@ server {
 ```
 
 要点：
+
 - 将 `YOUR_AMAP_SECURITY_KEY` 替换为从高德平台拿到的 `securityJsCode`；
 - 路径前缀必须是 `/_AMapService/`（高德官方要求）；
 - `proxy_pass` 末尾要带 `/`：`https://restapi.amap.com/`。
@@ -81,14 +84,15 @@ window._AMapSecurityConfig = {
 ```
 
 检查点：
+
 - **不应该**存在 `securityJsCode` 字段；
 - 高德 JS SDK 会把所有接口请求发到 `https://sign.example.com/_AMapService/...`，再由 Nginx 中转到 `restapi.amap.com`。
 
 如果你在控制台看到：
 
 ```js
-window._AMapSecurityConfig
-// { serviceHost: "https://sign.example.com/_AMapService" }
+>> window._AMapSecurityConfig
+{ serviceHost: "https://sign.example.com/_AMapService" }
 ```
 
 且 Network 里请求走的是 `/_AMapService/`，说明前端侧配置是对的。
@@ -107,9 +111,11 @@ window._AMapSecurityConfig
    ```bash
    curl 'https://sign.example.com/_AMapService/v3/geocode/geo?address=北京市朝阳区阜通东大街6号&key=YOUR_AMAP_JS_API_KEY'
    ```
+
    - 能返回正常 JSON 即说明代理和 `jscode` 附加正常。
 
 3. 浏览器端检查：
+
    - 打开 NeoSign，F12 → Network，过滤 `_AMapService`：
      - 请求 URL 形如 `https://sign.example.com/_AMapService/v3/...`；
      - 请求查询参数中 **看不到** `jscode`（它只出现在 Nginx → 高德那一跳）。
@@ -123,6 +129,7 @@ window._AMapSecurityConfig
 ### 5.1 地图不加载 / 控制台报密钥错误
 
 排查顺序：
+
 - 确认 `AMAP_PROXY_MODE=nginx` 已生效（重启后端）；
 - 检查 Nginx 配置里的 `securityJsCode` 是否正确粘贴；
 - 再次运行 `sudo nginx -t && sudo nginx -s reload`；
@@ -131,11 +138,13 @@ window._AMapSecurityConfig
 ### 5.2 Console 报 `INVALID_USER_DOMAIN`
 
 意味着 **高德认为请求来源域名不在白名单**，常见原因：
+
 - 未使用 `/_AMapService/` 代理，前端直接请求 `restapi.amap.com`；
 - 高德控制台中域名白名单未包含 `sign.example.com`；
 - 使用了错误的 JS API Key（非当前应用的）。
 
 建议：
+
 - 确保前端所有调用都走 `serviceHost` 代理；
 - 在高德控制台为该 JS API Key 配置正确的域名白名单；
 - 等待白名单变更在高德侧生效（通常几分钟）。
@@ -143,6 +152,7 @@ window._AMapSecurityConfig
 ### 5.3 仍然怀疑密钥泄露怎么办？
 
 最直接的安全恢复流程：
+
 - 在高德平台为该应用重新生成 `securityJsCode`；
 - 更新 Nginx 里的密钥并重载；
 - 确认前端不再出现 `securityJsCode` 字段；
@@ -173,8 +183,11 @@ window._AMapSecurityConfig
 ## 7. 参考链接
 
 - 高德安全密钥与代理：
+
   - https://lbs.amap.com/api/javascript-api-v2/guide/abc/jscode
   - https://lbs.amap.com/api/javascript-api-v2/guide/abc/proxy
+  
 - Nginx 文档：
+
   - https://nginx.org/en/docs/
   - http://nginx.org/en/docs/http/ngx_http_limit_req_module.html

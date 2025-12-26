@@ -50,7 +50,7 @@ AMAP_PROXY_MODE=nginx
 Complete Nginx config with HTTPS, security headers, AMap proxy, and Django upstream:
 
 ```nginx
-# HTTP 重定向到 HTTPS
+# HTTP redirect to HTTPS
 server {
     listen 80;
     server_name your-domain.com www.your-domain.com;
@@ -61,32 +61,32 @@ server {
     listen 443 ssl http2;
     server_name your-domain.com www.your-domain.com;
     
-    # SSL 证书配置
+    # SSL cert config
     ssl_certificate /path/to/ssl/fullchain.pem;
     ssl_certificate_key /path/to/ssl/privkey.pem;
     
-    # SSL 安全配置
+    # SSL security config
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!MD5;
     ssl_prefer_server_ciphers on;
     ssl_session_cache shared:SSL:10m;
     ssl_session_timeout 10m;
     
-    # 安全头
+    # Security headers
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
     add_header X-Frame-Options "SAMEORIGIN" always;
     add_header X-Content-Type-Options "nosniff" always;
     add_header X-XSS-Protection "1; mode=block" always;
     
-    # 日志配置
+    # logs
     access_log /var/log/nginx/neosign_access.log;
     error_log /var/log/nginx/neosign_error.log;
     
     client_max_body_size 20M;
     
-    # 高德地图 API 代理（生产环境推荐）
+    # AMap API Proxy (For production env)
     location /_AMapService/ {
-        # 在服务器端自动附加安全密钥（替换为实际密钥）
+        # Replace to your real security key
         set $args "$args&jscode=YOUR_AMAP_SECURITY_KEY";
         
         proxy_pass https://restapi.amap.com/;
@@ -106,7 +106,7 @@ server {
         }
     }
     
-    # 静态文件服务
+    # Static files
     location /static/ {
         alias /path/to/your/project/staticfiles/;
         expires 30d;
@@ -119,7 +119,7 @@ server {
         add_header Cache-Control "public";
     }
     
-    # Django 应用代理
+    # Django application proxy
     location / {
         proxy_pass http://127.0.0.1:8000;
         proxy_set_header Host $host;

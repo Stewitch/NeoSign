@@ -30,6 +30,7 @@ NeoSign 支持可选的地图 SDK 集成，用于可视化位置签到。系统�
 ### 1. 高德地图 (AMap) - 推荐国内用户
 
 **申请步骤：**
+
 1. 访问 [高德开放平台](https://lbs.amap.com/)
 2. 注册并登录控制台
 3. 创建应用 → 添加 Key
@@ -38,17 +39,20 @@ NeoSign 支持可选的地图 SDK 集成，用于可视化位置签到。系统�
 6. **重要：** 在 Key 管理页面找到并复制 **安全密钥 (securityJsCode)**
 
 **配置示例：**
+
 - 地图提供商：`amap` 或 `高德 (AMap)`
 - Map API Key：`your-amap-key-here`（应用 Key）
 - 地图安全密钥：`your-security-jscode-here`（安全密钥）
 
 **注意事项：**
+
 - **2021年12月02日后申请的 Key 必须配合安全密钥使用**
 - 安全密钥在高德控制台的"应用管理 → Key 管理"中查看
 - 本系统采用**明文方式**设置安全密钥（适合开发和中小型项目）
 - 生产环境建议通过 Nginx 代理转发（见高德官方文档）
 
 **官方文档：**
+
 - [JavaScript API 文档](https://lbs.amap.com/api/jsapi-v2/summary)
 - [Key 申请指南](https://lbs.amap.com/api/jsapi-v2/guide/abc/prepare)
 - [安全密钥使用说明](https://lbs.amap.com/api/javascript-api-v2/guide/abc/jscode)
@@ -58,6 +62,7 @@ NeoSign 支持可选的地图 SDK 集成，用于可视化位置签到。系统�
 ### 2. 腾讯地图 (Tencent Maps)
 
 **申请步骤：**
+
 1. 访问 [腾讯位置服务](https://lbs.qq.com/)
 2. 注册并登录控制台
 3. 我的应用 → 创建应用 → 添加 Key
@@ -65,10 +70,12 @@ NeoSign 支持可选的地图 SDK 集成，用于可视化位置签到。系统�
 5. 复制生成的 **Key**
 
 **配置示例：**
+
 - 地图提供商：`tencent` 或 `腾讯 (QQ 地图)`
 - Map API Key：`your-tencent-key-here`
 
 **官方文档：**
+
 - [JavaScript API GL 文档](https://lbs.qq.com/webApi/javascriptGL/glGuide/glBasic)
 - [Key 申请指南](https://lbs.qq.com/dev/console/application/mine)
 
@@ -77,6 +84,7 @@ NeoSign 支持可选的地图 SDK 集成，用于可视化位置签到。系统�
 ### 3. Google Maps
 
 **申请步骤：**
+
 1. 访问 [Google Cloud Console](https://console.cloud.google.com/)
 2. 创建项目
 3. 启用 **Maps JavaScript API**
@@ -85,10 +93,12 @@ NeoSign 支持可选的地图 SDK 集成，用于可视化位置签到。系统�
 6. 复制生成的 **API Key**
 
 **配置示例：**
+
 - 地图提供商：`google` 或 `Google Maps`
 - Map API Key：`your-google-maps-key-here`
 
 **官方文档：**
+
 - [Maps JavaScript API](https://developers.google.com/maps/documentation/javascript)
 - [Get API Key](https://developers.google.com/maps/documentation/javascript/get-api-key)
 
@@ -99,9 +109,11 @@ NeoSign 支持可选的地图 SDK 集成，用于可视化位置签到。系统�
 ## 配置步骤
 
 1. **申请 API Key**
+
    - 根据上述指南从对应平台获取 Key
 
 2. **配置系统**
+
    - 登录管理后台
    - 进入 **网站设置** 页面
    - 选择 **地图提供商**（AMap/Tencent/Google）
@@ -110,6 +122,7 @@ NeoSign 支持可选的地图 SDK 集成，用于可视化位置签到。系统�
    - 点击保存
 
 3. **创建位置签到活动**
+
    - 新建活动 → 签到形式选择 **位置** 或 **位置 + 二维码**
    - 点击"使用当前位置"获取坐标
    - 若已配置 SDK，下方会显示可视化地图
@@ -117,6 +130,7 @@ NeoSign 支持可选的地图 SDK 集成，用于可视化位置签到。系统�
    - 保存活动
 
 4. **测试签到**
+
    - 用户签到时系统会自动获取位置并判断是否在范围内
    - 如需调试，建议在 HTTPS 环境测试（浏览器安全要求）
 
@@ -135,6 +149,7 @@ NeoSign 支持可选的地图 SDK 集成，用于可视化位置签到。系统�
 ## 故障排查
 
 **问题：地图不显示**
+
 - 检查 API Key 是否正确填写
 - **高德地图用户**：确认安全密钥（securityJsCode）已正确填写
   - **生产环境推荐**：使用 Nginx 代理模式，参见 [Nginx 高德地图安全密钥代理配置](NGINX_AMAP_PROXY.zh.md)
@@ -143,11 +158,13 @@ NeoSign 支持可选的地图 SDK 集成，用于可视化位置签到。系统�
 - 常见错误：`INVALID_USER_SCODE` 表示安全密钥错误或缺失
 
 **问题：签到失败提示"不在范围内"**
+
 - 确认活动设置的中心坐标准确
 - 检查范围半径设置是否合理
 - 在 HTTPS 环境下测试，确保浏览器能获取精确位置
 
 **问题：摄像头/位置权限被拒**
+
 - 必须使用 HTTPS 或 localhost 访问
 - 检查浏览器权限设置
 - 参考 README 中的 HTTPS 开发环境配置
@@ -166,6 +183,7 @@ NeoSign 支持可选的地图 SDK 集成，用于可视化位置签到。系统�
 ## 更多帮助
 
 如需进一步帮助，请参考：
+
 - 本项目文档站首页的“配置”和“部署”章节
 - 各地图平台官方文档（见上方链接）
-- 在代码托管平台上为项目提交 Issue
+- 在 GitHub 上为项目提交 [Issue](https://github.com/Stewitch/NeoSign/issues)
