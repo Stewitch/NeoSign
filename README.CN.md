@@ -6,6 +6,8 @@
 
 一个基于 Django 6 和 PostgreSQL 18 的签到系统。
 
+[文档](https://stewitch.github.io/NeoSign)
+
 ## 功能特性
 - 支持二维码与地理围栏签到
 - 后台管理活动、参与者、导出
